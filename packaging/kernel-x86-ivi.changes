@@ -1,0 +1,527 @@
+* Wed Apr 02 2014 Jin Song <jin.kyu.song@linux.intel.com> 3.13.3
+- Reverted - TIVI-2798 : Disable i915 hotplug detection for Valleyview
+
+* Wed Mar 26 2014 Jin Song <jin.kyu.song@linux.intel.com> 3.13.3
+- TIVI-2790 : Change vmwgfx to built-in to enable Vmware
+- TIVI-713  : Change CONFIG_PROC_EVENTS to built-in
+- TIVI-2798 : Disable i915 hotplug detection for Valleyview
+
+* Mon Feb 18 2014 Jin Song <jin.kyu.song@linux.intel.com> 3.13.3
+- Upgrade to version 3.13.3.
+- TIVI-2676 : enable Fusion MTP device since Tizen IVI does not boot in VMware
+              Fusion
+- Back-port two NFC patches from sameo/nfc-next.git to enable NFC
+- Back-port DisplayPort fix
+
+* Mon Feb 07 2014 Jin Song <jin.kyu.song@linux.intel.com> 3.13.2
+- Upgrade to version 3.13.2.
+
+* Mon Jan 13 2014 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.4
+- Start using the 'setup-ivi' project:
+  https://wiki.tizen.org/wiki/IVI/artem-setup-ivi
+
+* Thu Dec 19 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.4
+- Enable the Wacom touchscreen driver as a module in order to enable people
+  using Tizen IVI on the Lenovo X230 laptop (related to TIVI-2396).
+
+* Tue Dec 10 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.4
+- Fix TIVI-2282 by back-porting 4 patches from the drm-intel tree.
+
+* Tue Dec 10 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.4
+- Upgrade to version 3.12.4.
+
+* Fri Dec 06 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.3
+- Enable the PEAK USB CAN driver, fixes TIVI-2263.
+
+* Fri Dec 06 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.3
+- Upgrade to version 3.12.3.
+
+* Fri Nov 20 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.0
+- Add a missing smack patch from Casey Schaufler.
+
+* Thu Nov 19 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.0
+- Another back-port from the drm-intel tree: fix VGA hotplug after modeset
+
+* Tue Nov 17 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.0
+- Back-port a couple of SMACK patches from linux-next: add a "lock" access
+  mode and improve ptrace access checks.
+
+* Sat Nov 07 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.0
+- Back-port a drm patch which fixes a problem preventing us from booting to the
+  UI on a ByT-I board. Fixes TIVI-2085.
+
+* Tue Nov 05 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.12.0
+- Upgrade to version 3.12.0.
+
+* Thu Oct 31 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.6
+- Enable legacy AT keyboard and PS2 mouse drivers as modules - these are needed
+  for VMWare. This change is required for fixing TIVI-2051.
+
+* Tue Oct 29 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.6
+- Upgrade to version 3.11.6.
+
+* Thu Oct 17 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.5
+- Re-enable the second HDMI port on BayTrail.
+
+* Thu Oct 17 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.5
+- Upgrade to version 3.11.5.
+
+* Thu Oct 17 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.4
+- Revise ivi_defconfig and make many of the compiled-in drivers to be loadable
+  modules. This is mostly for the sake of reaching the init proces as quickly
+  as possible.
+
+* Fri Oct 11 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.4
+- Revert the patch which enables the second HDMI port for now. It causes
+  regressions in user-space components. This is because the side-effect of this
+  patch is that HDMI-1 becomes HDMI-2.
+
+* Wed Oct 09 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.4
+- Disable Serial I/O an all the related drivers (AT and PS/2 keyboard, serial
+  mouse, etc). This improves boot speed.
+
+* Mon Oct 07 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.4
+- Upgrade to version 3.11.4.
+- Back-port an upstrem kernel patch which fixes an OOPs when the mmc module is
+  being unloaded. There is not tizen.org JIRA ticket for this one.
+
+* Thu Oct 03 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.3
+- Back port a patch from the drm-intel tree that enables the second HDMI port
+  on BayTrail boards.
+
+* Thu Oct 03 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.3
+- Upgrade to version 3.11.3.
+
+* Mon Sep 30 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.2
+- Upgrade to version 3.11.2.
+
+* Mon Sep 30 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.0
+- Turn many drivers to be modules, rather than compiled-in. We do not need
+  these drivers to boot to UI.
+
+* Thu Sep 12 13:09:49 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.0
+- Add a temporary workaround for the Intel i210 NVM error problem that we see
+  on some of our devices.
+
+* Wed Sep 11 07:08:41 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.0
+- Add a dependency on the 'rpm' tool, which fixes TIVI-1735. Also remove the
+  'setup-efi-ivi' dependency.
+
+* Mon Sep 9 12:00:02 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.0
+- Pick up Bluetooth Wideband speech support patches from the linux-next tree,
+  fixes TIVI-1203.
+
+* Mon Sep 9 12:00:00 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.0
+- Upgrade to version 3.11.0.
+
+* Mon Aug 19 13:03:36 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.0-rc6
+- Upgrade to version 3.11-rc6.
+
+* Thu Aug 15 12:16:01 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.11.0-rc5
+- Upgrade to 3.11-rc5-f1d6e17.
+
+* Wed Aug 14 14:15:25 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.4
+- Disable OTG support, addresses TIVI-1138.
+
+* Fri Aug  9 13:56:47 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.4
+- Make SDHC controller drivers to be compiled-in in order to let people boot
+  the system off eMMC.
+- Replace the old GPIO driver with the upstream version of it.
+
+* Tue Aug  6 03:18:36 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.4
+- Enable the efivars file-system support in order to be able to access the EFI
+  variables from user-space. This time should really fix TIVI-1521.
+
+* Tue Aug  6 03:18:36 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.4
+- Make EFI variables support to be compiled-in, rather than a module, fixes
+  TIVI-1521.
+
+* Fri Aug  2 11:09:22 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.4
+- Enable several networking features which are required for WiFi tethering with
+  connman to work. Should fix TIVI-1449, but I did not verify this.
+
+* Thu Aug  1 09:22:34 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.4
+- Upgrade to stable version 3.10.4.
+
+* Thu Aug  1 09:19:16 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0
+- Fix a USB-related regression - USB hubs were not detected.
+
+* Wed Jul 31 17:41:12 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0
+- Disable a couple of useless gfx features.
+
+* Wed Jul 31 11:49:48 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0
+- Disable USB gadget mode support.
+
+* Tue Jul 30 13:09:47 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0
+- Enable USB OTG support.
+
+* Thu Jul  4 06:15:45 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0
+- Enable the Ensoniq ENS1371 driver, which is convenient to have in VMWare
+  environement since VMWare emulates this audio card.
+
+* Tue Jul  2 14:34:25 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0
+- Actually upgrade for kernel release version 3.10.0. The previous upgrade had an issuee
+  and the kernel actually stayed to be 3.10.0-0.rc7.
+
+* Tue Jul  2 14:10:02 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc7
+- Provide the 'include/config' files in the 'kernel-x86-ivi-devel.rpm' package because
+  out-of-tree modules require it for compilation.
+
+* Tue Jul  2 13:15:57 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc7
+- Fix the kernel build symlink again, because it was lacking the leading "/".
+
+* Mon Jul  1 07:51:43 EEST 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc7
+- Upgrade to kernel release version 3.10.0.
+
+* Thu Jun 27 13:25:41 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc7
+- Enable the SMSC75XX USB<->ethernet adapter driver, enable the FTDI_SIO USB->serial
+  adapter driver, massage the kernel configuration a little bit.
+
+* Wed Jun 26 12:15:36 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc7
+- Call 'setup-gummiboot-conf' script to update gummiboot configuration when a
+  new kernel is installed or removed. This only changing the packaging, not the
+  kernel functionality.
+
+* Tue Jun 25 11:36:37 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc7
+- Fix the kernel build symlink, which was pointing to a non-existing directory.
+
+* Tue Jun 25 04:21:12 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc7
+- Rebase to 3.10.0-rc7. Pull the drm-intel-testing branch from the drm tree.
+
+* Fri Jun 21 03:41:55 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc5
+- Add BayTrail eMMC HW reset support plus a new PCI ID.
+
+* Fri Jun 21 03:21:19 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc5
+- Enable the CONFIG_SND_HDA_CODEC_HDMI configuration option (HDMI and
+  DisplayPort HD-audio codec support).
+
+* Thu Jun 13 16:44:11 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc5
+- Pull the latest i915 (gen graphics) patches from
+  git://people.freedesktop.org/~danvet/drm-intel / drm-intel-next
+
+* Wed Jun 12 16:13:45 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc5
+- Fix '/boot/vmlinuz' symlink creation, fixes TIVI-1038.
+
+* Wed Jun 12 16:12:29 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.10.0-rc5
+- Upgrade to kernel version 3.10-rc5 in order to pick the latest BayTrail bits from
+  upstream.
+
+* Wed Jun 12 10:14:40 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.9.4
+- Do not print warning messages when unable to create the vmlinuz symlink.
+
+* Mon Jun 10 07:46:06 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.9.4
+- Fix BayTrail boot issues.
+
+* Fri Jun  7 12:08:13 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.9.4
+- Ignore errors symlink creation errors (when /boot is FAT file-system, we
+  cannot create the /boot/vmlinuz symlinks)
+
+* Thu Jun  6 09:38:07 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.9.4
+- Adapt the spec file to Tizen 3.0
+- Add a temporary work-around which fixes an oops in SMACK LSM, see
+  https://bugzilla.kernel.org/show_bug.cgi?id=57791
+
+* Thu Jun  6 06:38:07 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.9.4
+- Upgrade to version 3.9.4
+
+* Wed May  8 07:05:27 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.9.1
+- Upgrade to version 3.9.1.
+
+* Tue May  7 10:08:23 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.9.0
+- Merge BayTrail support.
+
+* Mon Apr 22 06:26:20 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.9.0
+- Upgrade to version 3.9.
+
+* Thu Apr 18 15:25:24 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.7
+- Enable Android logger driver back, fix TIVI-719.
+
+* Thu Apr 18 05:10:34 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.7
+- Disable a bunch of seemingly useless HID drivers.
+
+* Wed Apr 17 13:43:46 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.7
+- Massage the default configuration file. Disable few useless modules/features
+  and enable few useful ones, including the connector feature, which fixes TIVI-713.
+
+* Wed Apr 17 11:31:40 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.7
+- Upgrade to version 3.8.7.
+
+* Tue Apr 16 12:39:55 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.5
+- Fix the post-uninstall script and prevent it from deleting the /boot/vmlinuz
+  symlink when the kernel is updated with 'rpm -U'. Fixes TIVI-609.
+
+* Mon Apr 15 07:13:42 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.5
+- Enable the deadline I/O scheduler.
+
+* Tue Apr  9 07:29:12 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.5
+- Enable the VMWare Graphical acceleration driver (vmwgfx).
+
+* Mon Apr  8 13:58:41 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.5
+- Enable Virtio and VMWare drivers to make the kernel run effeciently under
+  Qemu / VBox / VMWare.
+
+* Thu Apr  4 12:58:31 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.5
+- Upgrade to version 3.8.5.
+
+* Wed Apr  3 06:12:27 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.3
+- Revert the previous change and make SMACK to be the primary security module,
+  because reverting it apparently breaks some (bogus) apps.
+
+* Thu Mar 28 15:41:08 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.3
+- Fix TIVI-500 by stopping packaging the 'include/config' directory.
+
+* Tue Mar 19 09:15:09 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.3
+- Make the traditinal Unix DAC security model to be the default. It was SMACK
+  before this change. SMACK is not disabled, though, and can be enabled using
+  the 'security=smack' kernel boot option.
+
+* Mon Mar 18 10:51:00 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.3
+- Rename the kernel RPM package from 'kernel-adaptation-intel-automotive' to
+  'kernel-x86-ivi'.
+
+* Fri Mar 15 09:06:43 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.3
+- Upgrade to version 3.8.3.
+
+* Thu Mar 14 12:41:14 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.2
+- Upgrade to version 3.8.2.
+
+* Wed Mar  6 11:31:28 EET 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.1
+- Upgrade to version 3.8.1.
+
+* Wed Feb 20 09:31:21 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.0
+- Enable USB3 support.
+- Disable a lot of custom USB device drivers which we will unlikely ever need.
+
+* Wed Feb 20 07:44:14 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.8.0
+- Update to version 3.8.
+
+* Tue Feb 19 13:17:49 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.7.8
+- Fix out-of-tree drivers compilation.
+
+* Tue Feb 19 07:52:25 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.7.8
+- Upgrade to version 3.7.8.
+
+* Mon Jan 30 08:24:20 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.7.5
+- Upgrade to version 3.7.5.
+
+* Wed Jan 30 08:12:09 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.7.2
+- Enable the Conexant CX23885 driver, turn the igb driver into a kernel module.
+
+* Mon Jan 14 08:24:11 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.7.2
+- Upgrade to version 3.7.2.
+
+* Fri Jan 11 13:19:24 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.7.1
+- Disable various useless drivers and turn some drivers from being compiled-in
+  to be a module. Thie makes the vmlinuz size 3% smaller.
+
+* Mon Jan  7 08:40:44 UTC 2013 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.7.1
+- Enable USB camera support, fixes TIVI-454.
+
+* Fri Dec 28 08:07:08 UTC 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.7.1
+- Upgrade to version 3.7.1.
+
+* Tue Dec 11 09:20:11 UTC 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.7.0
+- Upgrade the kernel to version 3.7. The previous version is saved in the
+  devel-3.5.5-last tag.
+
+* Mon Nov 19 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.5
+- Enable the PPS subsystem and the PTP driver, required by the Ethernet AVB
+  out-of-tree drivers.
+
+* Mon Nov 19 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.5
+- Enable the PPS subsystem and the PTP driver, required by the Ethernet AVB
+  out-of-tree drivers.
+- Clean-up packaging stuff a little bit.
+
+* Fri Nov 16 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.5
+- Fix groups list in /proc/pid/status - the kernel showed only the first 32
+  groups but not all of them. Fixes TIVI-318.
+
+* Wed Nov  7 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.5
+- Clean-up the repository after switchint to 2.0alpha. No functional
+  changes.
+
+* Wed Oct 03 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.5
+- Update to the latest stable kernel version - 3.5.5.
+- Make SMACK to be the default security module.
+
+* Tue Oct 02 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.4
+- Enable SMACK support (Simplified Mandatory Access Control).
+
+* Tue Sep 25 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.4
+- Back port a couple of patches from the bluetooth-next.git kernel tree
+  to fix TIVI-203 (system hang when shutdown with BT phone connected).
+
+* Tue Sep 25 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.4
+- Update to the next stable kernel version - 3.5.4.
+
+* Mon Sep 17 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Revert 1 kenrel patches which break tethering:
+    o 56138f5 iwlwifi: dont pull too much payload in skb head
+  Not sure yet _why_ it breaks tethering - will work on that later,
+  but for now just revert it.
+
+* Thu Sep 13 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Make IPv6 to be built-in, rather than a module. We need IPv6 when we
+  boot-up, and having it as module only slows boot-up down.
+
+* Thu Sep  6 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- More NFC back-ports by Samuel Ortiz, this time from the NFC subsystem
+  tree which is staged for upstream.
+
+* Thu Sep  6 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Correct RPM pre- and post- install dependencies.
+
+* Thu Sep  6 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Make sure the /boot/vmlinuz link point to the previously installed kernel
+  when removing the kernel RPM package. Fixes TIVI-97.
+
+* Thu Sep  6 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Add perf binary RPM. Fixes TIVI-137.
+
+* Wed Sep  5 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Enable drivers for all the HID devices as modules. This should also fix
+  TIVI-170.
+
+* Wed Sep  5 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- 65 NFC patches back-ported from kernel 3.6-rc4 to bring the newest NFC
+  features to the Tizen kernel. Prepared and submitted by Samuel Ortiz.
+
+* Fri Aug 31 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Revise networking options.
+
+* Thu Aug 30 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Revise general configuration options.
+
+* Thu Aug 30 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Revise PM-specific configuration options.
+
+* Thu Aug 30 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Revise the processor-related configuration options.
+
+* Wed Aug 29 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Rename the defconfig to 'ivi_defconfig', because we now use the same kernel
+  for both TC and SB platforms.
+
+* Tue Aug 28 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.5.3
+- Upgrade the kernel to version 3.5.3.
+
+* Mon Aug 20 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.9
+- Remove the emgd driver, because it was moved to intel-emgd-kmod kernel
+  package and will be maintained out-of-tree by
+  Wang Quanxian<quanxian.wang@intel.com>.
+
+* Mon Aug 20 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.9
+- Upgrade to 3.4.9.
+
+* Wed Aug  1 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.7
+- After upgrading to 3.4.7 we are unable to load any kernel module because
+  of kernel version mismatch. Now it is fixed, along with TZIVI-280.
+
+* Tue Jul 31 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.7
+- Revise power management and ACPI options: make optional things to be kernel
+  modules, enable APEI (ACPI Platform Error Interface) support, enable the
+  intel_idle driver.
+
+* Tue Jul 31 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.7
+- Update to stable version 3.4.7.
+
+* Fri Jul 26 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.6
+- Disable ISA bus support and make PCMCIA support to be a kernel module
+  instead of being compiled-in.
+
+* Fri Jul 26 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.6
+- Revise kernel debugging options and enable a couple more (e.g., stack
+  overflow)
+
+* Fri Jul 26 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.6
+- Lessen vmliuz size by 446KiB. I've made all file-systems except ext4 to
+  be kernel modules rather than compiled-in. This should have a positive
+  effect on boot time.
+
+* Thu Jul 26 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.6
+- Update to stable version 3.4.6
+
+* Thu Jul 26 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Rename ivi_gen_defconfig to ivi_tc_defconfig (tc stands for TunnelCreek).
+  I do this because we'll soon get another configuration for SandyBridge
+  (ivi_sb_defconfig).
+
+* Thu Jul 26 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Remove the Crossville-only adv7180 driver - it does not compile with new
+  kernel and we do not have incentive to fix this because Crossville support
+  is going to be dropped soon.
+
+* Wed Jul 11 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Remove linux-firmware dependency, no functional changes.
+
+* Tue Jul 10 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Enable iwlwifi p2p support to make AP mode available, which is required
+  for tethering support. Fixes TZIVI-180.
+
+* Mon Jul  9 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Exclude Crossville BT firmware from being compiled into the kernel. This
+  makes it easier to compile the kernel manually. The firmware can be loaded
+  dynamically instead.
+
+* Mon Jul  9 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Enable the USB device controller driver for Nexcomm devices. Should
+  fix or at least partially fix TZIVI-95.
+
+* Fri Jun 29 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Add the emgd driver. We have dropped it when upgraded to 3.4.4 because
+  it did not compile. Now we are adding back the latest experimental
+  version (build 2667) of it. Credits to Quanxian Wang for the effort.
+
+* Thu Jun 28 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Enable the jack input notification which notifies user-space whenever the
+  something like a headset is plugged.
+
+* Tue Jun 26 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Create the /boot/vmlinuz symlink when installing the kernel (instead of
+  /boot/kernel). This is an enabler for TZIVI-183.
+
+* Tue Jun 26 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Enable the raw CAN bus protocol support, the broadcast manager CAN bus
+  protocol and the virtual local CAN bus interface, fixes TZIVI-79
+
+* Mon Jun 25 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.4
+- Upgrade to 3.4.4 which has important iwlwifi fixes
+
+* Mon Jun 25 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.3
+- Fix the changelog, now 'rpm -q --changelog' should work for the kernel
+
+* Mon Jun 25 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.3
+- Enable iwlwifi as a kernel module again - it was disabled during upgrade
+  to 3.4.3, so we are fixing a regression.
+
+* Thu Jun 21 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.4.3
+- Upgrade the kernel from 3.0.8 to 3.4.3
+- Dropped the emgd driver so far - we expect to have it back very soon
+- Tested that it boots to shell on VMT1000 device, but the output now goes
+  to VGA, not to LVDS - I think this is because the dropped emgd driver.
+
+* Mon Jun 18 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.0.8
+- Packaging changes only, no functional changes: change the tarball name from
+  linux-3.0.8.tar.bz2 to kernel-adaptation-intel-automative.tar.bz2 in order
+  to silent the build system which warns me otherwise.
+
+* Fri Jun 15 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.0.8
+- No changes, dummy build to check if OBS submittion works. It did not work
+  last time for me.
+
+* Thu Jun 14 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.com> 3.0.8
+- Cleaned-up the packaging:
+  - the spec file is completely re-written (thanks to Markus Lehtonen)
+  - all the junk from the packaging directory was removed
+  - created ivi_gen_defconfig file for generic IVI configuration, so
+    we do not store the defconfig in the packaging anymore
+
+* Wed Jun 13 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.con> 3.0.8
+- Apply patches from the packaging sub-directory to the git tree
+- Remove all the applied patches from the packaging sub-directory
+- Amend the .spec file correspondingly
+- No functional changes
+
+* Tue Jun 12 2012 Artem Bityutskiy <artem.bityutskiy@linux.intel.con> 3.0.8
+- Re-create the git history for the kernel. No functional changes.
