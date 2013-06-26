@@ -89,6 +89,34 @@
 
 /* DU */
 static struct rcar_du_encoder_data lager_du_encoders[] = {
+#if defined(CONFIG_DRM_ADV7511)
+	{
+		.type = RCAR_DU_ENCODER_HDMI,
+		.output = RCAR_DU_OUTPUT_LVDS0,
+	}, {
+		.type = RCAR_DU_ENCODER_NONE,
+		.output = RCAR_DU_OUTPUT_LVDS1,
+		.connector.lvds.panel = {
+			.width_mm = 210,
+			.height_mm = 158,
+			.mode = {
+				.clock = 65000,
+				.hdisplay = 1024,
+				.hsync_start = 1048,
+				.hsync_end = 1184,
+				.htotal = 1344,
+				.vdisplay = 768,
+				.vsync_start = 771,
+				.vsync_end = 777,
+				.vtotal = 806,
+				.flags = 0,
+			},
+		},
+	}, {
+		.type = RCAR_DU_ENCODER_VGA,
+		.output = RCAR_DU_OUTPUT_DPAD0,
+	},
+#else
 	{
 		.type = RCAR_DU_ENCODER_VGA,
 		.output = RCAR_DU_OUTPUT_DPAD0,
@@ -112,6 +140,7 @@ static struct rcar_du_encoder_data lager_du_encoders[] = {
 			},
 		},
 	},
+#endif
 };
 
 static const struct rcar_du_platform_data lager_du_pdata __initconst = {
