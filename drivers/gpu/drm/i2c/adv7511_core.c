@@ -1,5 +1,10 @@
 /**
- * Analog Devices ADV7511 HDMI transmitter driver
+ * drivers/gpu/drm/i2c/adv7511_core.c
+ *     This file is hdmi setting for adv7511.
+ *
+ * Copyright (C) 2013 Renesas Electronics Corporation
+ *
+ * * Analog Devices ADV7511 HDMI transmitter driver
  *
  * Copyright 2012 Analog Devices Inc.
  *
@@ -905,7 +910,6 @@ static int adv7511_probe(struct i2c_client *i2c,
 	adv7511->current_edid_segment = -1;
 
 	i2c_set_clientdata(i2c, adv7511);
-	adv7511_audio_init(&i2c->dev);
 
 	adv7511_set_link_config(adv7511, &link_config);
 
