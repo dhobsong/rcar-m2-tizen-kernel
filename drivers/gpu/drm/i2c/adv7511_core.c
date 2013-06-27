@@ -220,6 +220,7 @@ static void adv7511_set_config(struct drm_encoder *encoder, void *c)
 	adv7511_packet_enable(adv7511, ADV7511_PACKET_ENABLE_AVI_INFOFRAME);
 }
 
+#ifndef CONFIG_DRM_RCAR_DU
 static void adv7511_set_link_config(struct adv7511 *adv7511,
 	const struct adv7511_link_config *config)
 {
@@ -263,7 +264,7 @@ static void adv7511_set_link_config(struct adv7511 *adv7511,
 	adv7511->hsync_polarity = config->hsync_polarity;
 	adv7511->vsync_polarity = config->vsync_polarity;
 }
-
+#endif
 int adv7511_packet_enable(struct adv7511 *adv7511, unsigned int packet)
 {
 	if (packet & 0xff) {
@@ -760,6 +761,7 @@ static const struct regmap_config adv7511_regmap_config = {
 */
 
 
+#ifndef CONFIG_DRM_RCAR_DU
 static int adv7511_parse_dt(struct device_node *np, struct adv7511_link_config *config)
 {
 	int ret;
@@ -828,7 +830,7 @@ static int adv7511_parse_dt(struct device_node *np, struct adv7511_link_config *
 
 	return 0;
 }
-
+#endif
 static const int edid_i2c_addr = 0x7e;
 static const int packet_i2c_addr = 0x70;
 static const int cec_i2c_addr = 0x78;
@@ -836,11 +838,14 @@ static const int cec_i2c_addr = 0x78;
 static int adv7511_probe(struct i2c_client *i2c,
 	const struct i2c_device_id *id)
 {
+#ifndef CONFIG_DRM_RCAR_DU
 	struct adv7511_link_config link_config;
+#endif
 	struct adv7511 *adv7511;
 	unsigned int val;
 	int ret;
 
+#ifndef CONFIG_DRM_RCAR_DU
 	if (i2c->dev.of_node) {
 		ret = adv7511_parse_dt(i2c->dev.of_node, &link_config);
 		if (ret)
@@ -850,11 +855,13 @@ static int adv7511_probe(struct i2c_client *i2c,
 			return -EINVAL;
 		link_config = *(struct adv7511_link_config *)i2c->dev.platform_data;
 	}
+#endif
 
 	adv7511 = devm_kzalloc(&i2c->dev, sizeof(*adv7511), GFP_KERNEL);
 	if (!adv7511)
 		return -ENOMEM;
 
+#ifndef CONFIG_DRM_RCAR_DU
 	adv7511->gpio_pd = link_config.gpio_pd;
 
 	if (gpio_is_valid(adv7511->gpio_pd)) {
@@ -865,6 +872,7 @@ static int adv7511_probe(struct i2c_client *i2c,
 		mdelay(5);
 		gpio_set_value_cansleep(adv7511->gpio_pd, 0);
 	}
+#endif
 
 	adv7511->regmap = devm_regmap_init_i2c(i2c, &adv7511_regmap_config);
 	if (IS_ERR(adv7511->regmap))
@@ -916,8 +924,9 @@ static int adv7511_probe(struct i2c_client *i2c,
 
 	i2c_set_clientdata(i2c, adv7511);
 
+#ifndef CONFIG_DRM_RCAR_DU
 	adv7511_set_link_config(adv7511, &link_config);
-
+#endif
 	return 0;
 
 err_i2c_unregister_device:
