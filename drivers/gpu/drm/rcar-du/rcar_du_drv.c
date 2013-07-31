@@ -259,7 +259,11 @@ static const struct rcar_du_device_info rcar_du_r8a7790_info = {
 		 * (currently unsupported) TCON output.
 		 */
 		[RCAR_DU_OUTPUT_DPAD0] = {
+#if defined(CONFIG_DRM_ADV7511)
+			.possible_crtcs = BIT(2) | BIT(1),
+#else
 			.possible_crtcs = BIT(2) | BIT(1) | BIT(0),
+#endif
 			.encoder_type = DRM_MODE_ENCODER_NONE,
 		},
 		[RCAR_DU_OUTPUT_LVDS0] = {
