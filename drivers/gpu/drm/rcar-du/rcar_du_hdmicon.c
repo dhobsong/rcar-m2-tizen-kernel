@@ -28,12 +28,21 @@
 #include "rcar_du_hdmicon.h"
 #include "../i2c/adv7511.h"
 
+static inline struct drm_encoder *connector_to_encoder(
+					struct drm_connector *connector)
+{
+	struct rcar_du_connector *rcon =
+		 container_of(connector, struct rcar_du_connector, connector);
+	return rcon->encoder->encoder;
+}
+
 static int rcar_du_hdmi_connector_get_modes(struct drm_connector *connector)
 {
 	int count = 0;
+	struct drm_encoder *encoder = connector_to_encoder(connector);
 
-	count += to_encoder_slave(connector->encoder)->slave_funcs->get_modes(
-					connector->encoder, connector);
+	count += to_encoder_slave(encoder)->slave_funcs->get_modes(
+					encoder, connector);
 
 	return count;
 }
@@ -65,7 +74,16 @@ static void rcar_du_hdmi_connector_destroy(struct drm_connector *connector)
 static enum drm_connector_status
 rcar_du_hdmi_connector_detect(struct drm_connector *connector, bool force)
 {
-	return connector_status_connected;
+	enum drm_connector_status status = connector_status_unknown;
+	struct drm_encoder *encoder = connector_to_encoder(connector);
+
+	if (to_encoder_slave(encoder)->slave_funcs &&
+		 to_encoder_slave(encoder)->slave_funcs->detect)
+		status =
+		 to_encoder_slave(encoder)->slave_funcs->detect(
+						encoder, connector);
+
+	return status;
 }
 
 static const struct drm_connector_funcs connector_funcs = {
