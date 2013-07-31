@@ -965,7 +965,15 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 		struct drm_display_mode *desired_mode;
 		desired_mode = fb_helper->crtc_info[i].desired_mode;
 
+#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_MACH_LAGER)
+		if ((desired_mode) && (i == 0)) {
+#elif defined(CONFIG_MACH_KOELSCH)
+		if ((desired_mode) && (i == 1)) {
+#endif
+#else
 		if (desired_mode) {
+#endif
 			if (gamma_size == 0)
 				gamma_size = fb_helper->crtc_info[i].mode_set.crtc->gamma_size;
 			if (desired_mode->hdisplay < sizes.fb_width)
@@ -980,6 +988,13 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 		}
 	}
 
+#if defined(CONFIG_DRM_RCAR_DU)
+	if (crtc_count == 0) {
+		sizes.fb_width = sizes.surface_width = 1920;
+		sizes.fb_height = sizes.surface_height = 1080;
+		crtc_count++;
+	}
+#endif
 	if (crtc_count == 0 || sizes.fb_width == -1 || sizes.fb_height == -1) {
 		/* hmm everyone went away - assume VGA cable just fell out
 		   and will come back later. */
