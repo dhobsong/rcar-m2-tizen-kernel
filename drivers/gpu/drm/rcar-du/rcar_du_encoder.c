@@ -219,7 +219,11 @@ int rcar_du_encoder_init(struct rcar_du_device *rcdu,
 				false,
 				ADV7511_CSC_SCALING_4,
 				adv7511_csc_ycbcr_to_rgb,
+#if defined(CONFIG_DRM_ADV7511_DVI_OUTPUT)
+				false,
+#else
 				true,
+#endif
 				avi_info[0],
 			}
 		},
