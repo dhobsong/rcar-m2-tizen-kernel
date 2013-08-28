@@ -172,6 +172,15 @@ config DRM_ADV7511
 	select REGMAP_I2C
 	select HDMI
 
+config DRM_ADV7511_DVI_OUTPUT
+	bool "ADV7511 DVI output mode"
+	depends on DRM_ADV7511
+	help
+	Choose this option if you want to select DVI mode for
+	ADV7511 encoder.
+	If you want to use DVI mode, you select y.
+	If you want to use HDMI mode, you select n.
+
 config DRM_FBDEV_CRTC
 	int "Select FBDev CRTC"
 	depends on DRM_KMS_HELPER
