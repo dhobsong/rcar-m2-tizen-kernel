@@ -844,6 +844,9 @@ static int adv7511_probe(struct i2c_client *i2c,
 	struct adv7511 *adv7511;
 	unsigned int val;
 	int ret;
+#if defined(CONFIG_DRM_RCAR_DU)
+	unsigned int timeout;
+#endif
 
 #ifndef CONFIG_DRM_RCAR_DU
 	if (i2c->dev.of_node) {
@@ -918,7 +921,16 @@ static int adv7511_probe(struct i2c_client *i2c,
 	/* For active status of EDID ready */
 	regmap_update_bits(adv7511->regmap, ADV7511_REG_POWER,
 			ADV7511_POWER_POWER_DOWN, 0);
-	mdelay(100);
+
+#if defined(CONFIG_DRM_RCAR_DU)
+	/* Wait status of hotplug detect and hotplug interrupts */
+	for (timeout = 0; timeout < TIMEOUT_STATUS_HPD; timeout++) {
+		regmap_read(adv7511->regmap, ADV7511_REG_STATUS, &val);
+		if ((val & ADV7511_STATUS_HPD) && adv7511_hpd(adv7511))
+			break;
+		mdelay(1);
+	}
+#endif
 
 	adv7511->current_edid_segment = -1;
 
