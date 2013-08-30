@@ -74,6 +74,7 @@ static int rcar_du_load(struct drm_device *dev, unsigned long flags)
 	rcdu->info = (struct rcar_du_device_info *)pdev->id_entry->driver_data;
 	rcdu->ddev = dev;
 	dev->dev_private = rcdu;
+	rcdu->dpad0_source = rcdu->info->drgbs_bit;
 
 	/* I/O resources */
 	mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -277,6 +278,7 @@ static const struct rcar_du_device_info rcar_du_r8a7790_info = {
 		},
 	},
 	.num_lvds = 2,
+	.drgbs_bit = 0,
 };
 
 static const struct rcar_du_device_info rcar_du_r8a7791_info = {
@@ -297,6 +299,7 @@ static const struct rcar_du_device_info rcar_du_r8a7791_info = {
 		},
 	},
 	.num_lvds = 1,
+	.drgbs_bit = 1,
 };
 
 static const struct platform_device_id rcar_du_id_table[] = {
