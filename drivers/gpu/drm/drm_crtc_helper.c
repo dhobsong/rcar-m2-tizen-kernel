@@ -175,9 +175,11 @@ int drm_helper_probe_single_connector_modes(struct drm_connector *connector,
 
 	drm_mode_connector_list_update(connector);
 
+#if !defined(CONFIG_DRM_FBDEV_CRTC)
 	if (maxX && maxY)
 		drm_mode_validate_size(dev, &connector->modes, maxX,
 				       maxY, 0);
+#endif
 
 	if (connector->interlace_allowed)
 		mode_flags |= DRM_MODE_FLAG_INTERLACE;
