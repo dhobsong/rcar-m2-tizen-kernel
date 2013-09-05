@@ -1058,7 +1058,11 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 #endif
 
 	memset(&sizes, 0, sizeof(struct drm_fb_helper_surface_size));
+#if defined(CONFIG_DRM_RCAR_DU)
+	sizes.surface_depth = 32;
+#else
 	sizes.surface_depth = 24;
+#endif
 	sizes.surface_bpp = 32;
 	sizes.fb_width = (unsigned)-1;
 	sizes.fb_height = (unsigned)-1;
