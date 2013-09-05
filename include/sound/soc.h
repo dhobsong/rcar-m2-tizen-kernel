@@ -671,6 +671,21 @@ struct snd_soc_cache_ops {
 	int (*sync)(struct snd_soc_codec *codec);
 };
 
+/* component interface */
+struct snd_soc_component_driver {
+	const char *name;
+};
+
+struct snd_soc_component {
+	const char *name;
+	int id;
+	int num_dai;
+	struct device *dev;
+	struct list_head list;
+
+	const struct snd_soc_component_driver *driver;
+};
+
 /* SoC Audio Codec device */
 struct snd_soc_codec {
 	const char *name;
@@ -718,6 +733,9 @@ struct snd_soc_codec {
 	struct mutex cache_rw_mutex;
 	int val_bytes;
 
+	/* component */
+	struct snd_soc_component component;
+
 	/* dapm */
 	struct snd_soc_dapm_context dapm;
 	unsigned int ignore_pmdown_time:1; /* pmdown_time is ignored at stop */
@@ -737,6 +755,7 @@ struct snd_soc_codec_driver {
 	int (*remove)(struct snd_soc_codec *);
 	int (*suspend)(struct snd_soc_codec *);
 	int (*resume)(struct snd_soc_codec *);
+	struct snd_soc_component_driver component_driver;
 
 	/* Default control and setup, added after probe() is run */
 	const struct snd_kcontrol_new *controls;
@@ -852,20 +871,6 @@ struct snd_soc_platform {
 	struct dentry *debugfs_platform_root;
 	struct dentry *debugfs_dapm;
 #endif
-};
-
-struct snd_soc_component_driver {
-	const char *name;
-};
-
-struct snd_soc_component {
-	const char *name;
-	int id;
-	int num_dai;
-	struct device *dev;
-	struct list_head list;
-
-	const struct snd_soc_component_driver *driver;
 };
 
 struct snd_soc_dai_link {
