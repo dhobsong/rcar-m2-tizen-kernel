@@ -499,16 +499,6 @@ static irqreturn_t rcar_i2c_irq(int irq, void *ptr)
 	}
 
 	/*
-	 * Stop
-	 */
-	if (msr & MST) {
-		dev_dbg(dev, "Stop\n");
-		rcar_i2c_flags_set(priv, ID_DONE);
-		rcar_i2c_status_clear(priv);
-		goto out;
-	}
-
-	/*
 	 * Nack
 	 */
 	if (msr & MNR) {
@@ -518,6 +508,17 @@ static irqreturn_t rcar_i2c_irq(int irq, void *ptr)
 		rcar_i2c_bus_phase(priv, RCAR_BUS_PHASE_STOP);
 		rcar_i2c_irq_mask(priv, RCAR_IRQ_OPEN_FOR_STOP);
 		rcar_i2c_flags_set(priv, ID_NACK);
+		rcar_i2c_status_bit_clear(priv, MNR);
+		goto out;
+	}
+
+	/*
+	 * Stop
+	 */
+	if (msr & MST) {
+		dev_dbg(dev, "Stop\n");
+		rcar_i2c_flags_set(priv, ID_DONE);
+		rcar_i2c_status_clear(priv);
 		goto out;
 	}
 
