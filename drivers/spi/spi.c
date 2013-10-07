@@ -39,6 +39,9 @@
 #include <linux/ioport.h>
 #include <linux/acpi.h>
 
+#define CREATE_TRACE_POINTS
+#include <trace/events/spi.h>
+
 static void spidev_release(struct device *dev)
 {
 	struct spi_device	*spi = to_spi_device(dev);
@@ -553,6 +556,7 @@ static void spi_pump_messages(struct kthread_work *work)
 		    master->unprepare_transfer_hardware(master))
 			dev_err(&master->dev,
 				"failed to unprepare transfer hardware\n");
+		trace_spi_master_idle(master);
 		return;
 	}
 
@@ -572,6 +576,9 @@ static void spi_pump_messages(struct kthread_work *work)
 		master->busy = true;
 	spin_unlock_irqrestore(&master->queue_lock, flags);
 
+	if (!was_busy)
+		trace_spi_master_busy(master);
+
 	if (!was_busy && master->prepare_transfer_hardware) {
 		ret = master->prepare_transfer_hardware(master);
 		if (ret) {
@@ -580,6 +587,8 @@ static void spi_pump_messages(struct kthread_work *work)
 			return;
 		}
 	}
+
+	trace_spi_message_start(master->cur_msg);
 
 	ret = master->transfer_one_message(master, master->cur_msg);
 	if (ret) {
@@ -673,6 +682,8 @@ void spi_finalize_current_message(struct spi_master *master)
 	mesg->state = NULL;
 	if (mesg->complete)
 		mesg->complete(mesg->context);
+
+	trace_spi_message_done(mesg);
 }
 EXPORT_SYMBOL_GPL(spi_finalize_current_message);
 
@@ -1444,6 +1455,10 @@ static int __spi_async(struct spi_device *spi, struct spi_message *message)
 	struct spi_master *master = spi->master;
 	struct spi_transfer *xfer;
 
+	message->spi = spi;
+
+	trace_spi_message_submit(message);
+
 	/* Half-duplex links include original MicroWire, and ones with
 	 * only one data pin like SPI_3WIRE (switches direction) or where
 	 * either MOSI or MISO is missing.  They can also be caused by
@@ -1529,7 +1544,6 @@ static int __spi_async(struct spi_device *spi, struct spi_message *message)
 			return -EINVAL;
 	}
 
-	message->spi = spi;
 	message->status = -EINPROGRESS;
 	return master->transfer(spi, message);
 }
