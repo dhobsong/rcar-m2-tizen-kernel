@@ -65,6 +65,9 @@ struct rcar_du_device_info {
 	struct rcar_du_output_routing routes[RCAR_DU_OUTPUT_MAX];
 	unsigned int num_lvds;
 	unsigned int drgbs_bit;
+	unsigned int max_xres;
+	unsigned int max_yres;
+	bool interlace;
 };
 
 struct rcar_du_device {
