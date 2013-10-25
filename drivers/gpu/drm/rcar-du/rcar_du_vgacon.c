@@ -29,6 +29,21 @@ static int rcar_du_vga_connector_get_modes(struct drm_connector *connector)
 static int rcar_du_vga_connector_mode_valid(struct drm_connector *connector,
 					    struct drm_display_mode *mode)
 {
+	struct rcar_du_connector *rcon = to_rcar_connector(connector);
+	unsigned int max_width, max_height;
+	bool laced;
+
+	max_width = rcon->encoder->dev->info->max_xres;
+	max_height = rcon->encoder->dev->info->max_yres;
+	laced = rcon->encoder->dev->info->interlace;
+
+	if ((mode->hdisplay * mode->vdisplay) > (max_width * max_height))
+		return MODE_BAD_WIDTH;
+
+	if (((mode->hdisplay * mode->vdisplay) == (max_width * max_height))
+		&& (laced) && (!(mode->flags & DRM_MODE_FLAG_INTERLACE)))
+		return MODE_BAD;
+
 	return MODE_OK;
 }
 

@@ -279,6 +279,9 @@ static const struct rcar_du_device_info rcar_du_r8a7790_info = {
 	},
 	.num_lvds = 2,
 	.drgbs_bit = 0,
+	.max_xres = 1920,
+	.max_yres = 1080,
+	.interlace = false,
 };
 
 static const struct rcar_du_device_info rcar_du_r8a7791_info = {
@@ -300,6 +303,9 @@ static const struct rcar_du_device_info rcar_du_r8a7791_info = {
 	},
 	.num_lvds = 1,
 	.drgbs_bit = 1,
+	.max_xres = 1920,
+	.max_yres = 1080,
+	.interlace = true,
 };
 
 static const struct platform_device_id rcar_du_id_table[] = {
