@@ -740,7 +740,7 @@ int drm_fb_helper_check_var(struct fb_var_screeninfo *var,
 
 	switch (var->bits_per_pixel) {
 	case 16:
-		depth = (var->green.length == 6) ? 16 : 15;
+		depth = (var->green.length == 5) ? 15 : 16;
 		break;
 	case 32:
 		depth = (var->transp.length > 0) ? 32 : 24;
