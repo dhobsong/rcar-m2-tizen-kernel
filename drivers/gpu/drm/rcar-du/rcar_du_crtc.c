@@ -89,32 +89,43 @@ static void rcar_du_crtc_put(struct rcar_du_crtc *rcrtc)
 static void rcar_du_crtc_set_display_timing(struct rcar_du_crtc *rcrtc)
 {
 	const struct drm_display_mode *mode = &rcrtc->crtc.mode;
-	unsigned long clk;
+	unsigned long clk_in = 0, clk_ex = 0;
 	u32 value;
-	u32 div;
+	u32 div = 0, div_in = 0, div_ex = 0;
+	u32 abs_in = 0, abs_ex = 0;
+	u32 dclksel_bit = 0, dclkoinv_bit = 0;
+	const struct rcar_du_encoder_data *pdata =
+			&rcrtc->group->dev->pdata->encoders[rcrtc->index];
 
-	/* Dot clock */
-	clk = clk_get_rate(rcrtc->clock);
-	div = DIV_ROUND_CLOSEST(clk, mode->clock * 1000);
+	/* Internal dot clock */
+	clk_in = clk_get_rate(rcrtc->clock);
+	div_in = DIV_ROUND_CLOSEST(clk_in, mode->clock * 1000);
+
+	if (pdata->exclk != 0) {
+		/* External dot clock */
+		clk_ex = pdata->exclk;
+		div_ex = DIV_ROUND_CLOSEST(clk_ex, mode->clock * 1000);
+		/* Select recommand dot clock */
+		abs_ex = abs((mode->clock * 1000) - (clk_ex / div_ex));
+		abs_in = abs((mode->clock * 1000) - (clk_in / div_in));
+		if (abs_ex < abs_in) {
+			div = div_ex;
+			dclksel_bit = ESCR_DCLKSEL_DCLKIN;
+		} else {
+			div = div_in;
+			dclksel_bit = ESCR_DCLKSEL_CLKS;
+		}
+	} else {
+		div = div_in;
+		dclksel_bit = ESCR_DCLKSEL_CLKS;
+	}
+	if (mode->flags & DRM_MODE_FLAG_INTERLACE)
+		dclkoinv_bit = ESCR_DCLKOINV;
+
 	div = clamp(div, 1U, 64U) - 1;
 
-	if ((strcmp(mode->name, "1920x1080i") == 0) &&
-		rcar_du_has(rcrtc->group->dev, RCAR_DU_FEATURE_INTERLACE))
-			rcar_du_group_write(rcrtc->group,
-				rcrtc->index % 2 ? ESCR2 : ESCR, ESCR_DCLKOINV);
-	else if ((strcmp(mode->name, "1920x1080") == 0) &&
-		 (rcrtc->outputs != (1 << RCAR_DU_OUTPUT_DPAD0)) &&
-		 (rcrtc->outputs != (1 << RCAR_DU_OUTPUT_LVDS1))) {
-		if (rcar_du_has(rcrtc->group->dev,
-				 RCAR_DU_FEATURE_EXTERAL_CLOCK))
-			rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ?
-				ESCR2 : ESCR, 0);
-		else
-			rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ?
-				ESCR2 : ESCR, ESCR_DCLKSEL_CLKS | div);
-	} else
-		rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ?
-			ESCR2 : ESCR, ESCR_DCLKSEL_CLKS | div);
+	rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ?
+				ESCR2 : ESCR, dclksel_bit | dclkoinv_bit | div);
 	rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ? OTAR2 : OTAR, 0);
 
 	/* Signal polarities */
