@@ -65,6 +65,7 @@ struct rcar_du_connector_hdmi_data {
 struct rcar_du_encoder_data {
 	enum rcar_du_encoder_type type;
 	enum rcar_du_output output;
+	unsigned int exclk;
 
 	union {
 		struct rcar_du_connector_lvds_data lvds;
