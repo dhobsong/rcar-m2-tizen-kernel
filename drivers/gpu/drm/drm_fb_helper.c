@@ -1152,9 +1152,19 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 
 #if defined(CONFIG_DRM_RCAR_DU)
 	if (crtc_count == 0) {
+#if defined(CONFIG_DRM_ADV7511)
 		sizes.fb_width = sizes.surface_width = 1920;
 		sizes.fb_height = sizes.surface_height = 1080;
 		crtc_count++;
+#else
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+		if (CONFIG_DRM_FBDEV_CRTC_NUM >= (fb_helper->crtc_count - 1)) {
+			pr_err("Error! set FBDev CRTC number < (%d)\n",
+				CONFIG_DRM_FBDEV_CRTC_NUM);
+			return -EINVAL;
+		}
+#endif
+#endif
 	}
 #endif
 	if (crtc_count == 0 || sizes.fb_width == -1 || sizes.fb_height == -1) {
