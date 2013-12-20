@@ -57,6 +57,7 @@ struct rsnd_ssi_platform_info {
 
 struct rsnd_scu_platform_info {
 	u32 flags;
+	u32 convert_rate; /* sampling rate convert */
 };
 
 /*
