@@ -54,6 +54,12 @@
 
 /* DU */
 static struct rcar_du_encoder_data koelsch_du_encoders[] = {
+#if defined(CONFIG_DRM_ADV7511)
+	{
+		.type = RCAR_DU_ENCODER_HDMI,
+		.output = RCAR_DU_OUTPUT_DPAD0,
+	},
+#endif
 	{
 		.type = RCAR_DU_ENCODER_NONE,
 		.output = RCAR_DU_OUTPUT_LVDS0,
@@ -74,12 +80,6 @@ static struct rcar_du_encoder_data koelsch_du_encoders[] = {
 			},
 		},
 	},
-#if defined(CONFIG_DRM_ADV7511)
-	{
-		.type = RCAR_DU_ENCODER_HDMI,
-		.output = RCAR_DU_OUTPUT_DPAD0,
-	},
-#endif
 };
 
 static struct rcar_du_crtc_data koelsch_du_crtcs[] = {
