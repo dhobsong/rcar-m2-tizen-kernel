@@ -1101,6 +1101,7 @@ struct snd_soc_pcm_runtime {
 struct soc_mixer_control {
 	int min, max, platform_max;
 	unsigned int reg, rreg, shift, rshift, invert;
+	unsigned int sign_bit;
 };
 
 struct soc_bytes {
