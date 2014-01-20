@@ -35,30 +35,46 @@
 #include <asm/mach/arch.h>
 
 /* Audio-DMAC */
-#define AUDIO_DMAC_SLAVE(_id, _addr, t, r)			\
+#define AUDIO_DMAC_SLAVE(_id, _addr, toffset, roffset, t, r)	\
 {								\
 	.slave_id	= AUDIO_DMAC_SLAVE_## _id ##_TX,	\
-	.addr		= _addr + 0x8,				\
+	.addr		= _addr + toffset,			\
 	.chcr		= CHCR_TX(XMIT_SZ_32BIT),		\
 	.mid_rid	= t,					\
 }, {								\
 	.slave_id	= AUDIO_DMAC_SLAVE_## _id ##_RX,	\
-	.addr		= _addr + 0xc,				\
+	.addr		= _addr + roffset,			\
 	.chcr		= CHCR_RX(XMIT_SZ_32BIT),		\
 	.mid_rid	= r,					\
 }
 
+#define AUDIO_DMAC_SCU_SLAVE(_id, _addr, t, r)			\
+	AUDIO_DMAC_SLAVE(SCU##_id, _addr, 0x0, 0x4000, t, r)
+
+#define AUDIO_DMAC_SSI_SLAVE(_id, _addr, t, r)			\
+	AUDIO_DMAC_SLAVE(SSI##_id, _addr, 0x8, 0xc, t, r)
+
 static const struct sh_dmae_slave_config r8a7790_audio_dmac_slaves[] = {
-	AUDIO_DMAC_SLAVE(SSI0, 0xec241000, 0x01, 0x02),
-	AUDIO_DMAC_SLAVE(SSI1, 0xec241040, 0x03, 0x04),
-	AUDIO_DMAC_SLAVE(SSI2, 0xec241080, 0x05, 0x06),
-	AUDIO_DMAC_SLAVE(SSI3, 0xec2410c0, 0x07, 0x08),
-	AUDIO_DMAC_SLAVE(SSI4, 0xec241100, 0x09, 0x0a),
-	AUDIO_DMAC_SLAVE(SSI5, 0xec241140, 0x0b, 0x0c),
-	AUDIO_DMAC_SLAVE(SSI6, 0xec241180, 0x0d, 0x0e),
-	AUDIO_DMAC_SLAVE(SSI7, 0xec2411c0, 0x0f, 0x10),
-	AUDIO_DMAC_SLAVE(SSI8, 0xec241200, 0x11, 0x12),
-	AUDIO_DMAC_SLAVE(SSI9, 0xec241240, 0x13, 0x14),
+	AUDIO_DMAC_SCU_SLAVE(0, 0xec000000, 0x85, 0x9a),
+	AUDIO_DMAC_SCU_SLAVE(1, 0xec000400, 0x87, 0x9c),
+	AUDIO_DMAC_SCU_SLAVE(2, 0xec000800, 0x89, 0x9e),
+	AUDIO_DMAC_SCU_SLAVE(3, 0xec000c00, 0x8b, 0xa0),
+	AUDIO_DMAC_SCU_SLAVE(4, 0xec001000, 0x8d, 0xb0),
+	AUDIO_DMAC_SCU_SLAVE(5, 0xec001400, 0x8f, 0xb2),
+	AUDIO_DMAC_SCU_SLAVE(6, 0xec001800, 0x91, 0xb4),
+	AUDIO_DMAC_SCU_SLAVE(7, 0xec001c00, 0x93, 0xb6),
+	AUDIO_DMAC_SCU_SLAVE(8, 0xec002000, 0x95, 0xb8),
+	AUDIO_DMAC_SCU_SLAVE(9, 0xec002400, 0x97, 0xba),
+	AUDIO_DMAC_SSI_SLAVE(0, 0xec241000, 0x01, 0x02),
+	AUDIO_DMAC_SSI_SLAVE(1, 0xec241040, 0x03, 0x04),
+	AUDIO_DMAC_SSI_SLAVE(2, 0xec241080, 0x05, 0x06),
+	AUDIO_DMAC_SSI_SLAVE(3, 0xec2410c0, 0x07, 0x08),
+	AUDIO_DMAC_SSI_SLAVE(4, 0xec241100, 0x09, 0x0a),
+	AUDIO_DMAC_SSI_SLAVE(5, 0xec241140, 0x0b, 0x0c),
+	AUDIO_DMAC_SSI_SLAVE(6, 0xec241180, 0x0d, 0x0e),
+	AUDIO_DMAC_SSI_SLAVE(7, 0xec2411c0, 0x0f, 0x10),
+	AUDIO_DMAC_SSI_SLAVE(8, 0xec241200, 0x11, 0x12),
+	AUDIO_DMAC_SSI_SLAVE(9, 0xec241240, 0x13, 0x14),
 };
 
 #define DMAE_CHANNEL(a, b)			\
