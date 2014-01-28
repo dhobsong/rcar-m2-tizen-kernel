@@ -339,8 +339,10 @@ struct spi_master {
 #define SPI_MASTER_HALF_DUPLEX	BIT(0)		/* can't do full duplex */
 #define SPI_MASTER_NO_RX	BIT(1)		/* can't do buffer read */
 #define SPI_MASTER_NO_TX	BIT(2)		/* can't do buffer write */
-#define SPI_MASTER_U_PAGE	BIT(3)		/* select upper flash */
-#define SPI_MASTER_QUAD_MODE	BIT(4)		/* support quad mode */
+#define SPI_MASTER_MUST_RX      BIT(3)		/* requires rx */
+#define SPI_MASTER_MUST_TX      BIT(4)		/* requires tx */
+#define SPI_MASTER_U_PAGE	BIT(5)		/* select upper flash */
+#define SPI_MASTER_QUAD_MODE	BIT(6)		/* support quad mode */
 
 	/* lock and mutex for SPI bus locking */
 	spinlock_t		bus_lock_spinlock;
@@ -436,6 +438,10 @@ struct spi_master {
 	/* DMA channels for use with core dmaengine helpers */
 	struct dma_chan		*dma_tx;
 	struct dma_chan		*dma_rx;
+
+	/* dummy data for full duplex devices */
+	void			*dummy_rx;
+	void			*dummy_tx;
 };
 
 static inline void *spi_master_get_devdata(struct spi_master *master)
