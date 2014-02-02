@@ -374,7 +374,7 @@ static void s3c64xx_spi_dma_stop(struct s3c64xx_spi_driver_data *sdd,
 #else
 
 static void prepare_dma(struct s3c64xx_spi_dma_data *dma,
-					unsigned len, dma_addr_t buf)
+			struct sg_table *sgt)
 {
 	struct s3c64xx_spi_driver_data *sdd;
 	struct dma_slave_config config;
@@ -398,8 +398,8 @@ static void prepare_dma(struct s3c64xx_spi_dma_data *dma,
 		dmaengine_slave_config(dma->ch, &config);
 	}
 
-	desc = dmaengine_prep_slave_single(dma->ch, buf, len,
-					dma->direction, DMA_PREP_INTERRUPT);
+	desc = dmaengine_prep_slave_sg(dma->ch, sgt->sgl, sgt->nents,
+				       dma->direction, DMA_PREP_INTERRUPT);
 
 	desc->callback = s3c64xx_spi_dmacb;
 	desc->callback_param = dma;
@@ -502,7 +502,11 @@ static void enable_datapath(struct s3c64xx_spi_driver_data *sdd,
 		chcfg |= S3C64XX_SPI_CH_TXCH_ON;
 		if (dma_mode) {
 			modecfg |= S3C64XX_SPI_MODE_TXDMA_ON;
+#ifndef CONFIG_S3C_DMA
+			prepare_dma(&sdd->tx_dma, &xfer->tx_sg);
+#else
 			prepare_dma(&sdd->tx_dma, xfer->len, xfer->tx_dma);
+#endif
 		} else {
 			switch (sdd->cur_bpw) {
 			case 32:
@@ -534,7 +538,11 @@ static void enable_datapath(struct s3c64xx_spi_driver_data *sdd,
 			writel(((xfer->len * 8 / sdd->cur_bpw) & 0xffff)
 					| S3C64XX_SPI_PACKET_CNT_EN,
 					regs + S3C64XX_SPI_PACKET_CNT);
+#ifndef CONFIG_S3C_DMA
+			prepare_dma(&sdd->rx_dma, &xfer->rx_sg);
+#else
 			prepare_dma(&sdd->rx_dma, xfer->len, xfer->rx_dma);
+#endif
 		}
 	}
 
