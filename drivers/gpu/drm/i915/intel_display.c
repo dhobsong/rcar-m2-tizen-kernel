@@ -51,7 +51,10 @@ static void ironlake_pch_clock_get(struct intel_crtc *crtc,
 
 static int intel_set_mode(struct drm_crtc *crtc, struct drm_display_mode *mode,
 			  int x, int y, struct drm_framebuffer *old_fb);
-
+int intel_framebuffer_init(struct drm_device *dev,
+				  struct intel_framebuffer *ifb,
+				  struct drm_mode_fb_cmd2 *mode_cmd,
+				  struct drm_i915_gem_object *obj);
 
 typedef struct {
 	int	min, max;
