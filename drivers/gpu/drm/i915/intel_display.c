@@ -5764,6 +5764,10 @@ static void ironlake_init_pch_refclk(struct drm_device *dev)
 	 */
 	val = I915_READ(PCH_DREF_CONTROL);
 
+	/* Preserve SSC if the BIOS set it */
+	if (val & DREF_SSC1_ENABLE)
+		i915_panel_use_ssc = 1;
+
 	/* As we must carefully and slowly disable/enable each source in turn,
 	 * compute the final state we want first and check if we need to
 	 * make any changes at all.
