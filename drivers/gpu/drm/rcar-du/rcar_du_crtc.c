@@ -69,6 +69,9 @@ static int rcar_du_crtc_get(struct rcar_du_crtc *rcrtc)
 {
 	int ret;
 
+	if (rcrtc->started)
+		return 0;
+
 	ret = clk_prepare_enable(rcrtc->clock);
 	if (ret < 0)
 		return ret;
@@ -82,6 +85,9 @@ static int rcar_du_crtc_get(struct rcar_du_crtc *rcrtc)
 
 static void rcar_du_crtc_put(struct rcar_du_crtc *rcrtc)
 {
+	if (!rcrtc->started)
+		return;
+
 	rcar_du_group_put(rcrtc->group);
 	clk_disable_unprepare(rcrtc->clock);
 }
