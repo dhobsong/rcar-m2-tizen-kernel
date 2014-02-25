@@ -379,7 +379,6 @@ config SPI_SC18IS602
 config SPI_SH_MSIOF
 	tristate "SuperH MSIOF SPI controller"
 	depends on (SUPERH || ARCH_SHMOBILE) && HAVE_CLK
-	select SPI_BITBANG
 	help
 	  SPI driver for SuperH and SH Mobile MSIOF blocks.
 
