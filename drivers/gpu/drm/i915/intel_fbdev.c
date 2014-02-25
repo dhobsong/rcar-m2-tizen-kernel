@@ -324,31 +324,30 @@ static bool intel_fb_initial_config(struct drm_fb_helper *fb_helper,
 		/* go for command line mode first */
 		modes[i] = drm_pick_cmdline_mode(fb_conn, width, height);
 
-		/* try for preferred next */
+		/* try for preferred next or match current */
 		if (!modes[i]) {
+			struct drm_display_mode *preferred;
+
 			DRM_DEBUG_KMS("looking for preferred mode on connector %d\n",
 				      fb_conn->connector->base.id);
-			modes[i] = drm_has_preferred_mode(fb_conn, width,
-							  height);
-		}
-
-		/* last resort: use current mode */
-		if (!modes[i]) {
-			/*
-			 * IMPORTANT: We want to use the adjusted mode (i.e.
-			 * after the panel fitter upscaling) as the initial
-			 * config, not the input mode, which is what crtc->mode
-			 * usually contains. But since our current fastboot
-			 * code puts a mode derived from the post-pfit timings
-			 * into crtc->mode this works out correctly. We don't
-			 * use hwmode anywhere right now, so use it for this
-			 * since the fb helper layer wants a pointer to
-			 * something we own.
-			 */
+			preferred = drm_has_preferred_mode(fb_conn, width,
+							   height);
 			intel_mode_from_pipe_config(&encoder->crtc->hwmode,
 						    &to_intel_crtc(encoder->crtc)->config);
 			modes[i] = &encoder->crtc->hwmode;
+
+			if (preferred &&
+			    !drm_mode_same_size(preferred, modes[i])) {
+				DRM_DEBUG_KMS("using preferred mode %s "
+					      "instead of current mode %s "
+					      "on connector %d\n",
+					      preferred->name,
+					      modes[i]->name,
+					      fb_conn->connector->base.id);
+				modes[i] = preferred;
+			}
 		}
+
 		crtcs[i] = new_crtc;
 
 		DRM_DEBUG_KMS("connector %s on crtc %d: %s\n",

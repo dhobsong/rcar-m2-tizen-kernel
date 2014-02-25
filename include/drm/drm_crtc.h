@@ -1019,6 +1019,8 @@ extern bool drm_mode_equal(const struct drm_display_mode *mode1, const struct dr
 extern bool drm_mode_equal_no_clocks_no_stereo(const struct drm_display_mode *mode1, const struct drm_display_mode *mode2);
 extern int drm_mode_width(const struct drm_display_mode *mode);
 extern int drm_mode_height(const struct drm_display_mode *mode);
+extern bool drm_mode_same_size(const struct drm_display_mode *mode1,
+			       const struct drm_display_mode *mode2);
 
 /* for us by fb module */
 extern struct drm_display_mode *drm_mode_create(struct drm_device *dev);

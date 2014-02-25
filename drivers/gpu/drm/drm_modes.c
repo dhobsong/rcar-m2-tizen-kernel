@@ -894,6 +894,14 @@ bool drm_mode_equal_no_clocks_no_stereo(const struct drm_display_mode *mode1,
 }
 EXPORT_SYMBOL(drm_mode_equal_no_clocks_no_stereo);
 
+bool drm_mode_same_size(const struct drm_display_mode *mode1,
+			const struct drm_display_mode *mode2)
+{
+	return mode1->vdisplay == mode2->vdisplay &&
+		mode1->hdisplay == mode2->hdisplay;
+}
+EXPORT_SYMBOL(drm_mode_same_size);
+
 /**
  * drm_mode_validate_size - make sure modes adhere to size constraints
  * @dev: DRM device
