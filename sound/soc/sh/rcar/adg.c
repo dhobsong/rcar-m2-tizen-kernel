@@ -399,7 +399,6 @@ int rsnd_adg_probe(struct platform_device *pdev,
 	struct device *dev = rsnd_priv_to_dev(priv);
 	struct clk *clk, *clk_orig;
 	int i;
-	bool use_old_style = false;
 
 	adg = devm_kzalloc(dev, sizeof(*adg), GFP_KERNEL);
 	if (!adg) {
@@ -420,28 +419,6 @@ int rsnd_adg_probe(struct platform_device *pdev,
 	 */
 	for_each_rsnd_clk(clk, adg, i) {
 		if (clk_orig == clk) {
-			dev_warn(dev,
-				 "doesn't have device dependent clock, use independent clock\n");
-			use_old_style = true;
-			break;
-		}
-	}
-
-	/*
-	 * note:
-	 * these exist in order to keep compatible with
-	 * platform which has device independent audio clock,
-	 * but will be removed soon
-	 */
-	if (use_old_style) {
-		adg->clk[CLKA] = devm_clk_get(NULL, "audio_clk_a");
-		adg->clk[CLKB] = devm_clk_get(NULL, "audio_clk_b");
-		adg->clk[CLKC] = devm_clk_get(NULL, "audio_clk_c");
-		adg->clk[CLKI] = devm_clk_get(NULL, "audio_clk_internal");
-	}
-
-	for_each_rsnd_clk(clk, adg, i) {
-		if (IS_ERR(clk)) {
 			dev_err(dev, "Audio clock failed\n");
 			return -EIO;
 		}
