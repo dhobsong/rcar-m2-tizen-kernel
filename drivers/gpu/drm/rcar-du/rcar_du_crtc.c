@@ -232,8 +232,8 @@ void rcar_du_crtc_update_planes(struct drm_crtc *crtc)
 		}
 	}
 
-	/* Select display timing and dot clock generator 2 for planes associated
-	 * with superposition controller 2.
+	/* Select display timing and dot clock generator 1 for planes associated
+	 * with superposition controller 1.
 	 */
 	if (rcrtc->index % 2) {
 		u32 value = rcar_du_group_read(rcrtc->group, DPTSR);
@@ -247,8 +247,7 @@ void rcar_du_crtc_update_planes(struct drm_crtc *crtc)
 		 */
 		if (value != dptsr) {
 			rcar_du_group_write(rcrtc->group, DPTSR, dptsr);
-			if (rcrtc->group->used_crtcs)
-				rcar_du_group_restart(rcrtc->group);
+			rcar_du_group_restart(rcrtc->group);
 		}
 	}
 
