@@ -26,6 +26,7 @@ struct rcar_du_encoder {
 	struct drm_encoder *encoder;
 	enum rcar_du_output output;
 	struct rcar_du_lvdsenc *lvds;
+	struct rcar_du_device *dev;
 };
 
 #define to_rcar_encoder(e) \
