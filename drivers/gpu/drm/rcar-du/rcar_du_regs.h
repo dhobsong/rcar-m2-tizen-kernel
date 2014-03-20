@@ -321,6 +321,7 @@
 #define PnMR_SPIM_ALP		(1 << 12)	/* Alpha Blending */
 #define PnMR_SPIM_EOR		(2 << 12)	/* EOR */
 #define PnMR_SPIM_TP_OFF	(1 << 14)	/* No Transparent Color */
+#define PnMR_SPIM_MASK		(3 << 12)
 #define PnMR_CPSL_CP1		(0 << 8)	/* Color Palette selected 1 */
 #define PnMR_CPSL_CP2		(1 << 8)	/* Color Palette selected 2 */
 #define PnMR_CPSL_CP3		(2 << 8)	/* Color Palette selected 3 */
