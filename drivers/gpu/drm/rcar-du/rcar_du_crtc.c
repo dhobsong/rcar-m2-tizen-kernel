@@ -98,12 +98,19 @@ static void rcar_du_crtc_set_display_timing(struct rcar_du_crtc *rcrtc)
 	div = DIV_ROUND_CLOSEST(clk, mode->clock * 1000);
 	div = clamp(div, 1U, 64U) - 1;
 
-	if (strcmp(mode->name, "1920x1080") == 0)
-		rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ? ESCR2 :
-			ESCR, 0);
-	else
-		rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ? ESCR2 :
-			ESCR, ESCR_DCLKSEL_CLKS | div);
+	if ((strcmp(mode->name, "1920x1080") == 0) &&
+		 (rcrtc->outputs != (1 << RCAR_DU_OUTPUT_DPAD0)) &&
+		 (rcrtc->outputs != (1 << RCAR_DU_OUTPUT_LVDS1))) {
+		if (rcar_du_has(rcrtc->group->dev,
+				 RCAR_DU_FEATURE_EXTERAL_CLOCK))
+			rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ?
+				ESCR2 : ESCR, 0);
+		else
+			rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ?
+				ESCR2 : ESCR, ESCR_DCLKSEL_CLKS | div);
+	} else
+		rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ?
+			ESCR2 : ESCR, ESCR_DCLKSEL_CLKS | div);
 	rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ? OTAR2 : OTAR, 0);
 
 	/* Signal polarities */
