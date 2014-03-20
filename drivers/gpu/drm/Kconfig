@@ -172,6 +172,13 @@ config DRM_ADV7511
 	select REGMAP_I2C
 	select HDMI
 
+config DRM_FBDEV_CRTC
+	int "Select FBDev CRTC"
+	depends on DRM_KMS_HELPER
+	help
+	  Choose this option if you want to select CRTC of
+	  fbdev access.
+
 source "drivers/gpu/drm/exynos/Kconfig"
 
 source "drivers/gpu/drm/vmwgfx/Kconfig"

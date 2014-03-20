@@ -1183,6 +1183,10 @@ int drm_wait_vblank(struct drm_device *dev, void *data,
 		crtc = high_crtc >> _DRM_VBLANK_HIGH_CRTC_SHIFT;
 	else
 		crtc = flags & _DRM_VBLANK_SECONDARY ? 1 : 0;
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	if (file_priv == NULL)
+		crtc = CONFIG_DRM_FBDEV_CRTC;
+#endif
 	if (crtc >= dev->num_crtcs)
 		return -EINVAL;
 
