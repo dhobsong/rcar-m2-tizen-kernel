@@ -166,6 +166,12 @@ config DRM_SAVAGE
 	  Choose this option if you have a Savage3D/4/SuperSavage/Pro/Twister
 	  chipset. If M is selected the module will be called savage.
 
+config DRM_ADV7511
+	tristate "ADV7511 encoder"
+	depends on DRM && I2C
+	select REGMAP_I2C
+	select HDMI
+
 source "drivers/gpu/drm/exynos/Kconfig"
 
 source "drivers/gpu/drm/vmwgfx/Kconfig"
