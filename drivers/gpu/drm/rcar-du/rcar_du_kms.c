@@ -16,6 +16,7 @@
 #include <drm/drm_crtc_helper.h>
 #include <drm/drm_fb_cma_helper.h>
 #include <drm/drm_gem_cma_helper.h>
+#include <drm/drm_encoder_slave.h>
 
 #include "rcar_du_crtc.h"
 #include "rcar_du_drv.h"
@@ -268,7 +269,7 @@ int rcar_du_modeset_init(struct rcar_du_device *rcdu)
 	 * possible clones field.
 	 */
 	list_for_each_entry(encoder, &dev->mode_config.encoder_list, head) {
-		struct rcar_du_encoder *renc = to_rcar_encoder(encoder);
+		struct rcar_du_encoder *renc = rcar_du_encoder(encoder);
 		const struct rcar_du_output_routing *route =
 			&rcdu->info->routes[renc->output];
 
@@ -286,7 +287,6 @@ int rcar_du_modeset_init(struct rcar_du_device *rcdu)
 	drm_kms_helper_poll_init(dev);
 
 	drm_helper_disable_unused_functions(dev);
-
 	fbdev = drm_fbdev_cma_init(dev, 32, dev->mode_config.num_crtc,
 				   dev->mode_config.num_connector);
 	if (IS_ERR(fbdev))
