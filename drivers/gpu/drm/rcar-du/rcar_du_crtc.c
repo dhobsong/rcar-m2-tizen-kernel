@@ -254,7 +254,7 @@ static void rcar_du_crtc_start(struct rcar_du_crtc *rcrtc)
 
 		if (plane->crtc != crtc || !plane->enabled)
 			continue;
-
+		plane->fb_plane = true;
 		rcar_du_plane_setup(plane);
 	}
 
