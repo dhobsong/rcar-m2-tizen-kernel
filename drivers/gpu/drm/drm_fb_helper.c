@@ -965,12 +965,8 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 		struct drm_display_mode *desired_mode;
 		desired_mode = fb_helper->crtc_info[i].desired_mode;
 
-#if defined(CONFIG_DRM_RCAR_DU)
-#if defined(CONFIG_MACH_LAGER)
-		if ((desired_mode) && (i == 0)) {
-#elif defined(CONFIG_MACH_KOELSCH)
-		if ((desired_mode) && (i == 1)) {
-#endif
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+		if ((desired_mode) && (i == CONFIG_DRM_FBDEV_CRTC)) {
 #else
 		if (desired_mode) {
 #endif
