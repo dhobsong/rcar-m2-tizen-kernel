@@ -873,7 +873,7 @@ static int sh_eth_reset(struct net_device *ndev)
 
 		ret = sh_eth_check_reset(ndev);
 		if (ret)
-			goto out;
+			return ret;
 
 		/* Table Init */
 		sh_eth_write(ndev, 0x0, TDLAR);
@@ -900,7 +900,6 @@ static int sh_eth_reset(struct net_device *ndev)
 			     EDMR);
 	}
 
-out:
 	return ret;
 }
 
@@ -1264,7 +1263,7 @@ static int sh_eth_dev_init(struct net_device *ndev, bool start)
 	/* Soft Reset */
 	ret = sh_eth_reset(ndev);
 	if (ret)
-		goto out;
+		return ret;
 
 	if (mdp->cd->rmiimode)
 		sh_eth_write(ndev, 0x1, RMIIMODE);
@@ -1343,7 +1342,6 @@ static int sh_eth_dev_init(struct net_device *ndev, bool start)
 		netif_start_queue(ndev);
 	}
 
-out:
 	return ret;
 }
 
@@ -2615,10 +2613,8 @@ static int sh_mdio_init(struct sh_eth_private *mdp,
 
 	/* create bit control struct for PHY */
 	bitbang = devm_kzalloc(dev, sizeof(struct bb_info), GFP_KERNEL);
-	if (!bitbang) {
-		ret = -ENOMEM;
-		goto out;
-	}
+	if (!bitbang)
+		return -ENOMEM;
 
 	/* bitbang init */
 	bitbang->addr = mdp->addr + mdp->reg_offset[PIR];
@@ -2631,10 +2627,8 @@ static int sh_mdio_init(struct sh_eth_private *mdp,
 
 	/* MII controller setting */
 	mdp->mii_bus = alloc_mdio_bitbang(&bitbang->ctrl);
-	if (!mdp->mii_bus) {
-		ret = -ENOMEM;
-		goto out;
-	}
+	if (!mdp->mii_bus)
+		return -ENOMEM;
 
 	/* Hook up MII support for ethtool */
 	mdp->mii_bus->name = "sh_mii";
@@ -2669,8 +2663,6 @@ static int sh_mdio_init(struct sh_eth_private *mdp,
 
 out_free_bus:
 	free_mdio_bitbang(mdp->mii_bus);
-
-out:
 	return ret;
 }
 
@@ -2783,15 +2775,12 @@ static int sh_eth_drv_probe(struct platform_device *pdev)
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (unlikely(res == NULL)) {
 		dev_err(&pdev->dev, "invalid resource\n");
-		ret = -EINVAL;
-		goto out;
+		return -EINVAL;
 	}
 
 	ndev = alloc_etherdev(sizeof(struct sh_eth_private));
-	if (!ndev) {
-		ret = -ENOMEM;
-		goto out;
-	}
+	if (!ndev)
+		return -ENOMEM;
 
 	/* The sh Ether-specific entries in the device structure. */
 	ndev->base_addr = res->start;
@@ -2932,7 +2921,6 @@ out_release:
 	if (ndev)
 		free_netdev(ndev);
 
-out:
 	return ret;
 }
 
