@@ -874,6 +874,35 @@ int drm_fb_helper_pan_display(struct fb_var_screeninfo *var,
 }
 EXPORT_SYMBOL(drm_fb_helper_pan_display);
 
+static int drm_fb_helper_wait_for_vsync(struct drm_fb_helper *fb_helper)
+{
+	struct drm_device *dev = fb_helper->dev;
+	union drm_wait_vblank vblwait;
+
+	/* Waiting for VSYNC on multiple CRTCs doesn't make sense. Use the first
+	 * CRTC only.
+	 */
+	vblwait.request.type = _DRM_VBLANK_RELATIVE;
+	vblwait.request.sequence = 1;
+
+	return drm_wait_vblank(dev, &vblwait, NULL);
+}
+
+int drm_fb_helper_ioctl(struct fb_info *info, unsigned int cmd,
+			unsigned long arg)
+{
+	struct drm_fb_helper *fb_helper = info->par;
+
+	switch (cmd) {
+	case FBIO_WAITFORVSYNC:
+		return drm_fb_helper_wait_for_vsync(fb_helper);
+
+	default:
+		return -ENOIOCTLCMD;
+	}
+}
+EXPORT_SYMBOL(drm_fb_helper_ioctl);
+
 /*
  * Allocates the backing storage and sets up the fbdev info structure through
  * the ->fb_probe callback and then registers the fbdev and sets up the panic

@@ -242,6 +242,7 @@ static struct fb_ops drm_fbdev_cma_ops = {
 	.fb_set_par	= drm_fb_helper_set_par,
 	.fb_blank	= drm_fb_helper_blank,
 	.fb_pan_display	= drm_fb_helper_pan_display,
+	.fb_ioctl	= drm_fb_helper_ioctl,
 	.fb_setcmap	= drm_fb_helper_setcmap,
 };
 
