@@ -12,10 +12,13 @@
  */
 
 #include <linux/export.h>
+#include <linux/hdmi.h>
+#include <linux/i2c.h>
 
 #include <drm/drmP.h>
 #include <drm/drm_crtc.h>
 #include <drm/drm_crtc_helper.h>
+#include <drm/drm_encoder_slave.h>
 
 #include "rcar_du_drv.h"
 #include "rcar_du_encoder.h"
@@ -23,6 +26,8 @@
 #include "rcar_du_lvdscon.h"
 #include "rcar_du_lvdsenc.h"
 #include "rcar_du_vgacon.h"
+#include "rcar_du_hdmicon.h"
+#include "../i2c/adv7511.h"
 
 /* -----------------------------------------------------------------------------
  * Common connector functions
@@ -33,7 +38,7 @@ rcar_du_connector_best_encoder(struct drm_connector *connector)
 {
 	struct rcar_du_connector *rcon = to_rcar_connector(connector);
 
-	return &rcon->encoder->encoder;
+	return rcon->encoder->encoder;
 }
 
 /* -----------------------------------------------------------------------------
@@ -42,24 +47,29 @@ rcar_du_connector_best_encoder(struct drm_connector *connector)
 
 static void rcar_du_encoder_dpms(struct drm_encoder *encoder, int mode)
 {
-	struct rcar_du_encoder *renc = to_rcar_encoder(encoder);
+	struct rcar_du_encoder *renc = rcar_du_encoder(encoder);
 
 	if (renc->lvds)
 		rcar_du_lvdsenc_dpms(renc->lvds, encoder->crtc, mode);
+
+	if ((renc->output == RCAR_DU_OUTPUT_LVDS0) &&
+			(get_rcar_slave_funcs(encoder)->dpms))
+		get_rcar_slave_funcs(encoder)->dpms(encoder, mode);
 }
 
 static bool rcar_du_encoder_mode_fixup(struct drm_encoder *encoder,
 				       const struct drm_display_mode *mode,
 				       struct drm_display_mode *adjusted_mode)
 {
-	struct rcar_du_encoder *renc = to_rcar_encoder(encoder);
+	struct rcar_du_encoder *renc = rcar_du_encoder(encoder);
 	const struct drm_display_mode *panel_mode;
 	struct drm_device *dev = encoder->dev;
 	struct drm_connector *connector;
 	bool found = false;
 
-	/* DAC encoders have currently no restriction on the mode. */
-	if (encoder->encoder_type == DRM_MODE_ENCODER_DAC)
+	/* DAC and TMDS encoders have currently no restriction on the mode. */
+	if ((encoder->encoder_type == DRM_MODE_ENCODER_DAC)
+		|| (encoder->encoder_type == DRM_MODE_ENCODER_TMDS))
 		return true;
 
 	list_for_each_entry(connector, &dev->mode_config.connector_list, head) {
@@ -102,29 +112,40 @@ static bool rcar_du_encoder_mode_fixup(struct drm_encoder *encoder,
 
 static void rcar_du_encoder_mode_prepare(struct drm_encoder *encoder)
 {
-	struct rcar_du_encoder *renc = to_rcar_encoder(encoder);
+	struct rcar_du_encoder *renc = rcar_du_encoder(encoder);
 
 	if (renc->lvds)
 		rcar_du_lvdsenc_dpms(renc->lvds, encoder->crtc,
 				     DRM_MODE_DPMS_OFF);
+	if ((renc->output == RCAR_DU_OUTPUT_LVDS0) &&
+		(get_rcar_slave_funcs(encoder)->dpms))
+		get_rcar_slave_funcs(encoder)->dpms(encoder, DRM_MODE_DPMS_OFF);
 }
 
 static void rcar_du_encoder_mode_commit(struct drm_encoder *encoder)
 {
-	struct rcar_du_encoder *renc = to_rcar_encoder(encoder);
+	struct rcar_du_encoder *renc = rcar_du_encoder(encoder);
 
 	if (renc->lvds)
 		rcar_du_lvdsenc_dpms(renc->lvds, encoder->crtc,
 				     DRM_MODE_DPMS_ON);
+	if ((renc->output == RCAR_DU_OUTPUT_LVDS0) &&
+		(get_rcar_slave_funcs(encoder)->dpms))
+		get_rcar_slave_funcs(encoder)->dpms(encoder, DRM_MODE_DPMS_ON);
 }
 
 static void rcar_du_encoder_mode_set(struct drm_encoder *encoder,
 				     struct drm_display_mode *mode,
 				     struct drm_display_mode *adjusted_mode)
 {
-	struct rcar_du_encoder *renc = to_rcar_encoder(encoder);
+	struct rcar_du_encoder *renc = rcar_du_encoder(encoder);
 
 	rcar_du_crtc_route_output(encoder->crtc, renc->output);
+
+	if ((renc->output == RCAR_DU_OUTPUT_LVDS0) &&
+		(get_rcar_slave_funcs(encoder)->mode_set))
+		get_rcar_slave_funcs(encoder)->mode_set(encoder,
+						 mode, adjusted_mode);
 }
 
 static const struct drm_encoder_helper_funcs encoder_helper_funcs = {
@@ -139,6 +160,22 @@ static const struct drm_encoder_funcs encoder_funcs = {
 	.destroy = drm_encoder_cleanup,
 };
 
+struct hdmi_avi_infoframe avi_info[] = {
+	{
+		HDMI_INFOFRAME_TYPE_AVI,
+		2, 13,
+		HDMI_COLORSPACE_RGB,
+		HDMI_SCAN_MODE_UNDERSCAN,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	},
+};
+
+static const uint16_t adv7511_csc_ycbcr_to_rgb[] = {
+	0x0734, 0x04ad, 0x0000, 0x1c1b,
+	0x1ddc, 0x04ad, 0x1f24, 0x0135,
+	0x0000, 0x04ad, 0x087c, 0x1b77,
+};
+
 int rcar_du_encoder_init(struct rcar_du_device *rcdu,
 			 enum rcar_du_encoder_type type,
 			 enum rcar_du_output output,
@@ -147,6 +184,21 @@ int rcar_du_encoder_init(struct rcar_du_device *rcdu,
 	struct rcar_du_encoder *renc;
 	unsigned int encoder_type;
 	int ret;
+	struct i2c_adapter *adapter;
+	struct i2c_board_info info[] = {
+		{
+			.type = "adv7511",
+			.addr = 0x39,
+			.platform_data = &(struct adv7511_video_config) {
+				false,
+				ADV7511_CSC_SCALING_4,
+				adv7511_csc_ycbcr_to_rgb,
+				true,
+				avi_info[0],
+			}
+		},
+		{},
+	};
 
 	renc = devm_kzalloc(rcdu->dev, sizeof(*renc), GFP_KERNEL);
 	if (renc == NULL)
@@ -174,6 +226,9 @@ int rcar_du_encoder_init(struct rcar_du_device *rcdu,
 	case RCAR_DU_ENCODER_LVDS:
 		encoder_type = DRM_MODE_ENCODER_LVDS;
 		break;
+	case RCAR_DU_ENCODER_HDMI:
+		encoder_type = DRM_MODE_ENCODER_TMDS;
+		break;
 	case RCAR_DU_ENCODER_NONE:
 	default:
 		/* No external encoder, use the internal encoder type. */
@@ -181,17 +236,33 @@ int rcar_du_encoder_init(struct rcar_du_device *rcdu,
 		break;
 	}
 
-	ret = drm_encoder_init(rcdu->ddev, &renc->encoder, &encoder_funcs,
+	renc->encoder = to_drm_encoder(renc);
+
+	ret = drm_encoder_init(rcdu->ddev, renc->encoder, &encoder_funcs,
 			       encoder_type);
 	if (ret < 0)
 		return ret;
 
-	drm_encoder_helper_add(&renc->encoder, &encoder_helper_funcs);
+	if (type == RCAR_DU_ENCODER_HDMI) {
+		adapter = i2c_get_adapter(2);
+		if (adapter == NULL) {
+			return -EPROBE_DEFER;
+		}
+
+		drm_i2c_encoder_init(rcdu->ddev,
+				     to_encoder_slave(renc->encoder),
+				     adapter,
+				     &info[0]);
+	}
+
+	drm_encoder_helper_add(renc->encoder, &encoder_helper_funcs);
 
 	switch (encoder_type) {
 	case DRM_MODE_ENCODER_LVDS:
 		return rcar_du_lvds_connector_init(rcdu, renc,
-						   &data->connector.lvds.panel);
+						&data->connector.lvds.panel);
+	case DRM_MODE_ENCODER_TMDS:
+		return rcar_du_hdmi_connector_init(rcdu, renc);
 
 	case DRM_MODE_ENCODER_DAC:
 		return rcar_du_vga_connector_init(rcdu, renc);
