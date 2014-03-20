@@ -1269,6 +1269,7 @@ done:
 	drm_vblank_put(dev, crtc);
 	return ret;
 }
+EXPORT_SYMBOL(drm_wait_vblank);
 
 static void drm_handle_vblank_events(struct drm_device *dev, int crtc)
 {
