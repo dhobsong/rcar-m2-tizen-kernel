@@ -1083,6 +1083,10 @@ extern int drm_add_modes_noedid(struct drm_connector *connector,
 				int hdisplay, int vdisplay);
 
 extern int drm_edid_header_is_valid(const u8 *raw_edid);
+#if defined(CONFIG_DRM_ADV7511)
+extern struct edid *drm_do_get_edid(struct drm_connector *connector,
+int (*get_edid_block)(void *, unsigned char *buf, int, int), void *data);
+#endif
 extern bool drm_edid_block_valid(u8 *raw_edid, int block, bool print_bad_edid);
 extern bool drm_edid_is_valid(struct edid *edid);
 struct drm_display_mode *drm_mode_find_dmt(struct drm_device *dev,
