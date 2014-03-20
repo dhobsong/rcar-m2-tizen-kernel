@@ -98,15 +98,19 @@ static void rcar_du_crtc_set_display_timing(struct rcar_du_crtc *rcrtc)
 	div = DIV_ROUND_CLOSEST(clk, mode->clock * 1000);
 	div = clamp(div, 1U, 64U) - 1;
 
-	rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ? ESCR2 : ESCR,
-			    ESCR_DCLKSEL_CLKS | div);
+	if (strcmp(mode->name, "1920x1080") == 0)
+		rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ? ESCR2 :
+			ESCR, 0);
+	else
+		rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ? ESCR2 :
+			ESCR, ESCR_DCLKSEL_CLKS | div);
 	rcar_du_group_write(rcrtc->group, rcrtc->index % 2 ? OTAR2 : OTAR, 0);
 
 	/* Signal polarities */
 	value = ((mode->flags & DRM_MODE_FLAG_PVSYNC) ? 0 : DSMR_VSL)
 	      | ((mode->flags & DRM_MODE_FLAG_PHSYNC) ? 0 : DSMR_HSL)
 	      | DSMR_DIPM_DE;
-	rcar_du_crtc_write(rcrtc, DSMR, value);
+	rcar_du_crtc_write(rcrtc, DSMR, value | DSMR_CSPM); /* for HDMI */
 
 	/* Display timings */
 	rcar_du_crtc_write(rcrtc, HDSR, mode->htotal - mode->hsync_start - 19);
@@ -576,6 +580,8 @@ int rcar_du_crtc_create(struct rcar_du_group *rgrp, unsigned int index)
 	ret = drm_crtc_init(rcdu->ddev, crtc, &crtc_funcs);
 	if (ret < 0)
 		return ret;
+
+	rcdu->crtcs_connect_id[index] = rcrtc->plane->crtc->base.id;
 
 	drm_crtc_helper_add(crtc, &crtc_helper_funcs);
 
