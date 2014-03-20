@@ -175,7 +175,12 @@ static void rcar_du_plane_setup_mode(struct rcar_du_plane *plane,
 		rcar_du_plane_write(rgrp, index, PnALPHAR,
 				    PnALPHAR_ABIT_X | plane->alpha);
 
-	pnmr = PnMR_BM_MD | plane->format->pnmr;
+	/* Disable alpha blending of lowest plane */
+	if (plane->fb_plane == true)
+		pnmr = PnMR_BM_MD | ((plane->format->pnmr) & ~PnMR_SPIM_MASK) |
+		       PnMR_SPIM_TP_OFF;
+	else
+		pnmr = PnMR_BM_MD | plane->format->pnmr;
 
 	/* Disable color keying when requested. YUV formats have the
 	 * PnMR_SPIM_TP_OFF bit set in their pnmr field, disabling color keying
@@ -496,6 +501,7 @@ int rcar_du_planes_register(struct rcar_du_group *rgrp)
 
 		plane->hwplane = &planes->planes[i + 2];
 		plane->hwplane->zpos = 1;
+		plane->hwplane->fb_plane = false;
 
 		ret = drm_plane_init(rcdu->ddev, &plane->plane, crtcs,
 				     &rcar_du_plane_funcs, formats,
