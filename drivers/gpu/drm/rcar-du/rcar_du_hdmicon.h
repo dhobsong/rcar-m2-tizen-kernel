@@ -5,7 +5,7 @@
  *
  * This file is based on the drivers/gpu/drm/rcar-du/rcar_du_lvdscon.h
  *
- * Copyright (C) 2013 Renesas Corporation
+ * Copyright (C) 2013 Renesas Electronics Corporation
  *
  * Contact: Laurent Pinchart (laurent.pinchart@ideasonboard.com)
  *
