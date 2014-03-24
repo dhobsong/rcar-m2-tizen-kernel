@@ -455,6 +455,9 @@ struct drm_crtc {
 	void *helper_private;
 
 	struct drm_object_properties properties;
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	int flip_id;
+#endif
 };
 
 

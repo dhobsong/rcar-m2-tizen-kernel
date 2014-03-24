@@ -421,11 +421,12 @@ static void drm_fb_helper_dpms(struct fb_info *info, int dpms_mode)
 	 * For each CRTC in this fb, turn the connectors on/off.
 	 */
 	drm_modeset_lock_all(dev);
+#if !defined(CONFIG_DRM_FBDEV_CRTC)
 	if (!drm_fb_helper_is_bound(fb_helper)) {
 		drm_modeset_unlock_all(dev);
 		return;
 	}
-
+#endif
 	for (i = 0; i < fb_helper->crtc_count; i++) {
 		crtc = fb_helper->crtc_info[i].mode_set.crtc;
 
@@ -980,14 +981,30 @@ int drm_fb_helper_pan_display(struct fb_var_screeninfo *var,
 	int i;
 
 	drm_modeset_lock_all(dev);
+#if !defined(CONFIG_DRM_FBDEV_CRTC)
 	if (!drm_fb_helper_is_bound(fb_helper)) {
 		drm_modeset_unlock_all(dev);
 		return -EBUSY;
 	}
+#endif
 
 	for (i = 0; i < fb_helper->crtc_count; i++) {
 		modeset = &fb_helper->crtc_info[i].mode_set;
 
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+		if (modeset->crtc->base.id != modeset->crtc->flip_id) {
+			modeset->x = var->xoffset;
+			modeset->y = var->yoffset;
+
+			if (modeset->num_connectors) {
+				ret = drm_mode_set_config_internal(modeset);
+				if (!ret) {
+					info->var.xoffset = var->xoffset;
+					info->var.yoffset = var->yoffset;
+				}
+			}
+		}
+#else
 		modeset->x = var->xoffset;
 		modeset->y = var->yoffset;
 
@@ -998,6 +1015,7 @@ int drm_fb_helper_pan_display(struct fb_var_screeninfo *var,
 				info->var.yoffset = var->yoffset;
 			}
 		}
+#endif
 	}
 	drm_modeset_unlock_all(dev);
 	return ret;
