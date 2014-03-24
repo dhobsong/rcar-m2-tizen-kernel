@@ -185,7 +185,7 @@
 #define ADV7511_PACKET_GM(x)	    ADV7511_PACKET(5, x)
 #define ADV7511_PACKET_SPARE(x)	    ADV7511_PACKET(6, x)
 
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 #define TIMEOUT_STATUS_HPD 10
 #endif
 

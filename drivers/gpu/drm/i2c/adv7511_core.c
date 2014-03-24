@@ -220,7 +220,7 @@ static void adv7511_set_config(struct drm_encoder *encoder, void *c)
 	adv7511_packet_enable(adv7511, ADV7511_PACKET_ENABLE_AVI_INFOFRAME);
 }
 
-#ifndef CONFIG_DRM_RCAR_DU
+#if !defined(CONFIG_DRM_RCAR_DU) && !defined(CONFIG_DRM_RCAR_DU_MODULE)
 static void adv7511_set_link_config(struct adv7511 *adv7511,
 	const struct adv7511_link_config *config)
 {
@@ -761,7 +761,7 @@ static const struct regmap_config adv7511_regmap_config = {
 */
 
 
-#ifndef CONFIG_DRM_RCAR_DU
+#if !defined(CONFIG_DRM_RCAR_DU) && !defined(CONFIG_DRM_RCAR_DU_MODULE)
 static int adv7511_parse_dt(struct device_node *np, struct adv7511_link_config *config)
 {
 	int ret;
@@ -838,17 +838,17 @@ static const int cec_i2c_addr = 0x78;
 static int adv7511_probe(struct i2c_client *i2c,
 	const struct i2c_device_id *id)
 {
-#ifndef CONFIG_DRM_RCAR_DU
+#if !defined(CONFIG_DRM_RCAR_DU) && !defined(CONFIG_DRM_RCAR_DU_MODULE)
 	struct adv7511_link_config link_config;
 #endif
 	struct adv7511 *adv7511;
 	unsigned int val;
 	int ret;
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	unsigned int timeout;
 #endif
 
-#ifndef CONFIG_DRM_RCAR_DU
+#if !defined(CONFIG_DRM_RCAR_DU) && !defined(CONFIG_DRM_RCAR_DU_MODULE)
 	if (i2c->dev.of_node) {
 		ret = adv7511_parse_dt(i2c->dev.of_node, &link_config);
 		if (ret)
@@ -864,7 +864,7 @@ static int adv7511_probe(struct i2c_client *i2c,
 	if (!adv7511)
 		return -ENOMEM;
 
-#ifndef CONFIG_DRM_RCAR_DU
+#if !defined(CONFIG_DRM_RCAR_DU) && !defined(CONFIG_DRM_RCAR_DU_MODULE)
 	adv7511->gpio_pd = link_config.gpio_pd;
 
 	if (gpio_is_valid(adv7511->gpio_pd)) {
@@ -922,7 +922,7 @@ static int adv7511_probe(struct i2c_client *i2c,
 	regmap_update_bits(adv7511->regmap, ADV7511_REG_POWER,
 			ADV7511_POWER_POWER_DOWN, 0);
 
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	/* Wait status of hotplug detect and hotplug interrupts */
 	for (timeout = 0; timeout < TIMEOUT_STATUS_HPD; timeout++) {
 		regmap_read(adv7511->regmap, ADV7511_REG_STATUS, &val);
@@ -936,7 +936,7 @@ static int adv7511_probe(struct i2c_client *i2c,
 
 	i2c_set_clientdata(i2c, adv7511);
 
-#ifndef CONFIG_DRM_RCAR_DU
+#if !defined(CONFIG_DRM_RCAR_DU) && !defined(CONFIG_DRM_RCAR_DU_MODULE)
 	adv7511_set_link_config(adv7511, &link_config);
 #endif
 	return 0;

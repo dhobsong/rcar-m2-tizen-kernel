@@ -168,7 +168,7 @@ static const struct drm_display_mode drm_dmt_modes[] = {
 	{ DRM_MODE("640x480", DRM_MODE_TYPE_DRIVER, 36000, 640, 696,
 		   752, 832, 0, 480, 481, 484, 509, 0,
 		   DRM_MODE_FLAG_NHSYNC | DRM_MODE_FLAG_NVSYNC) },
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	/* 800x480@60Hz */
 	{ DRM_MODE("800x480", DRM_MODE_TYPE_DRIVER, 29580, 800, 816,
 		   896, 992, 0, 480, 481, 484, 497, 0,
@@ -202,7 +202,7 @@ static const struct drm_display_mode drm_dmt_modes[] = {
 	{ DRM_MODE("848x480", DRM_MODE_TYPE_DRIVER, 33750, 848, 864,
 		   976, 1088, 0, 480, 486, 494, 517, 0,
 		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC) },
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	/* 1024x600@60Hz */
 	{ DRM_MODE("1024x600", DRM_MODE_TYPE_DRIVER, 48960, 1024, 1064,
 		   1168, 1312, 0, 600, 601, 604, 622, 0,
@@ -237,7 +237,7 @@ static const struct drm_display_mode drm_dmt_modes[] = {
 	{ DRM_MODE("1152x864", DRM_MODE_TYPE_DRIVER, 108000, 1152, 1216,
 		   1344, 1600, 0, 864, 865, 868, 900, 0,
 		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_PVSYNC) },
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	/* 1280x720@60Hz */
 	{ DRM_MODE("1280x720", DRM_MODE_TYPE_DRIVER, 74480, 1280, 1336,
 		   1472, 1664, 0, 720, 721, 724, 746, 0,
@@ -427,7 +427,7 @@ static const struct drm_display_mode drm_dmt_modes[] = {
 	{ DRM_MODE("1856x1392", DRM_MODE_TYPE_DRIVER, 356500, 1856, 1904,
 		   1936, 2016, 0, 1392, 1395, 1399, 1474, 0,
 		   DRM_MODE_FLAG_PHSYNC | DRM_MODE_FLAG_NVSYNC) },
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	/* 1920x1080@60Hz */
 	{ DRM_MODE("1920x1080", DRM_MODE_TYPE_DRIVER, 172800, 1920, 2040,
 		   2248, 2576, 0, 1080, 1081, 1084, 1118, 0,
