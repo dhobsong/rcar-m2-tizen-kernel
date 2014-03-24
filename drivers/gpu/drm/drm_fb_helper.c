@@ -924,6 +924,9 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 	struct fb_info *info;
 	struct drm_fb_helper_surface_size sizes;
 	int gamma_size = 0;
+#if defined(CONFIG_DRM_RCAR_DU)
+	int des_hdisplay, des_vdisplay = 0;
+#endif
 
 	memset(&sizes, 0, sizeof(struct drm_fb_helper_surface_size));
 	sizes.surface_depth = 24;
@@ -931,6 +934,10 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 	sizes.fb_width = (unsigned)-1;
 	sizes.fb_height = (unsigned)-1;
 
+#if defined(CONFIG_DRM_RCAR_DU)
+	des_hdisplay = (unsigned)-1;
+	des_vdisplay = (unsigned)-1;
+#endif
 	/* if driver picks 8 or 16 by default use that
 	   for both depth/bpp */
 	if (preferred_bpp != sizes.surface_bpp)
@@ -988,6 +995,10 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 			if (desired_mode->vdisplay > sizes.surface_height)
 				sizes.surface_height = desired_mode->vdisplay;
 			crtc_count++;
+#if defined(CONFIG_DRM_RCAR_DU)
+			des_hdisplay = desired_mode->hdisplay;
+			des_vdisplay = desired_mode->vdisplay;
+#endif
 		}
 	}
 
@@ -1005,7 +1016,20 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 		sizes.fb_width = sizes.surface_width = 1024;
 		sizes.fb_height = sizes.surface_height = 768;
 	}
-
+#if defined(CONFIG_DRM_RCAR_DU)
+	if (fb_helper->fbdev) {
+		if (fb_helper->fbdev->var.xres != des_hdisplay) {
+			sizes.fb_width = sizes.surface_width = des_hdisplay;
+			fb_helper->fb->width = sizes.fb_width;
+			fb_helper->fb->pitches[0]
+				 = des_hdisplay * sizes.surface_bpp / 8;
+		}
+		if (fb_helper->fbdev->var.yres != des_vdisplay) {
+			sizes.fb_height = sizes.surface_height = des_vdisplay;
+			fb_helper->fb->height = sizes.fb_height;
+		}
+	}
+#endif
 	/* push down into drivers */
 	ret = (*fb_helper->funcs->fb_probe)(fb_helper, &sizes);
 	if (ret < 0)
