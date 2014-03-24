@@ -363,6 +363,8 @@ static void rcar_du_crtc_update_base(struct rcar_du_crtc *rcrtc)
 {
 	struct drm_crtc *crtc = &rcrtc->crtc;
 
+	rcrtc->plane->pitch = crtc->fb->pitches[0];
+
 	rcar_du_plane_compute_base(rcrtc->plane, crtc->fb);
 	rcar_du_plane_update_base(rcrtc->plane);
 }
