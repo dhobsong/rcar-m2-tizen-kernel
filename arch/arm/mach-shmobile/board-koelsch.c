@@ -1,7 +1,7 @@
 /*
  * Koelsch board support
  *
- * Copyright (C) 2013  Renesas Electronics Corporation
+ * Copyright (C) 2013-2014  Renesas Electronics Corporation
  * Copyright (C) 2013-2014  Renesas Solutions Corp.
  * Copyright (C) 2013  Magnus Damm
  * Copyright (C) 2014  Cogent Embedded, Inc.
@@ -73,20 +73,29 @@ static struct rcar_du_encoder_data koelsch_du_encoders[] = {
 				.flags = 0,
 			},
 		},
-		.exclk = 148500000,
 	},
 #if defined(CONFIG_DRM_ADV7511)
 	{
 		.type = RCAR_DU_ENCODER_HDMI,
 		.output = RCAR_DU_OUTPUT_DPAD0,
-		.exclk = 74250000,
 	},
 #endif
+};
+
+static struct rcar_du_crtc_data koelsch_du_crtcs[] = {
+	{
+		.exclk = 148500000,
+	},
+	{
+		.exclk = 74250000,
+	},
 };
 
 static const struct rcar_du_platform_data koelsch_du_pdata __initconst = {
 	.encoders = koelsch_du_encoders,
 	.num_encoders = ARRAY_SIZE(koelsch_du_encoders),
+	.crtcs = koelsch_du_crtcs,
+	.num_crtcs = ARRAY_SIZE(koelsch_du_crtcs),
 };
 
 static const struct resource du_resources[] __initconst = {
