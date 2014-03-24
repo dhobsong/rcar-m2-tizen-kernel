@@ -1397,6 +1397,15 @@ static int drm_fb_helper_probe_connector_modes(struct drm_fb_helper *fb_helper,
 	for (i = 0; i < fb_helper->connector_count; i++) {
 		connector = fb_helper->connector_info[i]->connector;
 		cmdline_mode = &fb_helper->connector_info[i]->cmdline_mode;
+#if defined(CONFIG_DRM_RCAR_DU)
+		if (cmdline_mode->specified) {
+			connector->cmd_xres = cmdline_mode->xres;
+			connector->cmd_yres = cmdline_mode->yres;
+		} else {
+			connector->cmd_xres = 0;
+			connector->cmd_yres = 0;
+		}
+#endif
 		count += connector->funcs->fill_modes(connector, maxX, maxY);
 
 		if ((cmdline_mode->specified) && (!cmdline_mode->rb) &&
