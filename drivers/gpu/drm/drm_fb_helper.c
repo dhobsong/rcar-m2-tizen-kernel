@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2014 Renesas Electronics Corporation
  * Copyright (c) 2006-2009 Red Hat Inc.
  * Copyright (c) 2006-2008 Intel Corporation
  * Copyright (c) 2007 Dave Airlie <airlied@linux.ie>
@@ -154,7 +155,6 @@ static int drm_fb_helper_parse_command_line(struct drm_fb_helper *fb_helper)
 				      mode->margins ? " with margins" : "",
 				      mode->interlace ?  " interlaced" : "");
 		}
-
 	}
 	return 0;
 }
@@ -1380,10 +1380,43 @@ static int drm_fb_helper_probe_connector_modes(struct drm_fb_helper *fb_helper,
 	struct drm_connector *connector;
 	int count = 0;
 	int i;
+	struct drm_display_mode *cur_mode;
+	struct drm_cmdline_mode *cmdline_mode;
+	bool match_flag = false;
 
 	for (i = 0; i < fb_helper->connector_count; i++) {
 		connector = fb_helper->connector_info[i]->connector;
+		cmdline_mode = &fb_helper->connector_info[i]->cmdline_mode;
 		count += connector->funcs->fill_modes(connector, maxX, maxY);
+
+		if ((cmdline_mode->specified) && (!cmdline_mode->rb) &&
+						 (!cmdline_mode->margins)) {
+			list_for_each_entry(cur_mode, &connector->modes, head) {
+				if ((cur_mode->hdisplay != cmdline_mode->xres)
+					|| (cur_mode->vdisplay
+					!= cmdline_mode->yres))
+					continue;
+				if (cmdline_mode->interlace) {
+					if (!(cur_mode->flags
+						 & DRM_MODE_FLAG_INTERLACE))
+						continue;
+				} else {
+					if (cur_mode->flags
+						 & DRM_MODE_FLAG_INTERLACE)
+						continue;
+				}
+				match_flag = true;
+				break;
+			}
+			if ((!match_flag) &&
+				 (connector->status ==
+				  connector_status_connected)) {
+				pr_err("Error! parse setting(%dx%d),laced:%d\n",
+				cmdline_mode->xres, cmdline_mode->yres,
+				cmdline_mode->interlace);
+				return -EINVAL;
+			}
+		}
 	}
 
 	return count;
@@ -1797,6 +1830,8 @@ bool drm_fb_helper_initial_config(struct drm_fb_helper *fb_helper, int bpp_sel)
 	count = drm_fb_helper_probe_connector_modes(fb_helper,
 						    dev->mode_config.max_width,
 						    dev->mode_config.max_height);
+	if (count < 0)
+		return -EINVAL;
 	/*
 	 * we shouldn't end up with no modes here.
 	 */
