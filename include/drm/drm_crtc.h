@@ -645,6 +645,9 @@ struct drm_connector {
 	int audio_latency[2];
 	int null_edid_counter; /* needed to workaround some HW bugs where we get all 0s */
 	unsigned bad_edid_counter;
+#if defined(CONFIG_DRM_RCAR_DU)
+	int cmd_xres, cmd_yres;
+#endif
 };
 
 /**
