@@ -647,6 +647,9 @@ int drm_crtc_init(struct drm_device *dev, struct drm_crtc *crtc,
 	crtc->dev = dev;
 	crtc->funcs = funcs;
 	crtc->invert_dimensions = false;
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	crtc->flip_id = -1;
+#endif
 
 	drm_modeset_lock_all(dev);
 	mutex_init(&crtc->mutex);
@@ -2022,6 +2025,9 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 	crtc = obj_to_crtc(obj);
 	DRM_DEBUG_KMS("[CRTC:%d]\n", crtc->base.id);
 
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	crtc->flip_id = crtc->base.id;
+#endif
 	if (crtc_req->mode_valid) {
 		int hdisplay, vdisplay;
 		/* If we have a mode we need a framebuffer. */
@@ -3482,6 +3488,10 @@ int drm_mode_page_flip_ioctl(struct drm_device *dev,
 	crtc = obj_to_crtc(obj);
 
 	mutex_lock(&crtc->mutex);
+
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	crtc->flip_id = page_flip->crtc_id;
+#endif
 	if (crtc->fb == NULL) {
 		/* The framebuffer is currently unbound, presumably
 		 * due to a hotplug event, that userspace has not
