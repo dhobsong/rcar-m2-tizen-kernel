@@ -94,8 +94,8 @@ static void rcar_du_crtc_set_display_timing(struct rcar_du_crtc *rcrtc)
 	u32 div = 0, div_in = 0, div_ex = 0;
 	u32 abs_in = 0, abs_ex = 0;
 	u32 dclksel_bit = 0, dclkoinv_bit = 0;
-	const struct rcar_du_encoder_data *pdata =
-			&rcrtc->group->dev->pdata->encoders[rcrtc->index];
+	const struct rcar_du_crtc_data *pdata =
+			&rcrtc->group->dev->pdata->crtcs[rcrtc->index];
 
 	/* Internal dot clock */
 	clk_in = clk_get_rate(rcrtc->clock);
