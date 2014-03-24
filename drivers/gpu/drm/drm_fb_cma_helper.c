@@ -1,6 +1,7 @@
 /*
  * drm kms/fb cma (contiguous memory allocator) helper functions
  *
+ * Copyright (C) 2013-2014 Renesas Electronics Corporation
  * Copyright (C) 2012 Analog Device Inc.
  *   Author: Lars-Peter Clausen <lars@metafoo.de>
  *
@@ -211,6 +212,10 @@ int drm_fb_cma_debugfs_show(struct seq_file *m, void *arg)
 	struct drm_device *dev = node->minor->dev;
 	struct drm_framebuffer *fb;
 	int ret;
+#if defined(CONFIG_DRM_RCAR_DU)
+	unsigned int align;
+	unsigned int align_width_size, align_height_size;
+#endif
 
 	ret = mutex_lock_interruptible(&dev->mode_config.mutex);
 	if (ret)
@@ -259,6 +264,10 @@ static int drm_fbdev_cma_create(struct drm_fb_helper *helper,
 	struct fb_info *fbi;
 	size_t size;
 	int ret;
+#if defined(CONFIG_DRM_RCAR_DU)
+	unsigned int align;
+	unsigned int align_width_size, align_height_size;
+#endif
 
 	DRM_DEBUG_KMS("surface width(%d), height(%d) and bpp(%d)\n",
 			sizes->surface_width, sizes->surface_height,
@@ -273,6 +282,23 @@ static int drm_fbdev_cma_create(struct drm_fb_helper *helper,
 		sizes->surface_depth);
 
 	size = mode_cmd.pitches[0] * mode_cmd.height;
+
+#if defined(CONFIG_DRM_RCAR_DU)
+	align = 4 * 1024;
+	if ((sizes->surface_width * sizes->surface_height * bytes_per_pixel)
+		& (align - 1)) {
+		align = 32;
+		align_width_size = (sizes->surface_width + (align - 1)) /
+				 align * align;
+
+		if (sizes->surface_bpp == 16)
+			align = 64;
+		align_height_size = (sizes->surface_height + (align - 1)) /
+				align * align;
+		size = align_width_size * align_height_size * bytes_per_pixel *
+				fbdev_cma->fb_size_mult;
+	}
+#endif
 	obj = drm_gem_cma_create(dev, size);
 	if (IS_ERR(obj))
 		return -ENOMEM;
