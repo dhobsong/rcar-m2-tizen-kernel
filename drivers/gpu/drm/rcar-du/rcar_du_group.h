@@ -36,6 +36,7 @@ struct rcar_du_group {
 	unsigned int used_crtcs;
 
 	struct rcar_du_planes planes;
+	bool interlace_grp;
 };
 
 u32 rcar_du_group_read(struct rcar_du_group *rgrp, u32 reg);
