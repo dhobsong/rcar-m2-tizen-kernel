@@ -1,6 +1,7 @@
 /*
  * Lager board support
  *
+ * Copyright (C) 2013-2014 Renesas Electronics Corporation
  * Copyright (C) 2013-2014  Renesas Solutions Corp.
  * Copyright (C) 2013  Magnus Damm
  * Copyright (C) 2014  Cogent Embedded, Inc.
@@ -90,7 +91,6 @@ static struct rcar_du_encoder_data lager_du_encoders[] = {
 	{
 		.type = RCAR_DU_ENCODER_HDMI,
 		.output = RCAR_DU_OUTPUT_LVDS0,
-		.exclk = 148500000,
 	}, {
 		.type = RCAR_DU_ENCODER_NONE,
 		.output = RCAR_DU_OUTPUT_LVDS1,
@@ -110,17 +110,14 @@ static struct rcar_du_encoder_data lager_du_encoders[] = {
 				.flags = 0,
 			},
 		},
-		.exclk = 148500000,
 	}, {
 		.type = RCAR_DU_ENCODER_VGA,
 		.output = RCAR_DU_OUTPUT_DPAD0,
-		.exclk = 0,
 	},
 #else
 	{
 		.type = RCAR_DU_ENCODER_VGA,
 		.output = RCAR_DU_OUTPUT_DPAD0,
-		.exclk = 148500000,
 	}, {
 		.type = RCAR_DU_ENCODER_NONE,
 		.output = RCAR_DU_OUTPUT_LVDS1,
@@ -140,14 +137,27 @@ static struct rcar_du_encoder_data lager_du_encoders[] = {
 				.flags = 0,
 			},
 		},
-		.exclk = 148500000,
 	},
 #endif
+};
+
+static struct rcar_du_crtc_data lager_du_crtcs[] = {
+	{
+		.exclk = 148500000,
+	},
+	{
+		.exclk = 148500000,
+	},
+	{
+		.exclk = 0,
+	},
 };
 
 static const struct rcar_du_platform_data lager_du_pdata __initconst = {
 	.encoders = lager_du_encoders,
 	.num_encoders = ARRAY_SIZE(lager_du_encoders),
+	.crtcs = lager_du_crtcs,
+	.num_crtcs = ARRAY_SIZE(lager_du_crtcs),
 };
 
 static const struct resource du_resources[] __initconst = {
