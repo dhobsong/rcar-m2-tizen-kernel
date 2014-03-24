@@ -61,6 +61,7 @@ struct rcar_du_plane {
 	unsigned int dst_y;
 
 	bool fb_plane;
+	bool interlace_flag;
 };
 
 struct rcar_du_planes {
