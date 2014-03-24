@@ -46,6 +46,7 @@ struct rcar_du_lvdsenc;
  */
 struct rcar_du_output_routing {
 	unsigned int possible_crtcs;
+	unsigned int possible_clones;
 	unsigned int encoder_type;
 };
 
