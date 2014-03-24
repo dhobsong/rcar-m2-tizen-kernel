@@ -112,7 +112,10 @@ void rcar_du_plane_update_base(struct rcar_du_plane *plane)
 	else
 		mwr = plane->pitch * 8 / plane->format->bpp;
 
-	rcar_du_plane_write(rgrp, index, PnMWR, mwr);
+	if ((plane->interlace_flag) && (plane->format->bpp == 32))
+		rcar_du_plane_write(rgrp, index, PnMWR, mwr * 2);
+	else
+		rcar_du_plane_write(rgrp, index, PnMWR, mwr);
 
 	/* The Y position is expressed in raster line units and must be doubled
 	 * for 32bpp formats, according to the R8A7790 datasheet. No mention of
@@ -123,8 +126,10 @@ void rcar_du_plane_update_base(struct rcar_du_plane *plane)
 	 * require a halved Y position value.
 	 */
 	rcar_du_plane_write(rgrp, index, PnSPXR, plane->src_x);
-	rcar_du_plane_write(rgrp, index, PnSPYR, plane->src_y *
-			    (plane->format->bpp == 32 ? 2 : 1));
+	if ((!plane->interlace_flag) && (plane->format->bpp == 32))
+		rcar_du_plane_write(rgrp, index, PnSPYR, plane->src_y * 2);
+	else
+		rcar_du_plane_write(rgrp, index, PnSPYR, plane->src_y);
 	rcar_du_plane_write(rgrp, index, PnDSA0R, plane->dma[0]);
 
 	if (plane->format->planes == 2) {
@@ -325,6 +330,11 @@ rcar_du_plane_update(struct drm_plane *plane, struct drm_crtc *crtc,
 	rplane->height = crtc_h;
 
 	rcar_du_plane_compute_base(rplane, fb);
+
+	if (crtc->mode.flags & DRM_MODE_FLAG_INTERLACE)
+		rplane->interlace_flag = true;
+	else
+		rplane->interlace_flag = false;
 	rcar_du_plane_setup(rplane);
 
 	mutex_lock(&rplane->group->planes.lock);
@@ -502,6 +512,7 @@ int rcar_du_planes_register(struct rcar_du_group *rgrp)
 		plane->hwplane = &planes->planes[i + 2];
 		plane->hwplane->zpos = 1;
 		plane->hwplane->fb_plane = false;
+		plane->hwplane->interlace_flag = false;
 
 		ret = drm_plane_init(rcdu->ddev, &plane->plane, crtcs,
 				     &rcar_du_plane_funcs, formats,

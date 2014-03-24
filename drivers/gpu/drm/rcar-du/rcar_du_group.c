@@ -117,9 +117,16 @@ void rcar_du_group_put(struct rcar_du_group *rgrp)
 
 static void __rcar_du_group_start_stop(struct rcar_du_group *rgrp, bool start)
 {
+	u32 dsysr_scm;
+
+	if (rgrp->interlace_grp)
+		dsysr_scm = DSYSR_SCM_INT_VIDEO;
+	else
+		dsysr_scm = DSYSR_SCM_INT_NONE;
+
 	rcar_du_group_write(rgrp, DSYSR,
-		(rcar_du_group_read(rgrp, DSYSR) & ~(DSYSR_DRES | DSYSR_DEN)) |
-		(start ? DSYSR_DEN : DSYSR_DRES));
+	     (rcar_du_group_read(rgrp, DSYSR) & ~(DSYSR_DRES | DSYSR_DEN |
+	      DSYSR_SCM_MASK)) | dsysr_scm | (start ? DSYSR_DEN : DSYSR_DRES));
 }
 
 void rcar_du_group_start_stop(struct rcar_du_group *rgrp, bool start)

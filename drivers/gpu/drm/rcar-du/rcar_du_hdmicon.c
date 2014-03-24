@@ -53,9 +53,6 @@ static int rcar_du_hdmi_connector_mode_valid(struct drm_connector *connector,
 	if (mode->clock > 165000)
 		return MODE_CLOCK_HIGH;
 
-	if (mode->flags & DRM_MODE_FLAG_INTERLACE)
-		return MODE_NO_INTERLACE;
-
 	return MODE_OK;
 }
 
@@ -107,6 +104,7 @@ int rcar_du_hdmi_connector_init(struct rcar_du_device *rcdu,
 	connector = &rcon->connector;
 	connector->polled = DRM_CONNECTOR_POLL_CONNECT |
 				DRM_CONNECTOR_POLL_DISCONNECT;
+	connector->interlace_allowed = true;
 
 	ret = drm_connector_init(rcdu->ddev, connector, &connector_funcs,
 				 DRM_MODE_CONNECTOR_HDMIA);
