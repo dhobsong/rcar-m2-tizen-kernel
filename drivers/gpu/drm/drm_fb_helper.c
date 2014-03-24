@@ -711,8 +711,13 @@ int drm_fb_helper_check_var(struct fb_var_screeninfo *var,
 	struct drm_framebuffer *fb = fb_helper->fb;
 	int depth;
 
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	if (in_dbg_master())
+		return -EINVAL;
+#else
 	if (var->pixclock != 0 || in_dbg_master())
 		return -EINVAL;
+#endif
 
 	/* Need to resize the fb object !!! */
 	if (var->bits_per_pixel > fb->bits_per_pixel ||
@@ -812,10 +817,12 @@ int drm_fb_helper_set_par(struct fb_info *info)
 	int ret;
 	int i;
 
+#if !defined(CONFIG_DRM_FBDEV_CRTC)
 	if (var->pixclock != 0) {
 		DRM_ERROR("PIXEL CLOCK SET\n");
 		return -EINVAL;
 	}
+#endif
 
 	drm_modeset_lock_all(dev);
 	for (i = 0; i < fb_helper->crtc_count; i++) {
@@ -1018,7 +1025,9 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 			fb_helper->crtc_info[i].mode_set.fb = fb_helper->fb;
 
 
+#if !defined(CONFIG_DRM_FBDEV_CRTC)
 	info->var.pixclock = 0;
+#endif
 	if (register_framebuffer(info) < 0)
 		return -EINVAL;
 
@@ -1036,6 +1045,12 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 
 	list_add(&fb_helper->kernel_fb_list, &kernel_fb_helper_list);
 
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	drm_fb_helper_fill_fix(info,
+			 fb_helper->fb->pitches[0], fb_helper->fb->depth);
+	drm_fb_helper_fill_var(info,
+			 fb_helper, sizes.fb_width, sizes.fb_height);
+#endif
 	return 0;
 }
 
@@ -1090,6 +1105,9 @@ void drm_fb_helper_fill_var(struct fb_info *info, struct drm_fb_helper *fb_helpe
 			    uint32_t fb_width, uint32_t fb_height)
 {
 	struct drm_framebuffer *fb = fb_helper->fb;
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	struct drm_display_mode *drm_mode;
+#endif
 	info->pseudo_palette = fb_helper->pseudo_palette;
 	info->var.xres_virtual = fb->width;
 	info->var.yres_virtual = fb->height;
@@ -1101,6 +1119,26 @@ void drm_fb_helper_fill_var(struct fb_info *info, struct drm_fb_helper *fb_helpe
 	info->var.height = -1;
 	info->var.width = -1;
 
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	drm_mode = fb_helper->crtc_info[CONFIG_DRM_FBDEV_CRTC].mode_set.mode;
+	if (drm_mode) {
+		info->var.left_margin = drm_mode->htotal - drm_mode->hsync_end;
+		info->var.right_margin =
+			 drm_mode->hsync_start - drm_mode->hdisplay;
+		info->var.upper_margin = drm_mode->vtotal - drm_mode->vsync_end;
+		info->var.lower_margin =
+			 drm_mode->vsync_start - drm_mode->vdisplay;
+		info->var.hsync_len =
+			 drm_mode->hsync_end - drm_mode->hsync_start;
+		info->var.vsync_len =
+			 drm_mode->vsync_end - drm_mode->vsync_start;
+		info->var.pixclock = 1000000000 / drm_mode->clock;
+		if (drm_mode->flags & DRM_MODE_FLAG_INTERLACE)
+			info->var.vmode = FB_VMODE_INTERLACED;
+		else
+			info->var.vmode = FB_VMODE_NONINTERLACED;
+	}
+#endif
 	switch (fb->depth) {
 	case 8:
 		info->var.red.offset = 0;
