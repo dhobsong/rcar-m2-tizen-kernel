@@ -1159,7 +1159,7 @@ extern void drm_set_preferred_mode(struct drm_connector *connector,
 				   int hpref, int vpref);
 
 extern int drm_edid_header_is_valid(const u8 *raw_edid);
-#if defined(CONFIG_DRM_ADV7511)
+#if defined(CONFIG_DRM_ADV7511) || defined(CONFIG_DRM_ADV7511_MODULE)
 extern struct edid *drm_do_get_edid(struct drm_connector *connector,
 int (*get_edid_block)(void *, unsigned char *buf, int, int), void *data);
 #endif

@@ -1152,7 +1152,7 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 
 #if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	if (crtc_count == 0) {
-#if defined(CONFIG_DRM_ADV7511)
+#if defined(CONFIG_DRM_ADV7511) || defined(CONFIG_DRM_ADV7511_MODULE)
 		sizes.fb_width = sizes.surface_width = 1920;
 		sizes.fb_height = sizes.surface_height = 1080;
 		crtc_count++;
