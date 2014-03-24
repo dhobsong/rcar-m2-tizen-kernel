@@ -1065,12 +1065,12 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 	struct fb_info *info;
 	struct drm_fb_helper_surface_size sizes;
 	int gamma_size = 0;
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	int des_hdisplay, des_vdisplay = 0;
 #endif
 
 	memset(&sizes, 0, sizeof(struct drm_fb_helper_surface_size));
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	sizes.surface_depth = 32;
 #else
 	sizes.surface_depth = 24;
@@ -1079,7 +1079,7 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 	sizes.fb_width = (unsigned)-1;
 	sizes.fb_height = (unsigned)-1;
 
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	des_hdisplay = (unsigned)-1;
 	des_vdisplay = (unsigned)-1;
 #endif
@@ -1140,7 +1140,7 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 			if (desired_mode->vdisplay > sizes.surface_height)
 				sizes.surface_height = desired_mode->vdisplay;
 			crtc_count++;
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 			des_hdisplay = desired_mode->hdisplay;
 			des_vdisplay = desired_mode->vdisplay;
 #endif
@@ -1150,7 +1150,7 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 		}
 	}
 
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	if (crtc_count == 0) {
 #if defined(CONFIG_DRM_ADV7511)
 		sizes.fb_width = sizes.surface_width = 1920;
@@ -1174,7 +1174,7 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 		sizes.fb_width = sizes.surface_width = 1024;
 		sizes.fb_height = sizes.surface_height = 768;
 	}
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	if (fb_helper->fbdev) {
 		if (fb_helper->fbdev->var.xres != des_hdisplay) {
 			sizes.fb_width = sizes.surface_width = des_hdisplay;
@@ -1397,7 +1397,7 @@ static int drm_fb_helper_probe_connector_modes(struct drm_fb_helper *fb_helper,
 	for (i = 0; i < fb_helper->connector_count; i++) {
 		connector = fb_helper->connector_info[i]->connector;
 		cmdline_mode = &fb_helper->connector_info[i]->cmdline_mode;
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 		if (cmdline_mode->specified) {
 			connector->cmd_xres = cmdline_mode->xres;
 			connector->cmd_yres = cmdline_mode->yres;
