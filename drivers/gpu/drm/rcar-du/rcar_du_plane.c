@@ -230,6 +230,7 @@ static void __rcar_du_plane_setup(struct rcar_du_plane *plane,
 	struct rcar_du_group *rgrp = plane->group;
 	u32 ddcr2 = PnDDCR2_CODE;
 	u32 ddcr4;
+	u32 mwr;
 
 	/* Data format
 	 *
@@ -259,6 +260,17 @@ static void __rcar_du_plane_setup(struct rcar_du_plane *plane,
 
 	rcar_du_plane_write(rgrp, index, PnDDCR2, ddcr2);
 	rcar_du_plane_write(rgrp, index, PnDDCR4, ddcr4);
+
+	/* Memory pitch (expressed in pixels) */
+	if (plane->format->planes == 2)
+		mwr = plane->pitch;
+	else
+		mwr = plane->pitch * 8 / plane->format->bpp;
+
+	if ((plane->interlace_flag) && (plane->format->bpp == 32))
+		rcar_du_plane_write(rgrp, index, PnMWR, mwr * 2);
+	else
+		rcar_du_plane_write(rgrp, index, PnMWR, mwr);
 
 	/* Destination position and size */
 	rcar_du_plane_write(rgrp, index, PnDSXR, plane->width);
