@@ -54,7 +54,7 @@
 
 /* DU */
 static struct rcar_du_encoder_data koelsch_du_encoders[] = {
-#if defined(CONFIG_DRM_ADV7511)
+#if defined(CONFIG_DRM_ADV7511) || defined(CONFIG_DRM_ADV7511_MODULE)
 	{
 		.type = RCAR_DU_ENCODER_HDMI,
 		.output = RCAR_DU_OUTPUT_DPAD0,
