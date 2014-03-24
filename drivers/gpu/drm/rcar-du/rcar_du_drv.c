@@ -262,17 +262,26 @@ static const struct rcar_du_device_info rcar_du_r8a7790_info = {
 		[RCAR_DU_OUTPUT_DPAD0] = {
 #if defined(CONFIG_DRM_ADV7511)
 			.possible_crtcs = BIT(2) | BIT(1),
+			.possible_clones = BIT(1),
 #else
 			.possible_crtcs = BIT(2) | BIT(1) | BIT(0),
+			.possible_clones = 0,
 #endif
 			.encoder_type = DRM_MODE_ENCODER_NONE,
 		},
 		[RCAR_DU_OUTPUT_LVDS0] = {
 			.possible_crtcs = BIT(0),
+			.possible_clones = 0,
 			.encoder_type = DRM_MODE_ENCODER_LVDS,
 		},
 		[RCAR_DU_OUTPUT_LVDS1] = {
+#if defined(CONFIG_DRM_ADV7511)
 			.possible_crtcs = BIT(2) | BIT(1),
+			.possible_clones = BIT(2),
+#else
+			.possible_crtcs = BIT(2) | BIT(1),
+			.possible_clones = BIT(0),
+#endif
 			.encoder_type = DRM_MODE_ENCODER_LVDS,
 		},
 	},
@@ -291,13 +300,15 @@ static const struct rcar_du_device_info rcar_du_r8a7791_info = {
 		/* R8A7791 has one RGB output, one LVDS output and one
 		 * (currently unsupported) TCON output.
 		 */
-		[RCAR_DU_OUTPUT_DPAD0] = {
-			.possible_crtcs = BIT(1),
-			.encoder_type = DRM_MODE_ENCODER_NONE,
-		},
 		[RCAR_DU_OUTPUT_LVDS0] = {
 			.possible_crtcs = BIT(0),
+			.possible_clones = 0,
 			.encoder_type = DRM_MODE_ENCODER_LVDS,
+		},
+		[RCAR_DU_OUTPUT_DPAD0] = {
+			.possible_crtcs = BIT(1),
+			.possible_clones = 0,
+			.encoder_type = DRM_MODE_ENCODER_NONE,
 		},
 	},
 	.num_lvds = 1,
