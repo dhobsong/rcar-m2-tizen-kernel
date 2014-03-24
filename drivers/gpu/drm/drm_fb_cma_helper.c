@@ -212,7 +212,7 @@ int drm_fb_cma_debugfs_show(struct seq_file *m, void *arg)
 	struct drm_device *dev = node->minor->dev;
 	struct drm_framebuffer *fb;
 	int ret;
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	unsigned int align;
 	unsigned int align_width_size, align_height_size;
 #endif
@@ -264,7 +264,7 @@ static int drm_fbdev_cma_create(struct drm_fb_helper *helper,
 	struct fb_info *fbi;
 	size_t size;
 	int ret;
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	unsigned int align;
 	unsigned int align_width_size, align_height_size;
 #endif
@@ -283,7 +283,7 @@ static int drm_fbdev_cma_create(struct drm_fb_helper *helper,
 
 	size = mode_cmd.pitches[0] * mode_cmd.height;
 
-#if defined(CONFIG_DRM_RCAR_DU)
+#if defined(CONFIG_DRM_RCAR_DU) || defined(CONFIG_DRM_RCAR_DU_MODULE)
 	align = 4 * 1024;
 	if ((sizes->surface_width * sizes->surface_height * bytes_per_pixel)
 		& (align - 1)) {
