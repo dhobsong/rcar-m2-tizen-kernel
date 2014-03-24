@@ -548,6 +548,10 @@ int drm_fb_helper_init(struct drm_device *dev,
 		fb_helper->crtc_info[i].mode_set.crtc = crtc;
 		i++;
 	}
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	fb_helper->detect_hotplug = false;
+	fb_helper->first_hotplug = false;
+#endif
 
 	return 0;
 out_free:
@@ -719,6 +723,7 @@ int drm_fb_helper_check_var(struct fb_var_screeninfo *var,
 		return -EINVAL;
 #endif
 
+#if !defined(CONFIG_DRM_FBDEV_CRTC)
 	/* Need to resize the fb object !!! */
 	if (var->bits_per_pixel > fb->bits_per_pixel ||
 	    var->xres > fb->width || var->yres > fb->height ||
@@ -730,6 +735,7 @@ int drm_fb_helper_check_var(struct fb_var_screeninfo *var,
 			  fb->width, fb->height, fb->bits_per_pixel);
 		return -EINVAL;
 	}
+#endif
 
 	switch (var->bits_per_pixel) {
 	case 16:
@@ -797,6 +803,9 @@ int drm_fb_helper_check_var(struct fb_var_screeninfo *var,
 	default:
 		return -EINVAL;
 	}
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	fb->depth = depth;
+#endif
 	return 0;
 }
 EXPORT_SYMBOL(drm_fb_helper_check_var);
@@ -816,6 +825,17 @@ int drm_fb_helper_set_par(struct fb_info *info)
 	struct fb_var_screeninfo *var = &info->var;
 	int ret;
 	int i;
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	struct drm_display_mode *disp_set_mode;
+	struct drm_display_mode *ref_disp_mode = NULL;
+	struct drm_connector *disp_conn = NULL;
+	struct drm_mode_set *mode_set;
+	struct drm_framebuffer *fb;
+	struct drm_cmdline_mode *cmdline_mode;
+	unsigned int bytes_per_pixel;
+	unsigned int match_flag;
+	unsigned int pre_pixfmt;
+#endif
 
 #if !defined(CONFIG_DRM_FBDEV_CRTC)
 	if (var->pixclock != 0) {
@@ -832,6 +852,115 @@ int drm_fb_helper_set_par(struct fb_info *info)
 			return ret;
 		}
 	}
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	disp_set_mode =
+		 fb_helper->crtc_info[CONFIG_DRM_FBDEV_CRTC].mode_set.mode;
+	mode_set = &fb_helper->crtc_info[CONFIG_DRM_FBDEV_CRTC].mode_set;
+	fb = fb_helper->crtc_info[CONFIG_DRM_FBDEV_CRTC].mode_set.fb;
+
+	for (i = 0; i < fb_helper->connector_count; i++) {
+		if (fb_helper->connector_info[i]) {
+			disp_conn = fb_helper->connector_info[i]->connector;
+			if ((disp_conn->encoder) &&
+				(disp_conn->encoder->crtc->base.id
+				 == mode_set->crtc->base.id))
+				break;
+			else
+				disp_conn = NULL;
+		}
+	}
+
+	if (disp_set_mode && disp_conn && fb &&
+		(((info->flags & FBINFO_MISC_USEREVENT)
+		== FBINFO_MISC_USEREVENT) || fb_helper->detect_hotplug)) {
+
+		if (fb_helper->detect_hotplug) {
+			if (var->xres != disp_set_mode->hdisplay)
+				var->xres = disp_set_mode->hdisplay;
+			if (var->yres != disp_set_mode->vdisplay)
+				var->yres = disp_set_mode->vdisplay;
+		}
+
+		fb_helper->detect_hotplug = false;
+		pre_pixfmt = drm_mode_legacy_fb_format(var->bits_per_pixel,
+						       fb->depth);
+		bytes_per_pixel = DIV_ROUND_UP(var->bits_per_pixel, 8);
+
+		if ((var->xres == disp_set_mode->hdisplay) &&
+			 (var->yres == disp_set_mode->vdisplay) &&
+			 (var->xres_virtual !=
+			 (fb->pitches[0] / bytes_per_pixel)) &&
+			 (fb->pixel_format == pre_pixfmt)) {
+			disp_set_mode->private_flags = DRM_FB_CHANGED;
+		} else if ((var->xres != disp_set_mode->hdisplay) ||
+			 (var->yres != disp_set_mode->vdisplay) ||
+			 (fb->pixel_format != pre_pixfmt)) {
+			disp_set_mode->private_flags = DRM_MODE_CHANGED;
+		} else
+			disp_set_mode->private_flags = false;
+
+		cmdline_mode = &fb_helper->connector_info[i]->cmdline_mode;
+		if ((cmdline_mode->specified) &&
+			(fb_helper->first_hotplug == false)) {
+			var->xres = cmdline_mode->xres;
+			var->yres = cmdline_mode->yres;
+			var->bits_per_pixel = cmdline_mode->bpp;
+			fb_helper->first_hotplug = true;
+		}
+
+		match_flag = 0;
+		list_for_each_entry(ref_disp_mode, &disp_conn->modes, head) {
+			if (((var->vmode & FB_VMODE_MASK) == true) &&
+			    !(ref_disp_mode->flags & DRM_MODE_FLAG_INTERLACE))
+				continue;
+			if ((var->xres == ref_disp_mode->hdisplay)
+			    && (var->yres == ref_disp_mode->vdisplay)) {
+				match_flag = 1;
+				break;
+			}
+		}
+		if (match_flag == 0) {
+			drm_modeset_unlock_all(dev);
+			return -EINVAL;
+		}
+
+		strcpy(disp_set_mode->name, ref_disp_mode->name);
+		disp_set_mode->type = ref_disp_mode->type;
+		disp_set_mode->clock = ref_disp_mode->clock;
+		disp_set_mode->hdisplay = ref_disp_mode->hdisplay;
+		disp_set_mode->hsync_start = ref_disp_mode->hsync_start;
+		disp_set_mode->hsync_end = ref_disp_mode->hsync_end;
+		disp_set_mode->htotal = ref_disp_mode->htotal;
+		disp_set_mode->hskew = ref_disp_mode->hskew;
+		disp_set_mode->vdisplay = ref_disp_mode->vdisplay;
+		disp_set_mode->vsync_start = ref_disp_mode->vsync_start;
+		disp_set_mode->vsync_end = ref_disp_mode->vsync_end;
+		disp_set_mode->vtotal = ref_disp_mode->vtotal;
+		disp_set_mode->vscan = ref_disp_mode->vscan;
+		disp_set_mode->flags = ref_disp_mode->flags;
+		disp_set_mode->base.type = DRM_MODE_OBJECT_MODE;
+
+		fb->width = var->xres_virtual;
+		fb->height = var->yres_virtual;
+		fb->bits_per_pixel = var->bits_per_pixel;
+		fb->pitches[0] = var->xres_virtual * bytes_per_pixel;
+		fb->pixel_format = drm_mode_legacy_fb_format(
+					fb->bits_per_pixel, fb->depth);
+		drm_fb_helper_fill_fix(info, fb->pitches[0], fb->depth);
+		drm_fb_helper_fill_var(info, fb_helper,
+					 var->xres, var->yres);
+		if (!disp_set_mode->private_flags)
+			goto mode_no_change;
+
+		ret = drm_mode_set_config_internal(&fb_helper->
+				crtc_info[CONFIG_DRM_FBDEV_CRTC].mode_set);
+		if (ret) {
+			drm_modeset_unlock_all(dev);
+			return ret;
+		}
+	}
+mode_no_change:
+#endif
 	drm_modeset_unlock_all(dev);
 
 	if (fb_helper->delayed_hotplug) {
@@ -999,6 +1128,9 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 			des_hdisplay = desired_mode->hdisplay;
 			des_vdisplay = desired_mode->vdisplay;
 #endif
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+			fb_helper->first_hotplug = true;
+#endif
 		}
 	}
 
@@ -1052,6 +1184,7 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 #if !defined(CONFIG_DRM_FBDEV_CRTC)
 	info->var.pixclock = 0;
 #endif
+
 	if (register_framebuffer(info) < 0)
 		return -EINVAL;
 
@@ -1133,7 +1266,8 @@ void drm_fb_helper_fill_var(struct fb_info *info, struct drm_fb_helper *fb_helpe
 	struct drm_display_mode *drm_mode;
 #endif
 	info->pseudo_palette = fb_helper->pseudo_palette;
-	info->var.xres_virtual = fb->width;
+	info->var.xres_virtual = fb->pitches[0] /
+				  DIV_ROUND_UP(fb->bits_per_pixel, 8);
 	info->var.yres_virtual = fb->height;
 	info->var.bits_per_pixel = fb->bits_per_pixel;
 	info->var.accel_flags = FB_ACCELF_TEXT;
@@ -1698,6 +1832,9 @@ int drm_fb_helper_hotplug_event(struct drm_fb_helper *fb_helper)
 	mutex_unlock(&fb_helper->dev->mode_config.mutex);
 
 	drm_modeset_lock_all(dev);
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	fb_helper->detect_hotplug = true;
+#endif
 	drm_setup_crtcs(fb_helper);
 	drm_modeset_unlock_all(dev);
 	drm_fb_helper_set_par(fb_helper->fbdev);

@@ -1,4 +1,5 @@
 /*
+ * Copyright (C) 2013-2014 Renesas Electronics Corporation
  * Copyright (c) 2006-2008 Intel Corporation
  * Copyright (c) 2007 Dave Airlie <airlied@linux.ie>
  *
@@ -667,6 +668,20 @@ int drm_crtc_helper_set_config(struct drm_mode_set *set)
 			fb_changed = true;
 	}
 
+#if defined(CONFIG_DRM_FBDEV_CRTC)
+	/* when there is change by fb_set_par */
+	switch (set->mode->private_flags) {
+	case DRM_FB_CHANGED:
+		fb_changed = true;
+		break;
+	case DRM_MODE_CHANGED:
+		mode_changed = true;
+		break;
+	default:
+		break;
+	}
+	set->mode->private_flags = false;
+#endif
 	if (set->x != set->crtc->x || set->y != set->crtc->y)
 		fb_changed = true;
 
