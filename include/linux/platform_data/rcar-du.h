@@ -1,7 +1,7 @@
 /*
  * rcar_du.h  --  R-Car Display Unit DRM driver
  *
- * Copyright (C) 2013 Renesas Electronics Corporation
+ * Copyright (C) 2013-2014 Renesas Electronics Corporation
  *
  * Contact: Laurent Pinchart (laurent.pinchart@ideasonboard.com)
  *
@@ -65,7 +65,6 @@ struct rcar_du_connector_hdmi_data {
 struct rcar_du_encoder_data {
 	enum rcar_du_encoder_type type;
 	enum rcar_du_output output;
-	unsigned int exclk;
 
 	union {
 		struct rcar_du_connector_lvds_data lvds;
@@ -74,9 +73,15 @@ struct rcar_du_encoder_data {
 	} connector;
 };
 
+struct rcar_du_crtc_data {
+	unsigned int exclk;
+};
+
 struct rcar_du_platform_data {
 	struct rcar_du_encoder_data *encoders;
 	unsigned int num_encoders;
+	struct rcar_du_crtc_data *crtcs;
+	unsigned int num_crtcs;
 };
 
 #endif /* __RCAR_DU_H__ */
