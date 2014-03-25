@@ -39,7 +39,7 @@ static void rcar_lvds_write(struct rcar_du_lvdsenc *lvds, u32 reg, u32 data)
 	iowrite32(data, lvds->mmio + reg);
 }
 
-static int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
+int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 				 struct rcar_du_crtc *rcrtc)
 {
 	const struct drm_display_mode *mode = &rcrtc->crtc.mode;
@@ -121,7 +121,7 @@ static int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 	return 0;
 }
 
-static void rcar_du_lvdsenc_stop(struct rcar_du_lvdsenc *lvds)
+void rcar_du_lvdsenc_stop(struct rcar_du_lvdsenc *lvds)
 {
 	if (lvds->dpms == DRM_MODE_DPMS_OFF)
 		return;
