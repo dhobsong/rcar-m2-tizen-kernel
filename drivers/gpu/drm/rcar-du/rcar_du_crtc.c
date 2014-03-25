@@ -288,7 +288,7 @@ static void rcar_du_crtc_start(struct rcar_du_crtc *rcrtc)
 
 		if (plane->crtc != crtc || !plane->enabled)
 			continue;
-		plane->fb_plane = true;
+
 		if (rcrtc->crtc.mode.flags & DRM_MODE_FLAG_INTERLACE)
 			plane->interlace_flag = true;
 		else
@@ -656,6 +656,7 @@ int rcar_du_crtc_create(struct rcar_du_group *rgrp, unsigned int index)
 	rcrtc->plane = &rgrp->planes.planes[index % 2];
 
 	rcrtc->plane->crtc = crtc;
+	rcrtc->plane->fb_plane = true;
 
 	ret = drm_crtc_init(rcdu->ddev, crtc, &crtc_funcs);
 	if (ret < 0)
