@@ -662,6 +662,7 @@ struct drm_connector {
 struct drm_plane_funcs {
 	int (*update_plane)(struct drm_plane *plane,
 			    struct drm_crtc *crtc, struct drm_framebuffer *fb,
+			    struct drm_live_source *src,
 			    int crtc_x, int crtc_y,
 			    unsigned int crtc_w, unsigned int crtc_h,
 			    uint32_t src_x, uint32_t src_y,
@@ -698,6 +699,7 @@ struct drm_plane {
 
 	struct drm_crtc *crtc;
 	struct drm_framebuffer *fb;
+	struct drm_live_source *src;
 
 	const struct drm_plane_funcs *funcs;
 
@@ -753,6 +755,7 @@ struct drm_live_source_funcs {
 struct drm_live_source {
 	struct drm_device *dev;
 	struct list_head head;
+	struct list_head filp_head;
 
 	struct drm_mode_object base;
 
@@ -1035,6 +1038,7 @@ extern int drm_live_source_init(struct drm_device *dev,
 				const uint32_t *formats, uint32_t format_count,
 				const struct drm_live_source_funcs *funcs);
 extern void drm_live_source_cleanup(struct drm_live_source *src);
+extern void drm_live_sources_release(struct drm_file *priv);
 
 extern const char *drm_get_connector_name(const struct drm_connector *connector);
 extern const char *drm_get_connector_status_name(enum drm_connector_status status);

@@ -464,6 +464,9 @@ struct drm_file {
 	struct list_head fbs;
 	struct mutex fbs_lock;
 
+	struct list_head sources;
+	struct mutex sources_lock;
+
 	wait_queue_head_t event_wait;
 	struct list_head event_list;
 	int event_space;

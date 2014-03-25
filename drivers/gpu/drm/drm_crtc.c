@@ -881,6 +881,31 @@ void drm_live_source_cleanup(struct drm_live_source *src)
 }
 EXPORT_SYMBOL(drm_live_source_cleanup);
 
+void drm_live_sources_release(struct drm_file *priv)
+{
+	struct drm_device *dev = priv->minor->dev;
+	struct drm_live_source *src, *next;
+	int ret;
+
+	drm_modeset_lock_all(dev);
+	mutex_lock(&priv->sources_lock);
+
+	list_for_each_entry_safe(src, next, &priv->sources, filp_head) {
+		list_del_init(&src->filp_head);
+		if (src->plane) {
+			ret = src->plane->funcs->disable_plane(src->plane);
+			if (ret)
+				DRM_ERROR("failed to disable plane with busy source\n");
+			src->plane->src = NULL;
+			src->plane->crtc = NULL;
+			src->plane = NULL;
+		}
+	}
+
+	mutex_unlock(&priv->sources_lock);
+	drm_modeset_unlock_all(dev);
+}
+
 int drm_bridge_init(struct drm_device *dev, struct drm_bridge *bridge,
 		const struct drm_bridge_funcs *funcs)
 {
@@ -1939,6 +1964,8 @@ int drm_mode_getplane(struct drm_device *dev, void *data,
 
 	if (plane->fb)
 		plane_resp->fb_id = plane->fb->base.id;
+	else if (plane->src)
+		plane_resp->fb_id = plane->src->base.id;
 	else
 		plane_resp->fb_id = 0;
 
@@ -1984,8 +2011,10 @@ int drm_mode_setplane(struct drm_device *dev, void *data,
 	struct drm_plane *plane;
 	struct drm_crtc *crtc;
 	struct drm_framebuffer *fb = NULL, *old_fb = NULL;
+	struct drm_live_source *src = NULL;
+	unsigned int width, height;
+	uint32_t pixel_format;
 	int ret = 0;
-	unsigned int fb_width, fb_height;
 	int i;
 
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
@@ -2011,7 +2040,7 @@ int drm_mode_setplane(struct drm_device *dev, void *data,
 		plane->funcs->disable_plane(plane);
 		plane->crtc = NULL;
 		plane->fb = NULL;
-		drm_modeset_unlock_all(dev);
+		plane->src = NULL;
 		goto out;
 	}
 
@@ -2020,22 +2049,58 @@ int drm_mode_setplane(struct drm_device *dev, void *data,
 	if (!obj) {
 		DRM_DEBUG_KMS("Unknown crtc ID %d\n",
 			      plane_req->crtc_id);
-		ret = -ENOENT;
-		goto out;
+		return -ENOENT;
 	}
 	crtc = obj_to_crtc(obj);
 
 	fb = drm_framebuffer_lookup(dev, plane_req->fb_id);
 	if (!fb) {
-		DRM_DEBUG_KMS("Unknown framebuffer ID %d\n",
+		obj = drm_mode_object_find(dev, plane_req->fb_id,
+					   DRM_MODE_OBJECT_LIVE_SOURCE);
+		if (obj)
+			src = obj_to_live_source(obj);
+	}
+
+	drm_modeset_lock_all(dev);
+
+	if (fb) {
+		width = fb->width << 16;
+		height = fb->height << 16;
+		pixel_format = fb->pixel_format;
+	} else if (src) {
+		unsigned int plane_mask = 1;
+		struct drm_plane *p;
+
+		if (src->plane && src->plane != plane) {
+			ret = -EBUSY;
+			goto out;
+		}
+
+		/* Verify that the source can be associated with the plane. */
+		list_for_each_entry(p, &dev->mode_config.plane_list, head) {
+			if (p == plane)
+				break;
+			plane_mask <<= 1;
+		}
+
+		if (!(src->possible_planes & plane_mask)) {
+			ret = -EINVAL;
+			goto out;
+		}
+
+		width = src->width << 16;
+		height = src->height << 16;
+		pixel_format = src->pixel_format;
+	} else {
+		DRM_DEBUG_KMS("Unknown framebuffer or live source ID %d\n",
 			      plane_req->fb_id);
 		ret = -ENOENT;
 		goto out;
 	}
 
-	/* Check whether this plane supports the fb pixel format. */
+	/* Check whether this plane supports the pixel format. */
 	for (i = 0; i < plane->format_count; i++)
-		if (fb->pixel_format == plane->format_types[i])
+		if (pixel_format == plane->format_types[i])
 			break;
 	if (i == plane->format_count) {
 		DRM_DEBUG_KMS("Invalid pixel format %s\n",
@@ -2044,14 +2109,11 @@ int drm_mode_setplane(struct drm_device *dev, void *data,
 		goto out;
 	}
 
-	fb_width = fb->width << 16;
-	fb_height = fb->height << 16;
-
-	/* Make sure source coordinates are inside the fb. */
-	if (plane_req->src_w > fb_width ||
-	    plane_req->src_x > fb_width - plane_req->src_w ||
-	    plane_req->src_h > fb_height ||
-	    plane_req->src_y > fb_height - plane_req->src_h) {
+	/* Make sure source coordinates are inside the source. */
+	if (plane_req->src_w > width ||
+	    plane_req->src_x > width - plane_req->src_w ||
+	    plane_req->src_h > height ||
+	    plane_req->src_y > height - plane_req->src_h) {
 		DRM_DEBUG_KMS("Invalid source coordinates "
 			      "%u.%06ux%u.%06u+%u.%06u+%u.%06u\n",
 			      plane_req->src_w >> 16,
@@ -2078,21 +2140,33 @@ int drm_mode_setplane(struct drm_device *dev, void *data,
 		goto out;
 	}
 
-	drm_modeset_lock_all(dev);
-	ret = plane->funcs->update_plane(plane, crtc, fb,
+	ret = plane->funcs->update_plane(plane, crtc, fb, src,
 					 plane_req->crtc_x, plane_req->crtc_y,
 					 plane_req->crtc_w, plane_req->crtc_h,
 					 plane_req->src_x, plane_req->src_y,
 					 plane_req->src_w, plane_req->src_h);
 	if (!ret) {
+		mutex_lock(&file_priv->sources_lock);
+		if (src) {
+			list_add_tail(&src->filp_head, &file_priv->sources);
+			src->plane = plane;
+		}
+		if (plane->src) {
+			list_del(&plane->src->filp_head);
+			plane->src->plane = NULL;
+		}
+		mutex_unlock(&file_priv->sources_lock);
+
 		old_fb = plane->fb;
 		plane->crtc = crtc;
 		plane->fb = fb;
+		plane->src = src;
 		fb = NULL;
 	}
-	drm_modeset_unlock_all(dev);
 
 out:
+	drm_modeset_unlock_all(dev);
+
 	if (fb)
 		drm_framebuffer_unreference(fb);
 	if (old_fb)
