@@ -27,13 +27,17 @@ struct drm_fbdev_cma;
 struct rcar_du_device;
 struct rcar_du_lvdsenc;
 
+#define R8A7790_ES1_DU_WORKAROUND
+
 #define RCAR_DU_FEATURE_CRTC_IRQ_CLOCK	(1 << 0)	/* Per-CRTC IRQ and clock */
 #define RCAR_DU_FEATURE_DEFR8		(1 << 1)	/* Has DEFR8 register */
 #define RCAR_DU_FEATURE_NO_LVDS_INTERFACE	(1 << 2)
 #define RCAR_DU_FEATURE_INTERLACE	(1 << 4)
 
 #define RCAR_DU_QUIRK_ALIGN_128B	(1 << 0)	/* Align pitches to 128 bytes */
+#ifdef R8A7790_ES1_DU_WORKAROUND
 #define RCAR_DU_QUIRK_LVDS_LANES	(1 << 1)	/* LVDS lanes 1 and 3 inverted */
+#endif
 
 /*
  * struct rcar_du_output_routing - Output routing specification
@@ -73,7 +77,11 @@ struct rcar_du_device_info {
 struct rcar_du_device {
 	struct device *dev;
 	const struct rcar_du_platform_data *pdata;
+#ifdef R8A7790_ES1_DU_WORKAROUND
+	struct rcar_du_device_info *info;
+#else
 	const struct rcar_du_device_info *info;
+#endif
 
 	void __iomem *mmio;
 
