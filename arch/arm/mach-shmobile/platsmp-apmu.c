@@ -173,7 +173,7 @@ static inline void cpu_enter_lowpower_a15(void)
 	dsb();
 }
 
-void shmobile_smp_apmu_cpu_die(unsigned int cpu)
+void __cpuinit shmobile_smp_apmu_cpu_die(unsigned int cpu)
 {
 	/* For this particular CPU deregister boot vector */
 	shmobile_smp_hook(cpu, 0, 0);
