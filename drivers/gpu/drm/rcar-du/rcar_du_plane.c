@@ -400,8 +400,7 @@ void rcar_du_plane_setup(struct rcar_du_plane *plane)
 
 static int
 rcar_du_plane_update(struct drm_plane *plane, struct drm_crtc *crtc,
-		       struct drm_framebuffer *fb, struct drm_live_source *src,
-		       int crtc_x, int crtc_y,
+		       struct drm_framebuffer *fb, int crtc_x, int crtc_y,
 		       unsigned int crtc_w, unsigned int crtc_h,
 		       uint32_t src_x, uint32_t src_y,
 		       uint32_t src_w, uint32_t src_h)
@@ -412,6 +411,7 @@ rcar_du_plane_update(struct drm_plane *plane, struct drm_crtc *crtc,
 	enum rcar_du_plane_source source;
 	uint32_t pixel_format;
 	unsigned int nplanes;
+	bool source_changed;
 	int ret;
 
 	pixel_format = fb ? fb->pixel_format : src->pixel_format;
@@ -430,10 +430,20 @@ rcar_du_plane_update(struct drm_plane *plane, struct drm_crtc *crtc,
 
 	nplanes = rplane->format ? rplane->format->planes : 0;
 
+	/* Check whether the source has changed from memory to live source or
+	 * from live source to memory. The source will be configured by the VSPS
+	 * bit in the PnDDCR4 register. Although the datasheet states that the
+	 * bit is updated during vertical blanking, it seems that updates only
+	 * occur when the DU group is held in reset through the DSYSR.DRES bit.
+	 * We thus need to restart the group if the source changes.
+	 */
 	if (src)
 		source = to_rcar_vsp1_source(src)->source;
 	else
 		source = RCAR_DU_PLANE_MEMORY;
+
+	source_changed = (rplane->source == RCAR_DU_PLANE_MEMORY) !=
+			 (source == RCAR_DU_PLANE_MEMORY);
 
 	/* Reallocate hardware planes if the source or the number of required
 	 * planes has changed.
@@ -479,8 +489,23 @@ rcar_du_plane_update(struct drm_plane *plane, struct drm_crtc *crtc,
 	rcar_du_plane_setup(rplane);
 
 	mutex_lock(&rplane->group->planes.lock);
+
+	/* If the source has changed we will need to restart the group for the
+	 * change to take effect. Set the need_restart flag and proceed to
+	 * update the planes. The update function might restart the group, in
+	 * which case the need_restart flag will be cleared. If the flag is
+	 * still set, force a group restart.
+	 */
+
+	if (source_changed)
+		rplane->group->planes.need_restart = true;
+
 	rplane->enabled = true;
 	rcar_du_crtc_update_planes(rplane->crtc);
+
+	if (rplane->group->planes.need_restart)
+		rcar_du_group_restart(rplane->group);
+
 	mutex_unlock(&rplane->group->planes.lock);
 
 	return 0;

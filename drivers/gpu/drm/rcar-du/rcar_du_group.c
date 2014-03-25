@@ -157,6 +157,8 @@ void rcar_du_group_start_stop(struct rcar_du_group *rgrp, bool start)
 
 void rcar_du_group_restart(struct rcar_du_group *rgrp)
 {
+	rgrp->planes.need_restart = false;
+
 	__rcar_du_group_start_stop(rgrp, false);
 	__rcar_du_group_start_stop(rgrp, true);
 }
