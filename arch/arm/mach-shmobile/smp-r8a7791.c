@@ -52,7 +52,7 @@ static void __init r8a7791_smp_prepare_cpus(unsigned int max_cpus)
 	iounmap(p);
 }
 
-static int r8a7791_smp_boot_secondary(unsigned int cpu,
+static int __cpuinit r8a7791_smp_boot_secondary(unsigned int cpu,
 				      struct task_struct *idle)
 {
 	/* Error out when hardware debug mode is enabled */
