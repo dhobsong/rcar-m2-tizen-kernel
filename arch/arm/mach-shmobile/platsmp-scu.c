@@ -52,7 +52,7 @@ void __init shmobile_smp_scu_prepare_cpus(unsigned int max_cpus)
 }
 
 #ifdef CONFIG_HOTPLUG_CPU
-void shmobile_smp_scu_cpu_die(unsigned int cpu)
+void __cpuinit shmobile_smp_scu_cpu_die(unsigned int cpu)
 {
 	/* For this particular CPU deregister boot vector */
 	shmobile_smp_hook(cpu, 0, 0);
