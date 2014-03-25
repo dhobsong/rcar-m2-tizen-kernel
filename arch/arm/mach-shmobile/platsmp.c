@@ -19,7 +19,8 @@ extern unsigned long shmobile_smp_fn[];
 extern unsigned long shmobile_smp_arg[];
 extern unsigned long shmobile_smp_mpidr[];
 
-void shmobile_smp_hook(unsigned int cpu, unsigned long fn, unsigned long arg)
+void __cpuinit shmobile_smp_hook(unsigned int cpu, unsigned long fn,
+				 unsigned long arg)
 {
 	shmobile_smp_fn[cpu] = 0;
 	flush_cache_all();
