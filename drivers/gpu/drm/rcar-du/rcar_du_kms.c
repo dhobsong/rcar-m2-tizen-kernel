@@ -277,6 +277,12 @@ int rcar_du_modeset_init(struct rcar_du_device *rcdu)
 			return ret;
 	}
 
+	if (rcar_du_has(rcdu, RCAR_DU_FEATURE_VSP1_SOURCE)) {
+		ret = rcar_du_vsp1_sources_init(rcdu);
+		if (ret < 0)
+			return ret;
+	}
+
 	drm_kms_helper_poll_init(dev);
 
 	drm_helper_disable_unused_functions(dev);

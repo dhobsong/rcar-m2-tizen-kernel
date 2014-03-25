@@ -19,6 +19,7 @@
 #include <drm/drmP.h>
 #include <drm/drm_crtc.h>
 
+struct rcar_du_device;
 struct rcar_du_format_info;
 struct rcar_du_group;
 
@@ -36,6 +37,12 @@ struct rcar_du_group;
 #define DU_CH_1		1
 #define DU_CH_2		2
 
+enum rcar_du_plane_source {
+	RCAR_DU_PLANE_MEMORY,
+	RCAR_DU_PLANE_VSPD0,
+	RCAR_DU_PLANE_VSPD1,
+};
+
 struct rcar_du_plane {
 	struct rcar_du_group *group;
 	struct drm_crtc *crtc;
@@ -43,6 +50,8 @@ struct rcar_du_plane {
 	bool enabled;
 
 	int hwindex;		/* 0-based, -1 means unused */
+	enum rcar_du_plane_source source;
+
 	unsigned int alpha;
 	unsigned int colorkey;
 	unsigned int zpos;
@@ -73,6 +82,8 @@ struct rcar_du_planes {
 	struct drm_property *colorkey;
 	struct drm_property *zpos;
 };
+
+int rcar_du_vsp1_sources_init(struct rcar_du_device *rcdu);
 
 int rcar_du_planes_init(struct rcar_du_group *rgrp);
 int rcar_du_planes_register(struct rcar_du_group *rgrp);

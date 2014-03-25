@@ -278,7 +278,8 @@ static const struct rcar_du_device_info rcar_du_r8a7790_info = {
 #else
 static const struct rcar_du_device_info rcar_du_r8a7790_info = {
 #endif
-	.features = RCAR_DU_FEATURE_CRTC_IRQ_CLOCK | RCAR_DU_FEATURE_DEFR8,
+	.features = RCAR_DU_FEATURE_CRTC_IRQ_CLOCK | RCAR_DU_FEATURE_DEFR8 |
+		    RCAR_DU_FEATURE_VSP1_SOURCE,
 	.quirks = RCAR_DU_QUIRK_ALIGN_128B,
 	.num_crtcs = 3,
 	.routes = {
@@ -323,8 +324,9 @@ static struct rcar_du_device_info rcar_du_r8a7791_info = {
 #else
 static const struct rcar_du_device_info rcar_du_r8a7791_info = {
 #endif
-	.features = RCAR_DU_FEATURE_CRTC_IRQ_CLOCK | RCAR_DU_FEATURE_DEFR8
-		  | RCAR_DU_FEATURE_NO_LVDS_INTERFACE,
+	.features = RCAR_DU_FEATURE_CRTC_IRQ_CLOCK | RCAR_DU_FEATURE_DEFR8 |
+		    RCAR_DU_FEATURE_NO_LVDS_INTERFACE |
+		    RCAR_DU_FEATURE_VSP1_SOURCE,
 	.num_crtcs = 2,
 	.routes = {
 		/* R8A7791 has one RGB output, one LVDS output and one

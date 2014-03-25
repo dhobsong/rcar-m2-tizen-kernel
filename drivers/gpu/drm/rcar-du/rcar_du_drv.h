@@ -33,6 +33,7 @@ struct rcar_du_lvdsenc;
 #define RCAR_DU_FEATURE_DEFR8		(1 << 1)	/* Has DEFR8 register */
 #define RCAR_DU_FEATURE_NO_LVDS_INTERFACE	(1 << 2)
 #define RCAR_DU_FEATURE_INTERLACE	(1 << 4)
+#define RCAR_DU_FEATURE_VSP1_SOURCE	(1 << 5)	/* Has inputs from VSP1 */
 
 #define RCAR_DU_QUIRK_ALIGN_128B	(1 << 0)	/* Align pitches to 128 bytes */
 #ifdef R8A7790_ES1_DU_WORKAROUND
@@ -94,6 +95,8 @@ struct rcar_du_device {
 	struct rcar_du_group groups[2];
 
 	unsigned int dpad0_source;
+	unsigned int vspd1_sink;
+
 	struct rcar_du_lvdsenc *lvds[2];
 	unsigned int crtcs_connect_id[3];
 };
