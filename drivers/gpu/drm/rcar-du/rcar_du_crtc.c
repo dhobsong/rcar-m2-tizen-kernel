@@ -425,6 +425,10 @@ static void rcar_du_crtc_disable(struct drm_crtc *crtc)
 	rcar_du_plane_release(rcrtc->plane);
 }
 
+static void rcar_du_crtc_load_lut(struct drm_crtc *crtc)
+{
+}
+
 static const struct drm_crtc_helper_funcs crtc_helper_funcs = {
 	.dpms = rcar_du_crtc_dpms,
 	.mode_fixup = rcar_du_crtc_mode_fixup,
@@ -433,6 +437,7 @@ static const struct drm_crtc_helper_funcs crtc_helper_funcs = {
 	.mode_set = rcar_du_crtc_mode_set,
 	.mode_set_base = rcar_du_crtc_mode_set_base,
 	.disable = rcar_du_crtc_disable,
+	.load_lut = rcar_du_crtc_load_lut,
 };
 
 void rcar_du_crtc_cancel_page_flip(struct rcar_du_crtc *rcrtc,
