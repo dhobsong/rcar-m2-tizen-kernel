@@ -512,10 +512,16 @@ int rcar_du_planes_register(struct rcar_du_group *rgrp)
 	unsigned int crtcs;
 	unsigned int i;
 	int ret;
+	unsigned int plane_num;
+
+	if (rgrp->index == 1)
+		plane_num = RCAR_DU2_NUM_KMS_PLANES;
+	else
+		plane_num = RCAR_DU01_NUM_KMS_PLANES;
 
 	crtcs = ((1 << rcdu->num_crtcs) - 1) & (3 << (2 * rgrp->index));
 
-	for (i = 0; i < RCAR_DU_NUM_KMS_PLANES; ++i) {
+	for (i = 0; i < plane_num; ++i) {
 		struct rcar_du_kms_plane *plane;
 
 		plane = devm_kzalloc(rcdu->dev, sizeof(*plane), GFP_KERNEL);
