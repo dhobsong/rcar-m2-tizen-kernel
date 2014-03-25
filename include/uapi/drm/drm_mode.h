@@ -33,6 +33,7 @@
 #define DRM_CONNECTOR_NAME_LEN	32
 #define DRM_DISPLAY_MODE_LEN	32
 #define DRM_PROP_NAME_LEN	32
+#define DRM_SOURCE_NAME_LEN	32
 
 #define DRM_MODE_TYPE_BUILTIN	(1<<0)
 #define DRM_MODE_TYPE_CLOCK_C	((1<<1) | DRM_MODE_TYPE_BUILTIN)
@@ -172,6 +173,37 @@ struct drm_mode_get_plane {
 struct drm_mode_get_plane_res {
 	__u64 plane_id_ptr;
 	__u32 count_planes;
+};
+
+struct drm_mode_set_live_source {
+	__u32 source_id;
+
+	__u32 plane_id;
+
+	__u32 width;
+	__u32 height;
+	__u32 pixel_format;
+};
+
+struct drm_mode_get_live_source {
+	__u32 source_id;
+	char name[DRM_SOURCE_NAME_LEN];
+
+	__u32 plane_id;
+
+	__u32 possible_planes;
+
+	__u32 count_format_types;
+	__u64 format_type_ptr;
+
+	__u32 width;
+	__u32 height;
+	__u32 pixel_format;
+};
+
+struct drm_mode_get_live_source_res {
+	__u64 source_id_ptr;
+	__u32 count_sources;
 };
 
 #define DRM_MODE_ENCODER_NONE	0
