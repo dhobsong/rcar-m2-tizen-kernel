@@ -761,9 +761,9 @@ struct drm_prime_handle {
 #define DRM_IOCTL_MODE_OBJ_SETPROPERTY	DRM_IOWR(0xBA, struct drm_mode_obj_set_property)
 #define DRM_IOCTL_MODE_CURSOR2		DRM_IOWR(0xBB, struct drm_mode_cursor2)
 
-#define DRM_IOCTL_MODE_GETSOURCERESOURCES DRM_IOWR(0xBB, struct drm_mode_get_live_source_res)
-#define DRM_IOCTL_MODE_GETSOURCE	DRM_IOWR(0xBC, struct drm_mode_get_live_source)
-#define DRM_IOCTL_MODE_SETSOURCE	DRM_IOWR(0xBD, struct drm_mode_set_live_source)
+#define DRM_IOCTL_MODE_GETSOURCERESOURCES DRM_IOWR(0xBC, struct drm_mode_get_live_source_res)
+#define DRM_IOCTL_MODE_GETSOURCE	DRM_IOWR(0xBD, struct drm_mode_get_live_source)
+#define DRM_IOCTL_MODE_SETSOURCE	DRM_IOWR(0xBE, struct drm_mode_set_live_source)
 
 /**
  * Device specific ioctls should only be in their respective headers

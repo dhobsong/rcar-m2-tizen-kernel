@@ -296,7 +296,8 @@ void rcar_du_plane_setup(struct rcar_du_plane *plane)
 
 static int
 rcar_du_plane_update(struct drm_plane *plane, struct drm_crtc *crtc,
-		       struct drm_framebuffer *fb, int crtc_x, int crtc_y,
+		       struct drm_framebuffer *fb, struct drm_live_source *src,
+		       int crtc_x, int crtc_y,
 		       unsigned int crtc_w, unsigned int crtc_h,
 		       uint32_t src_x, uint32_t src_y,
 		       uint32_t src_w, uint32_t src_h)
