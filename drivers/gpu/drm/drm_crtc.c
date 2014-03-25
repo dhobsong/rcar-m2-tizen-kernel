@@ -827,6 +827,60 @@ void drm_connector_unplug_all(struct drm_device *dev)
 }
 EXPORT_SYMBOL(drm_connector_unplug_all);
 
+int drm_live_source_init(struct drm_device *dev, struct drm_live_source *src,
+			 const char *name, unsigned long possible_planes,
+			 const uint32_t *formats, uint32_t format_count,
+			 const struct drm_live_source_funcs *funcs)
+{
+	int ret;
+
+	drm_modeset_lock_all(dev);
+
+	ret = drm_mode_object_get(dev, &src->base, DRM_MODE_OBJECT_LIVE_SOURCE);
+	if (ret)
+		goto out;
+
+	src->dev = dev;
+	src->funcs = funcs;
+	if (name)
+		strlcpy(src->name, name, DRM_SOURCE_NAME_LEN);
+	src->possible_planes = possible_planes;
+
+	src->format_types = kmalloc(format_count * sizeof(*src->format_types),
+				    GFP_KERNEL);
+	if (!src->format_types) {
+		DRM_DEBUG_KMS("out of memory when allocating source foramts\n");
+		drm_mode_object_put(dev, &src->base);
+		ret = -ENOMEM;
+		goto out;
+	}
+
+	memcpy(src->format_types, formats,
+	       format_count * sizeof(*src->format_types));
+	src->format_count = format_count;
+
+	list_add_tail(&src->head, &dev->mode_config.live_source_list);
+	dev->mode_config.num_live_source++;
+
+ out:
+	drm_modeset_unlock_all(dev);
+
+	return ret;
+}
+EXPORT_SYMBOL(drm_live_source_init);
+
+void drm_live_source_cleanup(struct drm_live_source *src)
+{
+	struct drm_device *dev = src->dev;
+
+	drm_modeset_lock_all(dev);
+	drm_mode_object_put(dev, &src->base);
+	list_del(&src->head);
+	dev->mode_config.num_live_source--;
+	drm_modeset_unlock_all(dev);
+}
+EXPORT_SYMBOL(drm_live_source_cleanup);
+
 int drm_bridge_init(struct drm_device *dev, struct drm_bridge *bridge,
 		const struct drm_bridge_funcs *funcs)
 {
@@ -2044,6 +2098,176 @@ out:
 	if (old_fb)
 		drm_framebuffer_unreference(old_fb);
 
+	return ret;
+}
+
+/**
+ * drm_mode_getsource_res - get live source info
+ * @dev: DRM device
+ * @data: ioctl data
+ * @file_priv: DRM file info
+ *
+ * Return a live source and set of IDs.
+ */
+int drm_mode_getsource_res(struct drm_device *dev, void *data,
+			   struct drm_file *file_priv)
+{
+	struct drm_mode_get_live_source_res *src_resp = data;
+	struct drm_mode_config *config;
+	struct drm_live_source *src;
+	uint32_t __user *src_ptr;
+	int copied = 0, ret = 0;
+
+	if (!drm_core_check_feature(dev, DRIVER_MODESET))
+		return -EINVAL;
+
+	drm_modeset_lock_all(dev);
+	config = &dev->mode_config;
+
+	/*
+	 * This ioctl is called twice, once to determine how much space is
+	 * needed, and the 2nd time to fill it.
+	 */
+	if (config->num_live_source &&
+	    (src_resp->count_sources >= config->num_live_source)) {
+		src_ptr = (uint32_t __user *)(unsigned long)src_resp->source_id_ptr;
+
+		list_for_each_entry(src, &config->live_source_list, head) {
+			if (put_user(src->base.id, src_ptr + copied)) {
+				ret = -EFAULT;
+				goto out;
+			}
+			copied++;
+		}
+	}
+	src_resp->count_sources = config->num_live_source;
+
+out:
+	drm_modeset_unlock_all(dev);
+	return ret;
+}
+
+/**
+ * drm_mode_getsource - get live source info
+ * @dev: DRM device
+ * @data: ioctl data
+ * @file_priv: DRM file info
+ *
+ * Return live source info, including formats supported, ...
+ */
+int drm_mode_getsource(struct drm_device *dev, void *data,
+		       struct drm_file *file_priv)
+{
+	struct drm_mode_get_live_source *src_resp = data;
+	struct drm_mode_object *obj;
+	struct drm_live_source *src;
+	int ret = 0;
+
+	if (!drm_core_check_feature(dev, DRIVER_MODESET))
+		return -EINVAL;
+
+	obj = drm_mode_object_find(dev, src_resp->source_id,
+				   DRM_MODE_OBJECT_LIVE_SOURCE);
+	if (!obj)
+		return -ENOENT;
+	src = obj_to_live_source(obj);
+
+	src_resp->source_id = src->base.id;
+	strlcpy(src_resp->name, src->name, DRM_SOURCE_NAME_LEN);
+	src_resp->possible_planes = src->possible_planes;
+
+	drm_modeset_lock_all(dev);
+
+	if (src->plane)
+		src_resp->plane_id = src->plane->base.id;
+	else
+		src_resp->plane_id = 0;
+
+	src_resp->width = src->width;
+	src_resp->height = src->height;
+	src_resp->pixel_format = src->pixel_format;
+
+	/*
+	 * This ioctl is called twice, once to determine how much space is
+	 * needed, and the 2nd time to fill it.
+	 */
+	if (src->format_count &&
+	    (src_resp->count_format_types >= src->format_count)) {
+		uint32_t __user *format_ptr;
+
+		format_ptr = (uint32_t __user *)(unsigned long)src_resp->format_type_ptr;
+		if (copy_to_user(format_ptr, src->format_types,
+				 sizeof(uint32_t) * src->format_count)) {
+			ret = -EFAULT;
+			goto out;
+		}
+	}
+	src_resp->count_format_types = src->format_count;
+
+out:
+	drm_modeset_unlock_all(dev);
+	return ret;
+}
+
+/**
+ * drm_mode_setsource - set up or tear down a live source
+ * @dev: DRM device
+ * @data: ioctl data*
+ * @file_priv: DRM file info
+ *
+ * Set live source info, including plane, and other factors.
+ * Or pass a NULL plane to disable.
+ */
+int drm_mode_setsource(struct drm_device *dev, void *data,
+		       struct drm_file *file_priv)
+{
+	struct drm_mode_set_live_source *src_req = data;
+	struct drm_mode_object *obj;
+	struct drm_live_source *src;
+	unsigned int i;
+	int ret = 0;
+
+	if (!drm_core_check_feature(dev, DRIVER_MODESET))
+		return -EINVAL;
+
+	/*
+	 * First, find the live source and plane objects. If not available, we
+	 * don't bother to call the driver.
+	 */
+	obj = drm_mode_object_find(dev, src_req->source_id,
+				   DRM_MODE_OBJECT_LIVE_SOURCE);
+	if (!obj) {
+		DRM_DEBUG_KMS("Unknown live source ID %d\n",
+			      src_req->source_id);
+		return -ENOENT;
+	}
+	src = obj_to_live_source(obj);
+
+	drm_modeset_lock_all(dev);
+
+	if (src->plane) {
+		ret = -EBUSY;
+		goto out;
+	}
+
+	/* Check whether this source supports the pixel format. */
+	for (i = 0; i < src->format_count; i++)
+		if (src_req->pixel_format == src->format_types[i])
+			break;
+
+	if (i == src->format_count) {
+		DRM_DEBUG_KMS("Invalid pixel format 0x%08x for source %u\n",
+			      src_req->pixel_format, src->base.id);
+		ret = -EINVAL;
+		goto out;
+	}
+
+	src->width = src_req->width;
+	src->height = src_req->height;
+	src->pixel_format = src_req->pixel_format;
+
+out:
+	drm_modeset_unlock_all(dev);
 	return ret;
 }
 
@@ -4036,6 +4260,7 @@ void drm_mode_config_init(struct drm_device *dev)
 	INIT_LIST_HEAD(&dev->mode_config.property_list);
 	INIT_LIST_HEAD(&dev->mode_config.property_blob_list);
 	INIT_LIST_HEAD(&dev->mode_config.plane_list);
+	INIT_LIST_HEAD(&dev->mode_config.live_source_list);
 	idr_init(&dev->mode_config.crtc_idr);
 
 	drm_modeset_lock_all(dev);
