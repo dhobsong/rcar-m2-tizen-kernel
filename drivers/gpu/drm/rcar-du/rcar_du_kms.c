@@ -27,7 +27,7 @@
 #include "rcar_du_lvdsenc.h"
 #include "rcar_du_regs.h"
 
-static bool rcar_du_fbdev_pan;
+static bool rcar_du_fbdev_pan = true;
 module_param_named(fb_cma_pan, rcar_du_fbdev_pan, bool, 0444);
 
 /* -----------------------------------------------------------------------------
@@ -294,7 +294,7 @@ int rcar_du_modeset_init(struct rcar_du_device *rcdu)
 	drm_helper_disable_unused_functions(dev);
 	fbdev = drm_fbdev_cma_init(dev, 32, dev->mode_config.num_crtc,
 				   dev->mode_config.num_connector,
-				   rcar_du_fbdev_pan ? 2 : 1);
+				   rcar_du_fbdev_pan ? 3 : 1);
 	if (IS_ERR(fbdev))
 		return PTR_ERR(fbdev);
 
