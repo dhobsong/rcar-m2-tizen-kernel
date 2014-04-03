@@ -125,8 +125,6 @@ static void rcar_du_crtc_set_display_timing(struct rcar_du_crtc *rcrtc)
 		div = div_in;
 		dclksel_bit = ESCR_DCLKSEL_CLKS;
 	}
-	if (mode->flags & DRM_MODE_FLAG_INTERLACE)
-		dclkoinv_bit = ESCR_DCLKOINV;
 
 	div = clamp(div, 1U, 64U) - 1;
 
