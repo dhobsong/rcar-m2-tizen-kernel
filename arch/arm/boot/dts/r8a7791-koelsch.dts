@@ -225,7 +225,7 @@
 };
 
 &pfc {
-	pinctrl-0 = <&du_pins &scif0_pins &scif1_pins>;
+	pinctrl-0 = <&du_pins &scif0_pins &scif1_pins &usb0_pins &usb1_pins>;
 	pinctrl-names = "default";
 
 	i2c2_pins: i2c2 {
@@ -282,6 +282,16 @@
 		renesas,groups = "msiof0_clk", "msiof0_sync", "msiof0_rx",
 				 "msiof0_tx";
 		renesas,function = "msiof0";
+	};
+
+	usb0_pins: usb0 {
+		renesas,groups = "usb0";
+		renesas,function = "usb0";
+	};
+
+	usb1_pins: usb1 {
+		renesas,groups = "usb1";
+		renesas,function = "usb1";
 	};
 };
 
