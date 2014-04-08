@@ -1406,7 +1406,10 @@ static int drm_fb_helper_probe_connector_modes(struct drm_fb_helper *fb_helper,
 			connector->cmd_yres = 0;
 		}
 #endif
-		count += connector->funcs->fill_modes(connector, maxX, maxY);
+		count = connector->funcs->fill_modes(connector, maxX, maxY);
+		if (count < 0)
+			return count;
+		count += count;
 
 		if ((cmdline_mode->specified) && (!cmdline_mode->rb) &&
 						 (!cmdline_mode->margins)) {
