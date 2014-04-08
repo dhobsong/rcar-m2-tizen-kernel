@@ -142,7 +142,8 @@
 };
 
 &pfc {
-	pinctrl-0 = <&du_pins &scif0_pins &scif1_pins>;
+	pinctrl-0 = <&du_pins &scif0_pins &scif1_pins
+		     &usb0_pins &usb1_pins &usb2_pins>;
 	pinctrl-names = "default";
 
 	du_pins: du {
@@ -194,6 +195,21 @@
 		renesas,groups = "msiof1_clk", "msiof1_sync", "msiof1_rx",
 				 "msiof1_tx";
 		renesas,function = "msiof1";
+	};
+
+	usb0_pins: usb0 {
+		renesas,groups = "usb0_ovc_vbus";
+		renesas,function = "usb0";
+	};
+
+	usb1_pins: usb1 {
+		renesas,groups = "usb1";
+		renesas,function = "usb1";
+	};
+
+	usb2_pins: usb2 {
+		renesas,groups = "usb2";
+		renesas,function = "usb2";
 	};
 };
 
