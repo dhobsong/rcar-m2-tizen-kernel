@@ -169,6 +169,10 @@ int drm_helper_probe_single_connector_modes(struct drm_connector *connector,
 #endif
 		count = (*connector_funcs->get_modes)(connector);
 
+	if (count < 0) {
+		DRM_ERROR("Failed to get mode list.\n");
+		return count;
+	}
 	if (count == 0 && connector->status == connector_status_connected)
 		count = drm_add_modes_noedid(connector, 1024, 768);
 	if (count == 0)
