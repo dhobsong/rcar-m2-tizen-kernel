@@ -30,6 +30,10 @@
 #include <linux/slab.h>
 
 struct gpio_rcar_priv {
+	/* per-gpio-device "gpios" for use with of_get_named_gpiod_flags() */
+	struct property gpios_property;
+	__be32 gpios_phandle_value[32 * 3]; /*  #gpio-cells assumed to be 2 */
+
 	void __iomem *base;
 	spinlock_t lock;
 	struct gpio_rcar_config config;
@@ -318,6 +322,7 @@ static int gpio_rcar_parse_pdata(struct gpio_rcar_priv *p)
 	struct gpio_rcar_config *pdata = p->pdev->dev.platform_data;
 	struct device_node *np = p->pdev->dev.of_node;
 	struct of_phandle_args args;
+	unsigned int k;
 	int ret;
 
 	if (pdata) {
@@ -338,6 +343,18 @@ static int gpio_rcar_parse_pdata(struct gpio_rcar_priv *p)
 					 : RCAR_MAX_GPIO_PER_BANK;
 		p->config.gpio_base = -1;
 		p->config.has_both_edge_trigger = info->has_both_edge_trigger;
+
+		/* initialize "gpios" property for this GPIO controller */
+		for (k = 0; k < RCAR_MAX_GPIO_PER_BANK; k++) {
+			p->gpios_phandle_value[k*3] = cpu_to_be32(np->phandle);
+			p->gpios_phandle_value[(k*3) + 1] = cpu_to_be32(k);
+			p->gpios_phandle_value[(k*3) + 2] = cpu_to_be32(0);
+		}
+
+		p->gpios_property.name = "gpios";
+		p->gpios_property.length = sizeof(p->gpios_phandle_value);
+		p->gpios_property.value = p->gpios_phandle_value;
+		of_add_property(np, &p->gpios_property);
 	}
 
 	if (p->config.number_of_pins == 0 ||
@@ -467,6 +484,8 @@ err0:
 static int gpio_rcar_remove(struct platform_device *pdev)
 {
 	struct gpio_rcar_priv *p = platform_get_drvdata(pdev);
+	struct gpio_rcar_config *pdata = dev_get_platdata(&p->pdev->dev);
+	struct device_node *np = p->pdev->dev.of_node;
 	int ret;
 
 	ret = gpiochip_remove(&p->gpio_chip);
@@ -474,6 +493,10 @@ static int gpio_rcar_remove(struct platform_device *pdev)
 		return ret;
 
 	irq_domain_remove(p->irq_domain);
+
+	if (!pdata && IS_ENABLED(CONFIG_OF) && np)
+		of_remove_property(np, &p->gpios_property);
+
 	return 0;
 }
 
