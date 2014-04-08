@@ -18,6 +18,19 @@
 #include <asm/smp_plat.h>
 #include <mach/common.h>
 
+/* only enable the cluster that includes the boot CPU by default */
+static bool enable_multicluster = false;
+
+static __init int apmu_setup(char *opt)
+{
+	if (!opt)
+		return -EINVAL;
+	if (!strncmp(opt, "multicluster", 12))
+		enable_multicluster = true;
+	return 0;
+}
+early_param("apmu", apmu_setup);
+
 static struct {
 	void __iomem *iomem;
 	int bit;
@@ -100,8 +113,7 @@ static void apmu_parse_cfg(void (*fn)(struct resource *res, int cpu, int bit))
 	bool is_allowed;
 
 	for (k = 0; k < ARRAY_SIZE(apmu_config); k++) {
-		/* only enable the cluster that includes the boot CPU */
-		is_allowed = false;
+		is_allowed = enable_multicluster;
 		for (bit = 0; bit < ARRAY_SIZE(apmu_config[k].cpus); bit++) {
 			id = apmu_config[k].cpus[bit];
 			if (id >= 0) {
