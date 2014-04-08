@@ -37,6 +37,7 @@
 #include <linux/platform_data/gpio-rcar.h>
 #include <linux/platform_data/rcar-du.h>
 #include <linux/platform_data/usb-rcar-gen2-phy.h>
+#include <linux/platform_data/vsp1.h>
 #include <linux/platform_device.h>
 #include <linux/regulator/driver.h>
 #include <linux/regulator/fixed.h>
@@ -436,6 +437,89 @@ static const struct resource usbhs_phy_resources[] __initconst = {
 	DEFINE_RES_MEM(0xe6590100, 0x100),
 };
 
+/* VSP1 */
+static const struct vsp1_platform_data koelsch_vspr_pdata __initconst = {
+	.features = 0,
+	.rpf_count = 5,
+	.uds_count = 1,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data koelsch_vsps_pdata __initconst = {
+	.features = 0,
+	.rpf_count = 5,
+	.uds_count = 3,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data koelsch_vspd0_pdata __initconst = {
+	.features = VSP1_HAS_LIF,
+	.rpf_count = 4,
+	.uds_count = 1,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data koelsch_vspd1_pdata __initconst = {
+	.features = VSP1_HAS_LIF,
+	.rpf_count = 4,
+	.uds_count = 1,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data * const koelsch_vsp1_pdata[4] __initconst
+									= {
+	&koelsch_vspr_pdata,
+	&koelsch_vsps_pdata,
+	&koelsch_vspd0_pdata,
+	&koelsch_vspd1_pdata,
+};
+
+static const struct resource vsp1_0_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe920000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(266)),
+};
+
+static const struct resource vsp1_1_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe928000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(267)),
+};
+
+static const struct resource vsp1_2_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe930000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(246)),
+};
+
+static const struct resource vsp1_3_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe938000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(247)),
+};
+
+static const struct resource * const vsp1_resources[4] __initconst = {
+	vsp1_0_resources,
+	vsp1_1_resources,
+	vsp1_2_resources,
+	vsp1_3_resources,
+};
+
+static void __init koelsch_add_vsp1_devices(void)
+{
+	struct platform_device_info info = {
+		.name = "vsp1",
+		.size_data = sizeof(*koelsch_vsp1_pdata[0]),
+		.num_res = 2,
+		.dma_mask = DMA_BIT_MASK(32),
+	};
+	unsigned int i;
+
+	for (i = 2; i < ARRAY_SIZE(vsp1_resources); ++i) {
+		info.id = i;
+		info.data = koelsch_vsp1_pdata[i];
+		info.res = vsp1_resources[i];
+
+		platform_device_register_full(&info);
+	}
+}
+
 static const struct pinctrl_map koelsch_pinctrl_map[] = {
 	/* DU */
 	PIN_MAP_MUX_GROUP_DEFAULT("rcar-du-r8a7791", "pfc-r8a7791",
@@ -594,6 +678,8 @@ static void __init koelsch_add_standard_devices(void)
 					  ARRAY_SIZE(usbhs_phy_resources),
 					  &usbhs_phy_pdata,
 					  sizeof(usbhs_phy_pdata));
+
+	koelsch_add_vsp1_devices();
 }
 
 /*
