@@ -415,7 +415,7 @@ int rsnd_adg_probe(struct platform_device *pdev,
 {
 	struct rsnd_adg *adg;
 	struct device *dev = rsnd_priv_to_dev(priv);
-	struct clk *clk, *clk_orig;
+	struct clk *clk;
 	int i;
 
 	adg = devm_kzalloc(dev, sizeof(*adg), GFP_KERNEL);
@@ -424,23 +424,13 @@ int rsnd_adg_probe(struct platform_device *pdev,
 		return -ENOMEM;
 	}
 
-	clk_orig	= devm_clk_get(dev, NULL);
 	adg->clk[CLKA]	= devm_clk_get(dev, "clk_a");
 	adg->clk[CLKB]	= devm_clk_get(dev, "clk_b");
 	adg->clk[CLKC]	= devm_clk_get(dev, "clk_c");
 	adg->clk[CLKI]	= devm_clk_get(dev, "clk_i");
 
-	/*
-	 * It request device dependent audio clock.
-	 * But above all clks will indicate rsnd module clock
-	 * if platform doesn't it
-	 */
-	for_each_rsnd_clk(clk, adg, i) {
-		if (clk_orig == clk) {
-			dev_err(dev, "Audio clock failed\n");
-			return -EIO;
-		}
-	}
+	for_each_rsnd_clk(clk, adg, i)
+		dev_dbg(dev, "clk %d : %p\n", i, clk);
 
 	rsnd_adg_ssi_clk_init(priv, adg);
 
