@@ -67,7 +67,7 @@ static int rsnd_dvc_init(struct rsnd_mod *dvc_mod,
 		return -EINVAL;
 	}
 
-	clk_enable(dvc->clk);
+	clk_prepare_enable(dvc->clk);
 
 	/*
 	 * fixme
@@ -102,7 +102,7 @@ static int rsnd_dvc_quit(struct rsnd_mod *mod,
 {
 	struct rsnd_dvc *dvc = rsnd_mod_to_dvc(mod);
 
-	clk_disable(dvc->clk);
+	clk_disable_unprepare(dvc->clk);
 
 	return 0;
 }
