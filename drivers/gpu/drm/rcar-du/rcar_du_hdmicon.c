@@ -41,8 +41,12 @@ static int rcar_du_hdmi_connector_get_modes(struct drm_connector *connector)
 	int count = 0;
 	struct drm_encoder *encoder = connector_to_encoder(connector);
 
-	count += to_encoder_slave(encoder)->slave_funcs->get_modes(
+	if (to_encoder_slave(encoder)->slave_funcs &&
+		 to_encoder_slave(encoder)->slave_funcs->get_modes)
+		count += to_encoder_slave(encoder)->slave_funcs->get_modes(
 					encoder, connector);
+	else
+		return -EIO;
 
 	return count;
 }
