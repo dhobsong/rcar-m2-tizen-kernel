@@ -1,6 +1,7 @@
 /*
  * r8a7790 processor support
  *
+ * Copyright (C) 2014  Renesas Electronics Corporation
  * Copyright (C) 2013  Renesas Solutions Corp.
  * Copyright (C) 2013  Magnus Damm
  *
@@ -26,6 +27,7 @@
 #include <linux/serial_sci.h>
 #include <linux/sh_dma.h>
 #include <linux/sh_timer.h>
+#include <linux/spi/sh_msiof.h>
 #include <mach/common.h>
 #include <mach/dma-register.h>
 #include <mach/irqs.h>
@@ -282,6 +284,53 @@ static const struct resource cmt00_resources[] __initconst = {
 					  &cmt##idx##_platform_data,	\
 					  sizeof(struct sh_timer_config))
 
+/* MSIOF */
+#define MSIOF_COMMON				\
+	.rx_fifo_override	= 256,			\
+	.num_chipselect		= 1
+
+static const struct sh_msiof_spi_info sh_msiof_info[] __initconst = {
+	{
+		MSIOF_COMMON,
+	},
+	{
+		MSIOF_COMMON,
+	},
+	{
+		MSIOF_COMMON,
+	},
+	{
+		MSIOF_COMMON,
+	},
+};
+
+static const struct resource sh_msiof0_resources[] __initconst = {
+	DEFINE_RES_MEM(0xe6e20000, 0x0064),
+	DEFINE_RES_IRQ(gic_spi(156)),
+};
+
+static const struct resource sh_msiof1_resources[] __initconst = {
+	DEFINE_RES_MEM(0xe6e10000, 0x0064),
+	DEFINE_RES_IRQ(gic_spi(157)),
+};
+
+static const struct resource sh_msiof2_resources[] __initconst = {
+	DEFINE_RES_MEM(0xe6e00000, 0x0064),
+	DEFINE_RES_IRQ(gic_spi(158)),
+};
+
+static const struct resource sh_msiof3_resources[] __initconst = {
+	DEFINE_RES_MEM(0xe6c90000, 0x0064),
+	DEFINE_RES_IRQ(gic_spi(159)),
+};
+
+#define r8a7790_register_msiof(idx)					\
+	platform_device_register_resndata(&platform_bus, "spi_sh_msiof", \
+				  (idx+1), sh_msiof##idx##_resources,	\
+				  ARRAY_SIZE(sh_msiof##idx##_resources), \
+				  &sh_msiof_info[idx],		\
+				  sizeof(struct sh_msiof_spi_info))
+
 void __init r8a7790_add_dt_devices(void)
 {
 	r8a7790_register_scif(0);
@@ -308,6 +357,10 @@ void __init r8a7790_add_standard_devices(void)
 	r8a7790_register_i2c(3);
 	r8a7790_register_audio_dmac(0);
 	r8a7790_register_audio_dmac(1);
+	r8a7790_register_msiof(0);
+	r8a7790_register_msiof(1);
+	r8a7790_register_msiof(2);
+	r8a7790_register_msiof(3);
 }
 
 void __init r8a7790_init_early(void)
