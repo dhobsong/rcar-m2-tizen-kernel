@@ -36,6 +36,7 @@
 #include <linux/pinctrl/machine.h>
 #include <linux/platform_data/gpio-rcar.h>
 #include <linux/platform_data/rcar-du.h>
+#include <linux/platform_data/usb-rcar-gen2-phy.h>
 #include <linux/platform_device.h>
 #include <linux/regulator/driver.h>
 #include <linux/regulator/fixed.h>
@@ -404,6 +405,37 @@ static struct resource sdhi2_resources[] __initdata = {
 	DEFINE_RES_IRQ(gic_spi(168)),
 };
 
+/* Internal PCI1 */
+static const struct resource pci1_resources[] __initconst = {
+	DEFINE_RES_MEM(0xee0d0000, 0x10000),	/* CFG */
+	DEFINE_RES_MEM(0xee0c0000, 0x10000),	/* MEM */
+	DEFINE_RES_IRQ(gic_spi(113)),
+};
+
+static const struct platform_device_info pci1_info __initconst = {
+	.parent		= &platform_bus,
+	.name		= "pci-rcar-gen2",
+	.id		= 1,
+	.res		= pci1_resources,
+	.num_res	= ARRAY_SIZE(pci1_resources),
+	.dma_mask	= DMA_BIT_MASK(32),
+};
+
+static void __init koelsch_add_usb1_device(void)
+{
+	platform_device_register_full(&pci1_info);
+}
+
+/* USBHS PHY */
+static const struct rcar_gen2_phy_platform_data usbhs_phy_pdata __initconst = {
+	.chan0_pci = 0,	/* Channel 0 is USBHS */
+	.chan2_pci = 1,	/* Channel 2 is PCI USB */
+};
+
+static const struct resource usbhs_phy_resources[] __initconst = {
+	DEFINE_RES_MEM(0xe6590100, 0x100),
+};
+
 static const struct pinctrl_map koelsch_pinctrl_map[] = {
 	/* DU */
 	PIN_MAP_MUX_GROUP_DEFAULT("rcar-du-r8a7791", "pfc-r8a7791",
@@ -495,6 +527,9 @@ static const struct pinctrl_map koelsch_pinctrl_map[] = {
 				  "sdhi2_ctrl", "sdhi2"),
 	PIN_MAP_MUX_GROUP_DEFAULT("sh_mobile_sdhi.2", "pfc-r8a7791",
 				  "sdhi2_cd", "sdhi2"),
+	/* USB1 */
+	PIN_MAP_MUX_GROUP_DEFAULT("pci-rcar-gen2.1", "pfc-r8a7791",
+				  "usb1", "usb1"),
 };
 
 static void __init koelsch_add_standard_devices(void)
@@ -552,6 +587,13 @@ static void __init koelsch_add_standard_devices(void)
 					  &sdhi2_info, sizeof(struct sh_mobile_sdhi_info));
 
 	koelsch_add_msiof_device(spi_bus, ARRAY_SIZE(spi_bus));
+	koelsch_add_usb1_device();
+
+	platform_device_register_resndata(&platform_bus, "usb_phy_rcar_gen2",
+					  -1, usbhs_phy_resources,
+					  ARRAY_SIZE(usbhs_phy_resources),
+					  &usbhs_phy_pdata,
+					  sizeof(usbhs_phy_pdata));
 }
 
 /*
