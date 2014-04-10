@@ -23,6 +23,7 @@
 #include <linux/kernel.h>
 #include <linux/sh_clk.h>
 #include <linux/clkdev.h>
+#include <linux/delay.h>
 #include <mach/clock.h>
 #include <mach/common.h>
 #include <mach/rcar-gen2.h>
@@ -43,6 +44,8 @@
  * *1 :	Table 7.6 indicates VCO ouput (PLLx = VCO/2)
  *	see "p1 / 2" on R8A7791_CLOCK_ROOT() below
  */
+
+static void __iomem *r8a7791_cpg_base;
 
 #define CPG_BASE 0xe6150000
 #define CPG_LEN 0x1000
@@ -183,6 +186,7 @@ enum {
 	MSTP216, MSTP208, MSTP207, MSTP206, MSTP205,
 	MSTP204, MSTP203, MSTP202,
 	MSTP124,
+	MSTP112,
 	MSTP000,
 	MSTP_NR
 };
@@ -231,6 +235,7 @@ static struct clk mstp_clks[MSTP_NR] = {
 	[MSTP203] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 3, MSTPSR2, 0), /* SCIFA1 */
 	[MSTP202] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 2, MSTPSR2, 0), /* SCIFA2 */
 	[MSTP124] = SH_CLK_MSTP32_STS(&rclk_clk, SMSTPCR1, 24, MSTPSR1, 0), /* CMT0 */
+	[MSTP112] = SH_CLK_MSTP32_STS(&zg_clk, SMSTPCR1, 12, MSTPSR1, 0), /* 3DG */
 	[MSTP000] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR0, 0, MSTPSR0, 0), /* MSIOF0 */
 };
 
@@ -295,6 +300,7 @@ static struct clk_lookup lookups[] = {
 	CLKDEV_DEV_ID("sata-r8a7791.1", &mstp_clks[MSTP814]),
 	CLKDEV_DEV_ID("pci-rcar-gen2.0", &mstp_clks[MSTP703]),
 	CLKDEV_DEV_ID("pci-rcar-gen2.1", &mstp_clks[MSTP703]),
+	CLKDEV_DEV_ID("pvrsrvkm", &mstp_clks[MSTP112]),
 
 	/* ICK */
 	CLKDEV_ICK_ID("lvds.0", "rcar-du-r8a7791", &mstp_clks[MSTP726]),
@@ -317,6 +323,8 @@ void __init r8a7791_clock_init(void)
 {
 	u32 mode = rcar_gen2_read_mode_pins();
 	int k, ret = 0;
+
+	r8a7791_cpg_base = ioremap(CPG_BASE, CPG_LEN);
 
 	switch (mode & (MD(14) | MD(13))) {
 	case 0:
@@ -361,4 +369,78 @@ void __init r8a7791_clock_init(void)
 
 epanic:
 	panic("failed to setup r8a7791 clocks\n");
+}
+
+/* Software Reset */
+#define SRCR0		0x00a0
+#define SRCR1		0x00a8
+#define SRCR2		0x00b0
+#define SRCR3		0x00b8
+#define SRCR4		0x00bc
+#define SRCR5		0x00c4
+#define SRCR6		0x01c8
+#define SRCR7		0x01cc
+#define SRCR8		0x0920
+#define SRCR9		0x0924
+#define SRCR10		0x0928
+#define SRCR11		0x092c
+#define SRSTCLR0	0x0940
+#define SRSTCLR1	0x0944
+#define SRSTCLR2	0x0948
+#define SRSTCLR3	0x094c
+#define SRSTCLR4	0x0950
+#define SRSTCLR5	0x0954
+#define SRSTCLR6	0x0958
+#define SRSTCLR7	0x095c
+#define SRSTCLR8	0x0960
+#define SRSTCLR9	0x0964
+#define SRSTCLR10	0x0968
+#define SRSTCLR11	0x096c
+
+#define SRST_REG(n)	{ .srcr = SRCR##n, .srstclr = SRSTCLR##n, }
+
+static struct software_reset_reg {
+	u16	srcr;
+	u16	srstclr;
+} r8a7791_reset_regs[] = {
+	[0] = SRST_REG(0),
+	[1] = SRST_REG(1),
+	[2] = SRST_REG(2),
+	[3] = SRST_REG(3),
+	[4] = SRST_REG(4),
+	[5] = SRST_REG(5),
+	[6] = SRST_REG(6),
+	[7] = SRST_REG(7),
+	[8] = SRST_REG(8),
+	[9] = SRST_REG(9),
+	[10] = SRST_REG(10),
+	[11] = SRST_REG(11),
+};
+
+static DEFINE_SPINLOCK(r8a7791_reset_lock);
+
+void r8a7791_module_reset(unsigned int n, u32 bits, int usecs)
+{
+	void __iomem *base = r8a7791_cpg_base;
+	unsigned long flags;
+	u32 srcr;
+
+	if (n >= ARRAY_SIZE(r8a7791_reset_regs)) {
+		pr_err("SRCR%u is not available\n", n);
+		return;
+	}
+
+	if (usecs <= 0)
+		usecs = 50; /* give a short delay for at least one RCLK cycle */
+
+	spin_lock_irqsave(&r8a7791_reset_lock, flags);
+	srcr = readl_relaxed(base + r8a7791_reset_regs[n].srcr);
+	writel_relaxed(srcr | bits, base + r8a7791_reset_regs[n].srcr);
+	readl_relaxed(base + r8a7791_reset_regs[n].srcr); /* sync */
+	spin_unlock_irqrestore(&r8a7791_reset_lock, flags);
+
+	udelay(usecs);
+
+	writel_relaxed(bits, base + r8a7791_reset_regs[n].srstclr);
+	readl_relaxed(base + r8a7791_reset_regs[n].srstclr); /* sync */
 }
