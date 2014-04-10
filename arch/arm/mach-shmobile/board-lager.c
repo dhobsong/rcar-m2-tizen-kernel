@@ -331,6 +331,19 @@ static const struct platform_device_info ether_info __initconst = {
 	.dma_mask	= DMA_BIT_MASK(32),
 };
 
+/* MSIOF spidev */
+static const struct spi_board_info spi_bus[] __initconst = {
+	{
+		.modalias	= "spidev",
+		.max_speed_hz	= 6000000,
+		.mode		= SPI_MODE_3,
+		.bus_num	= 2,
+		.chip_select	= 0,
+	},
+};
+
+#define lager_add_msiof_device spi_register_board_info
+
 /* SPI Flash memory (Spansion S25FL512SAGMFIG11 64Mb) */
 static struct mtd_partition spi_flash_part[] = {
 	/* Reserved for user loader program, read-only */
@@ -747,6 +760,19 @@ static const struct pinctrl_map lager_pinctrl_map[] = {
 	/* I2C2 */
 	PIN_MAP_MUX_GROUP_DEFAULT("i2c-rcar.2", "pfc-r8a7790",
 				  "i2c2", "i2c2"),
+	/* MSIOF1 */
+	PIN_MAP_MUX_GROUP_DEFAULT("spi_sh_msiof.1", "pfc-r8a7790",
+				  "msiof1_clk", "msiof1"),
+	PIN_MAP_MUX_GROUP_DEFAULT("spi_sh_msiof.1", "pfc-r8a7790",
+				  "msiof1_sync", "msiof1"),
+	PIN_MAP_MUX_GROUP_DEFAULT("spi_sh_msiof.1", "pfc-r8a7790",
+				  "msiof1_ss1", "msiof1"),
+	PIN_MAP_MUX_GROUP_DEFAULT("spi_sh_msiof.1", "pfc-r8a7790",
+				  "msiof1_ss2", "msiof1"),
+	PIN_MAP_MUX_GROUP_DEFAULT("spi_sh_msiof.1", "pfc-r8a7790",
+				  "msiof1_rx", "msiof1"),
+	PIN_MAP_MUX_GROUP_DEFAULT("spi_sh_msiof.1", "pfc-r8a7790",
+				  "msiof1_tx", "msiof1"),
 	/* QSPI */
 	PIN_MAP_MUX_GROUP_DEFAULT("qspi.0", "pfc-r8a7790",
 				  "qspi_ctrl", "qspi"),
@@ -888,6 +914,8 @@ static void __init lager_add_standard_devices(void)
 	platform_device_register_resndata(&platform_bus, "sh_mobile_sdhi", 2,
 					  sdhi2_resources, ARRAY_SIZE(sdhi2_resources),
 					  &sdhi2_info, sizeof(struct sh_mobile_sdhi_info));
+
+	lager_add_msiof_device(spi_bus, ARRAY_SIZE(spi_bus));
 }
 
 /*
