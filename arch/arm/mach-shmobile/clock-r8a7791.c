@@ -177,6 +177,7 @@ enum {
 	MSTP811, MSTP810, MSTP809,
 	MSTP726, MSTP724, MSTP723, MSTP721, MSTP720,
 	MSTP719, MSTP718, MSTP717, MSTP716, MSTP715, MSTP714, MSTP713,
+	MSTP704, MSTP703,
 	MSTP522,
 	MSTP314, MSTP312, MSTP311,
 	MSTP216, MSTP208, MSTP207, MSTP206, MSTP205,
@@ -215,6 +216,8 @@ static struct clk mstp_clks[MSTP_NR] = {
 	[MSTP715] = SH_CLK_MSTP32_STS(&p_clk, SMSTPCR7, 15, MSTPSR7, 0), /* SCIF4 */
 	[MSTP714] = SH_CLK_MSTP32_STS(&p_clk, SMSTPCR7, 14, MSTPSR7, 0), /* SCIF5 */
 	[MSTP713] = SH_CLK_MSTP32_STS(&p_clk, SMSTPCR7, 13, MSTPSR7, 0), /* HSCIF2 */
+	[MSTP704] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR7, 4, MSTPSR7, 0), /* HSUSB */
+	[MSTP703] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR7, 3, MSTPSR7, 0), /* EHCI */
 	[MSTP522] = SH_CLK_MSTP32_STS(&extal_clk, SMSTPCR5, 22, MSTPSR5, 0), /* Thermal */
 	[MSTP314] = SH_CLK_MSTP32_STS(&div4_clks[DIV4_SD0], SMSTPCR3, 14, MSTPSR3, 0), /* SDHI0 */
 	[MSTP312] = SH_CLK_MSTP32_STS(&div6_clks[DIV6_SD1], SMSTPCR3, 12, MSTPSR3, 0), /* SDHI1 */
@@ -290,11 +293,14 @@ static struct clk_lookup lookups[] = {
 	CLKDEV_DEV_ID("r8a7791-vin.2", &mstp_clks[MSTP809]),
 	CLKDEV_DEV_ID("sata-r8a7791.0", &mstp_clks[MSTP815]),
 	CLKDEV_DEV_ID("sata-r8a7791.1", &mstp_clks[MSTP814]),
+	CLKDEV_DEV_ID("pci-rcar-gen2.0", &mstp_clks[MSTP703]),
+	CLKDEV_DEV_ID("pci-rcar-gen2.1", &mstp_clks[MSTP703]),
 
 	/* ICK */
 	CLKDEV_ICK_ID("lvds.0", "rcar-du-r8a7791", &mstp_clks[MSTP726]),
 	CLKDEV_ICK_ID("du.0", "rcar-du-r8a7791", &mstp_clks[MSTP724]),
 	CLKDEV_ICK_ID("du.1", "rcar-du-r8a7791", &mstp_clks[MSTP723]),
+	CLKDEV_ICK_ID("usbhs", "usb_phy_rcar_gen2", &mstp_clks[MSTP704]),
 };
 
 #define R8A7791_CLOCK_ROOT(e, m, p0, p1, p30, p31)		\
