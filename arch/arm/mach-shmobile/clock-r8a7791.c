@@ -162,12 +162,15 @@ static struct clk div4_clks[DIV4_NR] = {
 /* DIV6 clocks */
 enum {
 	DIV6_SD1, DIV6_SD2,
+	DIV6_SSP,
 	DIV6_NR
 };
 
 static struct clk div6_clks[DIV6_NR] = {
 	[DIV6_SD1]	= SH_CLK_DIV6(&pll1_div2_clk, SD1CKCR, 0),
 	[DIV6_SD2]	= SH_CLK_DIV6(&pll1_div2_clk, SD2CKCR, 0),
+	[DIV6_SSP]      = SH_CLK_DIV6(&pll1_div2_clk, SSPCKCR, 0),
+
 };
 
 /* MSTP */
@@ -185,6 +188,8 @@ enum {
 	MSTP314, MSTP312, MSTP311,
 	MSTP216, MSTP208, MSTP207, MSTP206, MSTP205,
 	MSTP204, MSTP203, MSTP202,
+	MSTP131, MSTP119, MSTP118, MSTP115, MSTP109, MSTP103, MSTP101,
+	MSTP128, MSTP127,
 	MSTP124,
 	MSTP112,
 	MSTP000,
@@ -234,8 +239,17 @@ static struct clk mstp_clks[MSTP_NR] = {
 	[MSTP204] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 4, MSTPSR2, 0), /* SCIFA0 */
 	[MSTP203] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 3, MSTPSR2, 0), /* SCIFA1 */
 	[MSTP202] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 2, MSTPSR2, 0), /* SCIFA2 */
+	[MSTP131] = SH_CLK_MSTP32_STS(&zs_clk, SMSTPCR1, 31, MSTPSR1, 0), /* VSPS */
+	[MSTP128] = SH_CLK_MSTP32_STS(&zs_clk, SMSTPCR1, 28, MSTPSR1, 0), /* VSP1 (DU0) */
+	[MSTP127] = SH_CLK_MSTP32_STS(&zs_clk, SMSTPCR1, 27, MSTPSR1, 0), /* VSP1 (DU1) */
 	[MSTP124] = SH_CLK_MSTP32_STS(&rclk_clk, SMSTPCR1, 24, MSTPSR1, 0), /* CMT0 */
+	[MSTP119] = SH_CLK_MSTP32_STS(&zs_clk, SMSTPCR1, 19, MSTPSR1, 0), /* FDP0 */
+	[MSTP118] = SH_CLK_MSTP32_STS(&zs_clk, SMSTPCR1, 18, MSTPSR1, 0), /* FDP1 */
+	[MSTP115] = SH_CLK_MSTP32_STS(&zs_clk, SMSTPCR1, 15, MSTPSR1, 0), /* 2DDMAC */
 	[MSTP112] = SH_CLK_MSTP32_STS(&zg_clk, SMSTPCR1, 12, MSTPSR1, 0), /* 3DG */
+	[MSTP109] = SH_CLK_MSTP32_STS(&zs_clk, SMSTPCR1, 9,  MSTPSR1, 0),  /* SSP */
+	[MSTP103] = SH_CLK_MSTP32_STS(&zs_clk, SMSTPCR1, 3,  MSTPSR1, 0),  /* VPC0 */
+	[MSTP101] = SH_CLK_MSTP32_STS(&zs_clk, SMSTPCR1, 1,  MSTPSR1, 0),  /* VCP0 */
 	[MSTP000] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR0, 0, MSTPSR0, 0), /* MSIOF0 */
 };
 
@@ -257,6 +271,9 @@ static struct clk_lookup lookups[] = {
 	CLKDEV_CON_ID("mp",		&mp_clk),
 	CLKDEV_CON_ID("cp",		&cp_clk),
 	CLKDEV_CON_ID("peripheral_clk", &hp_clk),
+
+	/* DIV6 */
+	CLKDEV_CON_ID("ssp", &div6_clks[DIV6_SSP]),
 
 	/* MSTP */
 	CLKDEV_DEV_ID("sh-sci.0", &mstp_clks[MSTP204]), /* SCIFA0 */
@@ -300,6 +317,15 @@ static struct clk_lookup lookups[] = {
 	CLKDEV_DEV_ID("sata-r8a7791.1", &mstp_clks[MSTP814]),
 	CLKDEV_DEV_ID("pci-rcar-gen2.0", &mstp_clks[MSTP703]),
 	CLKDEV_DEV_ID("pci-rcar-gen2.1", &mstp_clks[MSTP703]),
+	CLKDEV_CON_ID("vsps", &mstp_clks[MSTP131]),
+	CLKDEV_DEV_ID("vsp1.2", &mstp_clks[MSTP128]),
+	CLKDEV_DEV_ID("vsp1.3", &mstp_clks[MSTP127]),
+	CLKDEV_CON_ID("fdp0", &mstp_clks[MSTP119]),
+	CLKDEV_CON_ID("fdp1", &mstp_clks[MSTP118]),
+	CLKDEV_CON_ID("tddmac", &mstp_clks[MSTP115]),
+	CLKDEV_DEV_ID("ssp_dev", &mstp_clks[MSTP109]),
+	CLKDEV_CON_ID("vpc0", &mstp_clks[MSTP103]),
+	CLKDEV_CON_ID("vcp0", &mstp_clks[MSTP101]),
 	CLKDEV_DEV_ID("pvrsrvkm", &mstp_clks[MSTP112]),
 
 	/* ICK */
