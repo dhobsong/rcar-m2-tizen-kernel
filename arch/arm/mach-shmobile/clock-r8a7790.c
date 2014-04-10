@@ -1,6 +1,7 @@
 /*
  * r8a7790 clock framework support
  *
+ * Copyright (C) 2014  Renesas Electronics Corporation
  * Copyright (C) 2013  Renesas Solutions Corp.
  * Copyright (C) 2013  Magnus Damm
  *
@@ -46,6 +47,7 @@
 #define CPG_BASE	0xe6150000
 #define CPG_LEN		0x1000
 
+#define SMSTPCR0	0xe6150130
 #define SMSTPCR1	0xe6150134
 #define SMSTPCR2	0xe6150138
 #define SMSTPCR3	0xe615013c
@@ -55,6 +57,7 @@
 #define SMSTPCR9	0xe6150994
 #define SMSTPCR10	0xe6150998
 
+#define MSTPSR0		IOMEM(0xe6150030)
 #define MSTPSR1		IOMEM(0xe6150038)
 #define MSTPSR2		IOMEM(0xe6150040)
 #define MSTPSR3		IOMEM(0xe6150048)
@@ -221,8 +224,10 @@ enum {
 	MSTP522,
 	MSTP502, MSTP501,
 	MSTP315, MSTP314, MSTP313, MSTP312, MSTP311, MSTP305, MSTP304,
-	MSTP216, MSTP207, MSTP206, MSTP204, MSTP203, MSTP202,
+	MSTP216, MSTP215, MSTP208, MSTP207, MSTP206, MSTP205, MSTP204, MSTP203,
+	MSTP202,
 	MSTP124,
+	MSTP000,
 	MSTP_NR
 };
 
@@ -283,12 +288,16 @@ static struct clk mstp_clks[MSTP_NR] = {
 	[MSTP305] = SH_CLK_MSTP32_STS(&div6_clks[DIV6_MMC1], SMSTPCR3, 5, MSTPSR3, 0), /* MMC1 */
 	[MSTP304] = SH_CLK_MSTP32_STS(&cp_clk, SMSTPCR3, 4, MSTPSR3, 0), /* TPU0 */
 	[MSTP216] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 16, MSTPSR2, 0), /* SCIFB2 */
+	[MSTP215] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 15, MSTPSR2, 0), /* MSIOF3 */
+	[MSTP208] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 8, MSTPSR2, 0), /* MSIOF1 */
 	[MSTP207] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 7, MSTPSR2, 0), /* SCIFB1 */
 	[MSTP206] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 6, MSTPSR2, 0), /* SCIFB0 */
+	[MSTP205] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 5, MSTPSR2, 0), /* MSIOF2 */
 	[MSTP204] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 4, MSTPSR2, 0), /* SCIFA0 */
 	[MSTP203] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 3, MSTPSR2, 0), /* SCIFA1 */
 	[MSTP202] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 2, MSTPSR2, 0), /* SCIFA2 */
 	[MSTP124] = SH_CLK_MSTP32_STS(&rclk_clk, SMSTPCR1, 24, MSTPSR1, 0), /* CMT0 */
+	[MSTP000] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR0, 0, MSTPSR0, 0), /* MSIOF0 */
 };
 
 static struct clk_lookup lookups[] = {
@@ -363,6 +372,10 @@ static struct clk_lookup lookups[] = {
 	CLKDEV_DEV_ID("sh_mmcif.1", &mstp_clks[MSTP305]),
 	CLKDEV_DEV_ID("sh_cmt.0", &mstp_clks[MSTP124]),
 	CLKDEV_DEV_ID("qspi.0", &mstp_clks[MSTP917]),
+	CLKDEV_DEV_ID("spi_sh_msiof.1", &mstp_clks[MSTP000]),
+	CLKDEV_DEV_ID("spi_sh_msiof.2", &mstp_clks[MSTP208]),
+	CLKDEV_DEV_ID("spi_sh_msiof.3", &mstp_clks[MSTP205]),
+	CLKDEV_DEV_ID("spi_sh_msiof.4", &mstp_clks[MSTP215]),
 	CLKDEV_DEV_ID("renesas_usbhs", &mstp_clks[MSTP704]),
 	CLKDEV_DEV_ID("pci-rcar-gen2.0", &mstp_clks[MSTP703]),
 	CLKDEV_DEV_ID("pci-rcar-gen2.1", &mstp_clks[MSTP703]),
