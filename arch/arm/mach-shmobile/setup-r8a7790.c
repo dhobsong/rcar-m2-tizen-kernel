@@ -419,6 +419,9 @@ void __init r8a7790_add_dt_devices(void)
 	r8a7790_register_scif(8);
 	r8a7790_register_scif(9);
 	r8a7790_register_cmt(00);
+	r8a7790_register_audio_dmac(0);
+	r8a7790_register_audio_dmac(1);
+	r8a7790_register_audmapp();
 }
 
 void __init r8a7790_add_standard_devices(void)
