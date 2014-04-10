@@ -230,7 +230,9 @@
 };
 
 &pfc {
-	pinctrl-0 = <&du_pins &scif0_pins &scif1_pins &usb0_pins &usb1_pins>;
+	pinctrl-0 = <&du_pins &scif0_pins &scif1_pins &usb0_pins &usb1_pins
+			&sound_pins
+			&sound_clk_pins>;
 	pinctrl-names = "default";
 
 	i2c2_pins: i2c2 {
@@ -297,6 +299,15 @@
 	usb1_pins: usb1 {
 		renesas,groups = "usb1";
 		renesas,function = "usb1";
+	};
+
+	sound_pins: sound {
+		renesas,groups = "ssi0129_ctrl", "ssi0_data", "ssi1_data";
+		renesas,function = "ssi";
+	};
+	sound_clk_pins: sound_clk {
+		renesas,groups = "audio_clk_a";
+		renesas,function = "audio_clk";
 	};
 };
 
