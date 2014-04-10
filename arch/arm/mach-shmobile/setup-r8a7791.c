@@ -1,7 +1,7 @@
 /*
  * r8a7791 processor support
  *
- * Copyright (C) 2013  Renesas Electronics Corporation
+ * Copyright (C) 2013-2014  Renesas Electronics Corporation
  * Copyright (C) 2013  Renesas Solutions Corp.
  * Copyright (C) 2013  Magnus Damm
  *
@@ -26,6 +26,7 @@
 #include <linux/platform_data/irq-renesas-irqc.h>
 #include <linux/serial_sci.h>
 #include <linux/sh_timer.h>
+#include <linux/spi/sh_msiof.h>
 #include <mach/common.h>
 #include <mach/irqs.h>
 #include <mach/r8a7791.h>
@@ -189,6 +190,45 @@ static const struct resource thermal_resources[] __initconst = {
 					thermal_resources,		\
 					ARRAY_SIZE(thermal_resources))
 
+/* MSIOF */
+#define MSIOF_COMMON				\
+	.rx_fifo_override	= 256,			\
+	.num_chipselect		= 1
+
+static const struct sh_msiof_spi_info sh_msiof_info[] __initconst = {
+	{
+		MSIOF_COMMON,
+	},
+	{
+		MSIOF_COMMON,
+	},
+	{
+		MSIOF_COMMON,
+	},
+};
+
+static const struct resource sh_msiof0_resources[] __initconst = {
+	DEFINE_RES_MEM(0xe6e20000, 0x0064),
+	DEFINE_RES_IRQ(gic_spi(156)),
+};
+
+static const struct resource sh_msiof1_resources[] __initconst = {
+	DEFINE_RES_MEM(0xe6e10000, 0x0064),
+	DEFINE_RES_IRQ(gic_spi(157)),
+};
+
+static const struct resource sh_msiof2_resources[] __initconst = {
+	DEFINE_RES_MEM(0xe6e00000, 0x0064),
+	DEFINE_RES_IRQ(gic_spi(158)),
+};
+
+#define r8a7791_register_msiof(idx)					\
+	platform_device_register_resndata(&platform_bus, "spi_sh_msiof", \
+				  (idx+1), sh_msiof##idx##_resources,	\
+				  ARRAY_SIZE(sh_msiof##idx##_resources), \
+				  &sh_msiof_info[idx],		\
+				  sizeof(struct sh_msiof_spi_info))
+
 void __init r8a7791_add_dt_devices(void)
 {
 	r8a7791_register_scif(0);
@@ -217,6 +257,9 @@ void __init r8a7791_add_standard_devices(void)
 	r8a7791_add_dt_devices();
 	r8a7791_register_irqc(0);
 	r8a7791_register_thermal();
+	r8a7791_register_msiof(0);
+	r8a7791_register_msiof(1);
+	r8a7791_register_msiof(2);
 }
 
 void __init r8a7791_init_early(void)
