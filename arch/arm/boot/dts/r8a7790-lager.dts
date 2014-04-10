@@ -1,6 +1,7 @@
 /*
  * Device Tree Source for the Lager board
  *
+ * Copyright (C) 2014 Renesas Electronics Corporation
  * Copyright (C) 2013-2014 Renesas Solutions Corp.
  * Copyright (C) 2014 Cogent Embedded, Inc.
  *
@@ -25,11 +26,6 @@
 	memory@40000000 {
 		device_type = "memory";
 		reg = <0 0x40000000 0 0x80000000>;
-	};
-
-	memory@180000000 {
-		device_type = "memory";
-		reg = <1 0x80000000 0 0x80000000>;
 	};
 
 	lbsc {
