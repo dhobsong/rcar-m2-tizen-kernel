@@ -30,11 +30,6 @@
 #include "rcar_du_regs.h"
 #include "rcar_du_lvdsenc.h"
 
-#ifdef R8A7790_ES1_DU_WORKAROUND
-#define PRODUCT_REGISTER	0xFF000044
-#define PRODUCT_CUT_MASK	(0x00007FF0)
-#define PRODUCT_H2_BIT		(0x45 << 8)
-#endif
 /* -----------------------------------------------------------------------------
  * DRM operations
  */
@@ -62,9 +57,6 @@ static int rcar_du_load(struct drm_device *dev, unsigned long flags)
 	struct rcar_du_platform_data *pdata = pdev->dev.platform_data;
 	struct rcar_du_device *rcdu;
 	struct resource *mem;
-#ifdef R8A7790_ES1_DU_WORKAROUND
-	void __iomem *product_reg;
-#endif
 	int ret;
 
 	if (pdata == NULL) {
@@ -84,18 +76,6 @@ static int rcar_du_load(struct drm_device *dev, unsigned long flags)
 	rcdu->ddev = dev;
 	dev->dev_private = rcdu;
 	rcdu->dpad0_source = rcdu->info->drgbs_bit;
-
-#ifdef R8A7790_ES1_DU_WORKAROUND
-	product_reg = ioremap_nocache(PRODUCT_REGISTER, 0x04);
-	if (!product_reg)
-		return -ENOMEM;
-
-	/* Add the workaround of LVDS lane mis-connection in R-Car H2 ES1.x. */
-	if ((readl(product_reg) & PRODUCT_CUT_MASK) == PRODUCT_H2_BIT)
-		rcdu->info->quirks = rcdu->info->quirks |
-					 RCAR_DU_QUIRK_LVDS_LANES;
-	iounmap(product_reg);
-#endif
 
 	/* I/O resources */
 	mem = platform_get_resource(pdev, IORESOURCE_MEM, 0);
@@ -276,11 +256,7 @@ static int rcar_du_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef R8A7790_ES1_DU_WORKAROUND
-static struct rcar_du_device_info rcar_du_r8a7779_info = {
-#else
 static const struct rcar_du_device_info rcar_du_r8a7779_info = {
-#endif
 	.features = 0,
 	.num_crtcs = 2,
 	.routes = {
@@ -299,11 +275,7 @@ static const struct rcar_du_device_info rcar_du_r8a7779_info = {
 	.num_lvds = 0,
 };
 
-#ifdef R8A7790_ES1_DU_WORKAROUND
 static const struct rcar_du_device_info rcar_du_r8a7790_info = {
-#else
-static const struct rcar_du_device_info rcar_du_r8a7790_info = {
-#endif
 	.features = RCAR_DU_FEATURE_CRTC_IRQ_CLOCK | RCAR_DU_FEATURE_DEFR8,
 	.quirks = RCAR_DU_QUIRK_ALIGN_128B,
 	.num_crtcs = 3,
@@ -344,11 +316,7 @@ static const struct rcar_du_device_info rcar_du_r8a7790_info = {
 	.interlace = false,
 };
 
-#ifdef R8A7790_ES1_DU_WORKAROUND
-static struct rcar_du_device_info rcar_du_r8a7791_info = {
-#else
 static const struct rcar_du_device_info rcar_du_r8a7791_info = {
-#endif
 	.features = RCAR_DU_FEATURE_CRTC_IRQ_CLOCK | RCAR_DU_FEATURE_DEFR8
 		  | RCAR_DU_FEATURE_NO_LVDS_INTERFACE,
 	.num_crtcs = 2,
