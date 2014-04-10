@@ -79,18 +79,12 @@ int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 			LVDCTRCR_CTR2SEL_DISP | LVDCTRCR_CTR1SEL_VSYNC |
 			LVDCTRCR_CTR0SEL_HSYNC);
 
-#ifdef R8A7790_ES1_DU_WORKAROUND
 	if (rcar_du_needs(lvds->dev, RCAR_DU_QUIRK_LVDS_LANES))
 		lvdhcr = LVDCHCR_CHSEL_CH(0, 0) | LVDCHCR_CHSEL_CH(1, 3)
 		       | LVDCHCR_CHSEL_CH(2, 2) | LVDCHCR_CHSEL_CH(3, 1);
 	else
 		lvdhcr = LVDCHCR_CHSEL_CH(0, 0) | LVDCHCR_CHSEL_CH(1, 1)
 		       | LVDCHCR_CHSEL_CH(2, 2) | LVDCHCR_CHSEL_CH(3, 3);
-#else
-	rcar_lvds_write(lvds, LVDCHCR,
-		LVDCHCR_CHSEL_CH(0, 0) | LVDCHCR_CHSEL_CH(1, 1) |
-		LVDCHCR_CHSEL_CH(2, 2) | LVDCHCR_CHSEL_CH(3, 3));
-#endif
 
 	rcar_lvds_write(lvds, LVDCHCR, lvdhcr);
 
