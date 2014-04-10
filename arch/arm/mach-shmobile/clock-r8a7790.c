@@ -44,6 +44,8 @@
  *	see "p1 / 2" on R8A7790_CLOCK_ROOT() below
  */
 
+static void __iomem *r8a7790_cpg_base;
+
 #define CPG_BASE	0xe6150000
 #define CPG_LEN		0x1000
 
@@ -227,6 +229,7 @@ enum {
 	MSTP216, MSTP215, MSTP208, MSTP207, MSTP206, MSTP205, MSTP204, MSTP203,
 	MSTP202,
 	MSTP124,
+	MSTP112,
 	MSTP000,
 	MSTP_NR
 };
@@ -297,6 +300,7 @@ static struct clk mstp_clks[MSTP_NR] = {
 	[MSTP203] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 3, MSTPSR2, 0), /* SCIFA1 */
 	[MSTP202] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR2, 2, MSTPSR2, 0), /* SCIFA2 */
 	[MSTP124] = SH_CLK_MSTP32_STS(&rclk_clk, SMSTPCR1, 24, MSTPSR1, 0), /* CMT0 */
+	[MSTP112] = SH_CLK_MSTP32_STS(&zg_clk, SMSTPCR1, 12, MSTPSR1, 0), /* 3DG */
 	[MSTP000] = SH_CLK_MSTP32_STS(&mp_clk, SMSTPCR0, 0, MSTPSR0, 0), /* MSIOF0 */
 };
 
@@ -382,6 +386,7 @@ static struct clk_lookup lookups[] = {
 	CLKDEV_DEV_ID("pci-rcar-gen2.2", &mstp_clks[MSTP703]),
 	CLKDEV_DEV_ID("sata-r8a7790.0", &mstp_clks[MSTP815]),
 	CLKDEV_DEV_ID("sata-r8a7790.1", &mstp_clks[MSTP814]),
+	CLKDEV_DEV_ID("pvrsrvkm", &mstp_clks[MSTP112]),
 
 	/* ICK */
 	CLKDEV_ICK_ID("usbhs", "usb_phy_rcar_gen2", &mstp_clks[MSTP704]),
@@ -417,6 +422,16 @@ static struct clk_lookup lookups[] = {
 
 };
 
+static void __init r8a7790_rgx_control_init(void)
+{
+	unsigned int val;
+
+#define RGXCR		0x0B4
+
+	val = ioread32(r8a7790_cpg_base + RGXCR);
+	iowrite32(val | (1 << 16), r8a7790_cpg_base + RGXCR);
+}
+
 #define R8A7790_CLOCK_ROOT(e, m, p0, p1, p30, p31)		\
 	extal_clk.rate	= e * 1000 * 1000;			\
 	main_clk.parent	= m;					\
@@ -431,6 +446,8 @@ void __init r8a7790_clock_init(void)
 {
 	u32 mode = rcar_gen2_read_mode_pins();
 	int k, ret = 0;
+
+	r8a7790_cpg_base = ioremap(CPG_BASE, CPG_LEN);
 
 	switch (mode & (MD(14) | MD(13))) {
 	case 0:
@@ -475,4 +492,6 @@ void __init r8a7790_clock_init(void)
 		shmobile_clk_init();
 	else
 		panic("failed to setup r8a7790 clocks\n");
+
+	r8a7790_rgx_control_init();
 }
