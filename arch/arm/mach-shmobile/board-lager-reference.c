@@ -27,6 +27,7 @@
 #include <linux/platform_data/usb-rcar-gen2-phy.h>
 #include <linux/usb/phy.h>
 #include <linux/usb/renesas_usbhs.h>
+#include <linux/platform_data/vsp1.h>
 #include <mach/clock.h>
 #include <mach/common.h>
 #include <mach/irqs.h>
@@ -190,6 +191,10 @@ static const struct clk_name clk_names[] __initconst = {
 	{ "src0", "src.0", "rcar_sound" },
 	{ "src1", "src.1", "rcar_sound" },
 	{ "dvc0", "dvc.0", "rcar_sound" },
+	{ "vsp1-rt", NULL, "vsp1.0" },
+	{ "vsp1-sy", NULL, "vsp1.1" },
+	{ "vsp1-du0", NULL, "vsp1.2" },
+	{ "vsp1-du1", NULL, "vsp1.3" },
 };
 
 /*
@@ -404,6 +409,88 @@ static const struct platform_device_info pci2_info __initconst = {
 static void __init lager_add_usb2_device(void)
 {
 	platform_device_register_full(&pci2_info);
+};
+
+/* VSP1 */
+static const struct vsp1_platform_data lager_vspr_pdata __initconst = {
+	.features = VSP1_HAS_LUT | VSP1_HAS_SRU,
+	.rpf_count = 5,
+	.uds_count = 1,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data lager_vsps_pdata __initconst = {
+	.features = VSP1_HAS_SRU,
+	.rpf_count = 5,
+	.uds_count = 3,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data lager_vspd0_pdata __initconst = {
+	.features = VSP1_HAS_LIF | VSP1_HAS_LUT,
+	.rpf_count = 4,
+	.uds_count = 1,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data lager_vspd1_pdata __initconst = {
+	.features = VSP1_HAS_LIF | VSP1_HAS_LUT,
+	.rpf_count = 4,
+	.uds_count = 1,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data * const lager_vsp1_pdata[4] __initconst = {
+	&lager_vspr_pdata,
+	&lager_vsps_pdata,
+	&lager_vspd0_pdata,
+	&lager_vspd1_pdata,
+};
+
+static const struct resource vspr_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe920000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(266)),
+};
+
+static const struct resource vsps_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe928000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(267)),
+};
+
+static const struct resource vspd0_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe930000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(246)),
+};
+
+static const struct resource vspd1_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe938000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(247)),
+};
+
+static const struct resource * const vsp1_resources[4] __initconst = {
+	vspr_resources,
+	vsps_resources,
+	vspd0_resources,
+	vspd1_resources,
+};
+
+static void __init lager_add_vsp1_devices(void)
+{
+	struct platform_device_info info = {
+		.name = "vsp1",
+		.size_data = sizeof(*lager_vsp1_pdata[0]),
+		.num_res = 2,
+		.dma_mask = DMA_BIT_MASK(32),
+	};
+	unsigned int i;
+
+	for (i = 0; i < ARRAY_SIZE(vsp1_resources); ++i) {
+		info.id = i;
+		info.data = lager_vsp1_pdata[i];
+		info.res = vsp1_resources[i];
+
+		platform_device_register_full(&info);
+	}
 }
 
 static void __init lager_add_standard_devices(void)
@@ -423,6 +510,7 @@ static void __init lager_add_standard_devices(void)
 	lager_add_usb1_device();
 	lager_add_usb2_device();
 	lager_add_rsnd_device();
+	lager_add_vsp1_devices();
 }
 
 static const char *lager_boards_compat_dt[] __initdata = {
