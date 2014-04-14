@@ -143,7 +143,9 @@
 
 &pfc {
 	pinctrl-0 = <&du_pins &scif0_pins &scif1_pins
-		     &usb0_pins &usb1_pins &usb2_pins>;
+		     &usb0_pins &usb1_pins &usb2_pins
+			&sound_pins
+			&sound_clk_pins>;
 	pinctrl-names = "default";
 
 	du_pins: du {
@@ -210,6 +212,15 @@
 	usb2_pins: usb2 {
 		renesas,groups = "usb2";
 		renesas,function = "usb2";
+	};
+
+	sound_pins: sound {
+		renesas,groups = "ssi0129_ctrl", "ssi0_data", "ssi1_data";
+		renesas,function = "ssi";
+	};
+	sound_clk_pins: sound_clk {
+		renesas,groups = "audio_clk_a";
+		renesas,function = "audio_clk";
 	};
 };
 
