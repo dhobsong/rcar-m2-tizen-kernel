@@ -718,10 +718,13 @@
 		mstp5_clks: mstp5_clks@e6150144 {
 			compatible = "renesas,r8a7790-mstp-clocks", "renesas,cpg-mstp-clocks";
 			reg = <0 0xe6150144 0 4>, <0 0xe615003c 0 4>;
-			clocks = <&extal_clk>, <&p_clk>;
+			clocks = <&extal_clk>, <&p_clk>, <&zs_clk>, <&zs_clk>;
 			#clock-cells = <1>;
-			renesas,clock-indices = <R8A7790_CLK_THERMAL R8A7790_CLK_PWM>;
-			clock-output-names = "thermal", "pwm";
+			renesas,clock-indices = <R8A7790_CLK_THERMAL R8A7790_CLK_PWM
+					R8A7790_CLK_DMA_LOW R8A7790_CLK_DMA_HI>;
+			clock-indices = <R8A7790_CLK_THERMAL R8A7790_CLK_PWM
+					R8A7790_CLK_DMA_LOW R8A7790_CLK_DMA_HI>;
+			clock-output-names = "thermal", "pwm", "dmal", "dmah";
 		};
 		mstp7_clks: mstp7_clks@e615014c {
 			compatible = "renesas,r8a7790-mstp-clocks", "renesas,cpg-mstp-clocks";

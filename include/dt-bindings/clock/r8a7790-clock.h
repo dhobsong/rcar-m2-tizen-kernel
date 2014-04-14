@@ -65,6 +65,8 @@
 /* MSTP5 */
 #define R8A7790_CLK_THERMAL		22
 #define R8A7790_CLK_PWM			23
+#define R8A7790_CLK_DMA_LOW		2
+#define R8A7790_CLK_DMA_HI		1
 
 /* MSTP7 */
 #define R8A7790_CLK_EHCI		3
