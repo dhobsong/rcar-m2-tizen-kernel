@@ -141,6 +141,15 @@ static int sh_mobile_sdhi_write16_hook(struct tmio_mmc_host *host, int addr)
 	return 0;
 }
 
+#define SH_MOBILE_SDHI_DISABLE_AUTO_CMD12	0x4000
+
+static void sh_mobile_sdhi_disable_auto_cmd12(int *val)
+{
+	*val |= SH_MOBILE_SDHI_DISABLE_AUTO_CMD12;
+
+	return;
+}
+
 static void sh_mobile_sdhi_cd_wakeup(const struct platform_device *pdev)
 {
 	mmc_detect_change(platform_get_drvdata(pdev), msecs_to_jiffies(100));
@@ -196,6 +205,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
 	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
 	mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
+	mmc_data->disable_auto_cmd12 = sh_mobile_sdhi_disable_auto_cmd12;
 	if (p) {
 		mmc_data->flags = p->tmio_flags;
 		mmc_data->ocr_mask = p->tmio_ocr_mask;
