@@ -3,7 +3,7 @@
 # from MeeGo/Moblin/Fedora
 #
 
-%define upstream_version 3.13.3
+%define upstream_version 3.14.2
 %define variant x86-ivi
 %define kernel_version %{version}-%{release}
 %define kernel_full_version %{version}-%{release}-%{variant}
@@ -26,7 +26,7 @@ Version: %{upstream_version}
 #%else
 #Release: %{rc_str}.%{release_ver}.<CI_CNT>.<B_CNT>
 #%endif
-Release: 3
+Release: 1
 
 BuildRequires: module-init-tools
 BuildRequires: findutils
@@ -199,6 +199,8 @@ install -d  %{buildroot}/usr/libexec
 mv %{buildroot}/bin/* %{buildroot}/usr/bin/
 mv %{buildroot}/libexec/* %{buildroot}/usr/libexec/
 rm %{buildroot}/etc/bash_completion.d/perf
+rm -rf %{buildroot}/usr/lib/debug/.build-id
+rm -rf %{buildroot}/usr/lib/debug/lib/traceevent/plugins/*.debug
 
 
 
@@ -259,3 +261,4 @@ fi
 /usr/bin/perf
 /usr/bin/trace
 /usr/libexec/perf-core
+/lib/traceevent/plugins/*.so
