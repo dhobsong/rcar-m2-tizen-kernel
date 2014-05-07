@@ -76,6 +76,9 @@ static struct rcar_du_platform_data koelsch_du_pdata = {
 	.num_encoders = ARRAY_SIZE(koelsch_du_encoders),
 	.crtcs = koelsch_du_crtcs,
 	.num_crtcs = ARRAY_SIZE(koelsch_du_crtcs),
+#ifdef CONFIG_DRM_FBDEV_CRTC
+	.fbdev_crtc = 1,
+#endif
 };
 
 static const struct resource du_resources[] __initconst = {
