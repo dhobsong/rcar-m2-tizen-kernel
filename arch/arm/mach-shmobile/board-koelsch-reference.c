@@ -62,9 +62,20 @@ static struct rcar_du_encoder_data koelsch_du_encoders[] = {
 	},
 };
 
+static struct rcar_du_crtc_data koelsch_du_crtcs[] = {
+	{
+		.exclk = 148500000,
+	},
+	{
+		.exclk = 74250000,
+	},
+};
+
 static struct rcar_du_platform_data koelsch_du_pdata = {
 	.encoders = koelsch_du_encoders,
 	.num_encoders = ARRAY_SIZE(koelsch_du_encoders),
+	.crtcs = koelsch_du_crtcs,
+	.num_crtcs = ARRAY_SIZE(koelsch_du_crtcs),
 };
 
 static const struct resource du_resources[] __initconst = {
