@@ -9,6 +9,7 @@
 /*
  * Created: Fri Mar 19 14:30:16 1999 by faith@valinux.com
  *
+ * Copyright (C) 2013-2014 Renesas Electronics Corporation
  * Copyright 1999, 2000 Precision Insight, Inc., Cedar Park, Texas.
  * Copyright 2000 VA Linux Systems, Inc., Sunnyvale, California.
  * All Rights Reserved.
@@ -1185,7 +1186,7 @@ int drm_wait_vblank(struct drm_device *dev, void *data,
 		crtc = flags & _DRM_VBLANK_SECONDARY ? 1 : 0;
 #if defined(CONFIG_DRM_FBDEV_CRTC)
 	if (file_priv == NULL)
-		crtc = CONFIG_DRM_FBDEV_CRTC_NUM;
+		crtc = dev->fbdev_crtc;
 #endif
 	if (crtc >= dev->num_crtcs)
 		return -EINVAL;

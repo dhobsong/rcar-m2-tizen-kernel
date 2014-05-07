@@ -849,9 +849,9 @@ int drm_fb_helper_set_par(struct fb_info *info)
 	drm_fb_helper_restore_fbdev_mode(fb_helper);
 #if defined(CONFIG_DRM_FBDEV_CRTC)
 	disp_set_mode =
-		 fb_helper->crtc_info[CONFIG_DRM_FBDEV_CRTC_NUM].mode_set.mode;
-	mode_set = &fb_helper->crtc_info[CONFIG_DRM_FBDEV_CRTC_NUM].mode_set;
-	fb = fb_helper->crtc_info[CONFIG_DRM_FBDEV_CRTC_NUM].mode_set.fb;
+		 fb_helper->crtc_info[dev->fbdev_crtc].mode_set.mode;
+	mode_set = &fb_helper->crtc_info[dev->fbdev_crtc].mode_set;
+	fb = fb_helper->crtc_info[dev->fbdev_crtc].mode_set.fb;
 
 	for (i = 0; i < fb_helper->connector_count; i++) {
 		if (fb_helper->connector_info[i]) {
@@ -948,7 +948,7 @@ int drm_fb_helper_set_par(struct fb_info *info)
 			goto mode_no_change;
 
 		ret = drm_mode_set_config_internal(&fb_helper->
-				crtc_info[CONFIG_DRM_FBDEV_CRTC_NUM].mode_set);
+				crtc_info[dev->fbdev_crtc].mode_set);
 		if (ret) {
 			drm_modeset_unlock_all(dev);
 			return ret;
@@ -1125,7 +1125,7 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 		desired_mode = fb_helper->crtc_info[i].desired_mode;
 
 #if defined(CONFIG_DRM_FBDEV_CRTC)
-		if ((desired_mode) && (i == CONFIG_DRM_FBDEV_CRTC_NUM)) {
+		if ((desired_mode) && (i == fb_helper->dev->fbdev_crtc)) {
 #else
 		if (desired_mode) {
 #endif
@@ -1158,9 +1158,9 @@ static int drm_fb_helper_single_fb_probe(struct drm_fb_helper *fb_helper,
 		crtc_count++;
 #else
 #if defined(CONFIG_DRM_FBDEV_CRTC)
-		if (CONFIG_DRM_FBDEV_CRTC_NUM >= (fb_helper->crtc_count - 1)) {
+		if (fb_helper->dev->fbdev_crtc >= (fb_helper->crtc_count - 1)) {
 			pr_err("Error! set FBDev CRTC number < (%d)\n",
-				CONFIG_DRM_FBDEV_CRTC_NUM);
+				fb_helper->dev->fbdev_crtc);
 			return -EINVAL;
 		}
 #endif
@@ -1305,7 +1305,7 @@ void drm_fb_helper_fill_var(struct fb_info *info, struct drm_fb_helper *fb_helpe
 
 #if defined(CONFIG_DRM_FBDEV_CRTC)
 	drm_mode =
-		 fb_helper->crtc_info[CONFIG_DRM_FBDEV_CRTC_NUM].mode_set.mode;
+		 fb_helper->crtc_info[fb_helper->dev->fbdev_crtc].mode_set.mode;
 	if (drm_mode) {
 		info->var.left_margin = drm_mode->htotal - drm_mode->hsync_end;
 		info->var.right_margin =
