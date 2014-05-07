@@ -190,15 +190,6 @@ config DRM_FBDEV_CRTC
 	  If you want to use FBDev every CRTC, you select y.
 	  If you want to not use FBDev every CRTC, you select n.
 
-config DRM_FBDEV_CRTC_NUM
-	int "FBDev CRTC number"
-	depends on DRM_FBDEV_CRTC
-	help
-	  Choose this option if you want to select CRTC of
-	  fbdev access.
-	  Selected number of CRTC set as CRTC which can use
-	  fbdev access.
-
 source "drivers/gpu/drm/exynos/Kconfig"
 
 source "drivers/gpu/drm/vmwgfx/Kconfig"
