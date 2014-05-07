@@ -104,6 +104,9 @@ static struct rcar_du_platform_data lager_du_pdata = {
 	.num_encoders = ARRAY_SIZE(lager_du_encoders),
 	.crtcs = lager_du_crtcs,
 	.num_crtcs = ARRAY_SIZE(lager_du_crtcs),
+#ifdef CONFIG_DRM_FBDEV_CRTC
+	.fbdev_crtc = 0,
+#endif
 };
 
 static const struct resource du_resources[] __initconst = {
