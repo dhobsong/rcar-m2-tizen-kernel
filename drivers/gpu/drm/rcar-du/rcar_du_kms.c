@@ -217,6 +217,17 @@ int rcar_du_modeset_init(struct rcar_du_device *rcdu)
 
 	rcdu->num_crtcs = rcdu->info->num_crtcs;
 
+#ifdef CONFIG_DRM_FBDEV_CRTC
+	if (rcdu->pdata->fbdev_crtc) {
+		if (rcdu->pdata->fbdev_crtc > rcdu->num_crtcs) {
+			dev_err(rcdu->dev, "CRTC number of FBDev use error.\n");
+			return -EINVAL;
+		}
+		rcdu->ddev->fbdev_crtc = rcdu->pdata->fbdev_crtc;
+	} else
+		rcdu->ddev->fbdev_crtc = DU_CH_0;
+#endif
+
 	/* Initialize the groups. */
 	num_groups = DIV_ROUND_UP(rcdu->num_crtcs, 2);
 
