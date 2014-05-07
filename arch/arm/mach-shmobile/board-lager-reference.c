@@ -87,9 +87,23 @@ static struct rcar_du_encoder_data lager_du_encoders[] = {
 #endif
 };
 
+static struct rcar_du_crtc_data lager_du_crtcs[] = {
+	{
+		.exclk = 148500000,
+	},
+	{
+		.exclk = 148500000,
+	},
+	{
+		.exclk = 0,
+	},
+};
+
 static struct rcar_du_platform_data lager_du_pdata = {
 	.encoders = lager_du_encoders,
 	.num_encoders = ARRAY_SIZE(lager_du_encoders),
+	.crtcs = lager_du_crtcs,
+	.num_crtcs = ARRAY_SIZE(lager_du_crtcs),
 };
 
 static const struct resource du_resources[] __initconst = {
