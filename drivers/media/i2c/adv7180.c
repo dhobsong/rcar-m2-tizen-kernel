@@ -1,4 +1,8 @@
 /*
+ * drivers/media/i2c/adv7180.c
+ *
+ * Copyright (C) 2011-2014 Renesas Electronics Corporation
+ *
  * adv7180.c Analog Devices ADV7180 video decoder driver
  * Copyright (c) 2009 Intel Corporation
  *
@@ -29,6 +33,7 @@
 #include <media/v4l2-ctrls.h>
 #include <media/v4l2-chip-ident.h>
 #include <linux/mutex.h>
+#include <media/soc_camera.h>
 
 #define ADV7180_INPUT_CONTROL_REG			0x00
 #define ADV7180_INPUT_CONTROL_AD_PAL_BG_NTSC_J_SECAM	0x00
@@ -55,24 +60,31 @@
 #define ADV7180_AUTODETECT_ENABLE_REG			0x07
 #define ADV7180_AUTODETECT_DEFAULT			0x7f
 /* Contrast */
-#define ADV7180_CON_REG		0x08	/*Unsigned */
-#define ADV7180_CON_MIN		0
-#define ADV7180_CON_DEF		128
-#define ADV7180_CON_MAX		255
-/* Brightness*/
-#define ADV7180_BRI_REG		0x0a	/*Signed */
-#define ADV7180_BRI_MIN		-128
-#define ADV7180_BRI_DEF		0
-#define ADV7180_BRI_MAX		127
+#define ADV7180_CON_REG		0x08	/* Unsigned */
+#define ADV7180_CON_MIN		0	/* Gain on luma channel = 0 */
+#define ADV7180_CON_DEF		128	/* Gain on luma channel = 1 */
+#define ADV7180_CON_MAX		255	/* Gain on luma channel = 2 */
+/* Brightness */
+#define ADV7180_BRI_REG		0x0a	/* Signed */
+#define ADV7180_BRI_MIN		-128	/* -30 IRE */
+#define ADV7180_BRI_DEF		0	/* 0 IRE */
+#define ADV7180_BRI_MAX		127	/* +30 IRE */
 /* Hue */
-#define ADV7180_HUE_REG		0x0b	/*Signed, inverted */
-#define ADV7180_HUE_MIN		-127
-#define ADV7180_HUE_DEF		0
-#define ADV7180_HUE_MAX		128
+#define ADV7180_HUE_REG		0x0b	/* Signed, inverted */
+#define ADV7180_HUE_MIN		-127	/* -90 degree */
+#define ADV7180_HUE_DEF		0	/* 0 degree */
+#define ADV7180_HUE_MAX		128	/* +90 degree */
+/* Saturation */
+#define ADV7180_SD_SAT_CB_REG	0xe3	/* Unsigned */
+#define ADV7180_SD_SAT_CR_REG	0xe4	/* Unsigned */
+#define ADV7180_SAT_MIN		0	/* Gain on Cb/Cr channel = -42 dB */
+#define ADV7180_SAT_DEF		128	/* Gain on Cb/Cr channel = 0 dB */
+#define ADV7180_SAT_MAX		255	/* Gain on Cb/Cr channel = +6 dB */
 
 #define ADV7180_ADI_CTRL_REG				0x0e
 #define ADV7180_ADI_CTRL_IRQ_SPACE			0x20
 
+/* Power Management */
 #define ADV7180_PWR_MAN_REG		0x0f
 #define ADV7180_PWR_MAN_ON		0x04
 #define ADV7180_PWR_MAN_OFF		0x24
@@ -89,6 +101,11 @@
 #define ADV7180_STATUS1_AUTOD_SECAM	0x50
 #define ADV7180_STATUS1_AUTOD_PAL_COMB	0x60
 #define ADV7180_STATUS1_AUTOD_SECAM_525	0x70
+#define ADV7180_STATUS1_COL_KILL	0x80
+#define ADV7180_STATUS1_PAL_SIGNAL	(ADV7180_STATUS1_AUTOD_PAL_M | \
+					ADV7180_STATUS1_AUTOD_PAL_60 | \
+					ADV7180_STATUS1_AUTOD_PAL_B_G | \
+					ADV7180_STATUS1_AUTOD_PAL_COMB)
 
 #define ADV7180_IDENT_REG 0x11
 #define ADV7180_ID_7180 0x18
@@ -97,12 +114,6 @@
 #define ADV7180_ICONF1_ACTIVE_LOW	0x01
 #define ADV7180_ICONF1_PSYNC_ONLY	0x10
 #define ADV7180_ICONF1_ACTIVE_TO_CLR	0xC0
-/* Saturation */
-#define ADV7180_SD_SAT_CB_REG	0xe3	/*Unsigned */
-#define ADV7180_SD_SAT_CR_REG	0xe4	/*Unsigned */
-#define ADV7180_SAT_MIN		0
-#define ADV7180_SAT_DEF		128
-#define ADV7180_SAT_MAX		255
 
 #define ADV7180_IRQ1_LOCK	0x01
 #define ADV7180_IRQ1_UNLOCK	0x02
@@ -116,8 +127,12 @@
 #define ADV7180_IMR3_ADI	0x4C
 #define ADV7180_IMR4_ADI	0x50
 
-#define ADV7180_NTSC_V_BIT_END_REG	0xE6
+#define ADV7180_NTSC_V_BIT_END_REG		0xE6
 #define ADV7180_NTSC_V_BIT_END_MANUAL_NVEND	0x4F
+
+/* Input image size */
+#define ADV7180_MAX_WIDTH	720
+#define ADV7180_MAX_HEIGHT	480
 
 struct adv7180_state {
 	struct v4l2_ctrl_handler ctrl_hdl;
@@ -128,10 +143,32 @@ struct adv7180_state {
 	v4l2_std_id		curr_norm;
 	bool			autodetect;
 	u8			input;
+	const struct adv7180_color_format	*cfmt;
 };
+
 #define to_adv7180_sd(_ctrl) (&container_of(_ctrl->handler,		\
 					    struct adv7180_state,	\
 					    ctrl_hdl)->sd)
+
+struct regval_list {
+	unsigned char reg_num;
+	unsigned char value;
+};
+
+struct adv7180_color_format {
+	enum v4l2_mbus_pixelcode code;
+	enum v4l2_colorspace colorspace;
+};
+
+/*
+ * supported color format list
+ */
+static const struct adv7180_color_format adv7180_cfmts[] = {
+	{
+		.code		= V4L2_MBUS_FMT_YUYV8_2X8,
+		.colorspace	= V4L2_COLORSPACE_JPEG,
+	},
+};
 
 static v4l2_std_id adv7180_std_to_v4l2(u8 status1)
 {
@@ -319,6 +356,137 @@ out:
 	return ret;
 }
 
+static int adv7180_s_stream(struct v4l2_subdev *sd, int enable)
+{
+	struct i2c_client *client = v4l2_get_subdevdata(sd);
+	struct adv7180_state *state = to_state(sd);
+
+	dev_dbg(&client->dev, "format %d\n", state->cfmt->code);
+
+	return 0;
+}
+
+static int adv7180_g_mbus_config(struct v4l2_subdev *sd,
+					struct v4l2_mbus_config *cfg)
+{
+	struct i2c_client *client = v4l2_get_subdevdata(sd);
+	struct soc_camera_subdev_desc *ssdd = soc_camera_i2c_to_desc(client);
+
+	cfg->flags = V4L2_MBUS_PCLK_SAMPLE_RISING | V4L2_MBUS_MASTER |
+		V4L2_MBUS_VSYNC_ACTIVE_LOW | V4L2_MBUS_HSYNC_ACTIVE_LOW |
+		V4L2_MBUS_DATA_ACTIVE_HIGH;
+	cfg->type = V4L2_MBUS_BT656;
+	cfg->flags = soc_camera_apply_board_flags(ssdd, cfg);
+
+	return 0;
+}
+
+/*
+ * adv7180_g_crop() - V4L2 decoder i/f handler for g_crop
+ * @sd: pointer to standard V4L2 sub-device structure
+ * @a: pointer to standard V4L2 cropcap structure
+ *
+ * Gets current cropping rectangle.
+ */
+static int adv7180_g_crop(struct v4l2_subdev *sd, struct v4l2_crop *a)
+{
+	a->c.left = 0;
+	a->c.top = 0;
+	/* set current window size */
+	a->c.width = ADV7180_MAX_WIDTH;		/* width is fixed value */
+	a->c.height = ADV7180_MAX_HEIGHT;	/* heigth is fixed value */
+	a->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+	return 0;
+}
+
+/*
+ * adv7180_cropcap() - V4L2 decoder i/f handler for cropcap
+ * @sd: pointer to standard V4L2 sub-device structure
+ * @a: pointer to standard V4L2 cropcap structure
+ *
+ * Gets cropping limits, default cropping rectangle and pixel aspect.
+ */
+static int adv7180_cropcap(struct v4l2_subdev *sd, struct v4l2_cropcap *a)
+{
+	a->bounds.left = 0;
+	a->bounds.top = 0;
+	/* set maximum window size */
+	a->bounds.width = ADV7180_MAX_WIDTH;	/* width is fixed value */
+	a->bounds.height = ADV7180_MAX_HEIGHT;	/* heigth is fixed value */
+	a->defrect = a->bounds;
+	a->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	a->pixelaspect.numerator = 1;
+	a->pixelaspect.denominator = 1;
+
+	return 0;
+}
+
+/*
+ * adv7180_try_fmt() - V4L2 decoder i/f handler for try_mbus_fmt
+ * @sd: pointer to standard V4L2 sub-device structure
+ * @mf: pointer to mediabus format structure
+ *
+ * Negotiate the image capture size and mediabus format.
+ * Try a format.
+ */
+static int adv7180_try_fmt(struct v4l2_subdev *sd,
+			  struct v4l2_mbus_framefmt *mf)
+{
+	struct adv7180_state *state = to_state(sd);
+	int i;
+
+	mf->width = ADV7180_MAX_WIDTH;		/* width is fixed value */
+	mf->height = ADV7180_MAX_HEIGHT;	/* heigth is fixed value */
+
+	for (i = 0; i < ARRAY_SIZE(adv7180_cfmts); i++)
+		if (mf->code == adv7180_cfmts[i].code)
+			break;
+
+	if (i == ARRAY_SIZE(adv7180_cfmts)) {
+		/* Unsupported format requested. Propose either */
+		if (state->cfmt) {
+			/* the current one or */
+			mf->colorspace = state->cfmt->colorspace;
+			mf->code = state->cfmt->code;
+		} else {
+			/* the default one */
+			mf->colorspace = adv7180_cfmts[0].colorspace;
+			mf->code = adv7180_cfmts[0].code;
+		}
+	} else {
+		/* Also return the colorspace */
+		mf->colorspace	= adv7180_cfmts[i].colorspace;
+	}
+
+	return 0;
+}
+
+/*
+ * adv7180_enum_fmt() - V4L2 decoder i/f handler for enum_mbus_fmt
+ * @sd: pointer to standard V4L2 sub-device structure
+ * @index: format index
+ * @code: pointer to mediabus format
+ *
+ * Enumerate supported mediabus formats.
+ */
+static int adv7180_enum_fmt(struct v4l2_subdev *sd, unsigned int index,
+			   enum v4l2_mbus_pixelcode *code)
+{
+	if (index >= ARRAY_SIZE(adv7180_cfmts))
+		return -EINVAL;
+
+	*code = adv7180_cfmts[index].code;
+
+	return 0;
+}
+
+/*
+ * adv7180_s_ctrl() - V4L2 decoder i/f handler for s_ctrl
+ * @ctrl: pointer to standard V4L2 control structure
+ *
+ * Set a control in ADV7180 decoder device.
+ */
 static int adv7180_s_ctrl(struct v4l2_ctrl *ctrl)
 {
 	struct v4l2_subdev *sd = to_adv7180_sd(ctrl);
@@ -329,29 +497,56 @@ static int adv7180_s_ctrl(struct v4l2_ctrl *ctrl)
 
 	if (ret)
 		return ret;
+
 	val = ctrl->val;
 	switch (ctrl->id) {
 	case V4L2_CID_BRIGHTNESS:
-		ret = i2c_smbus_write_byte_data(client, ADV7180_BRI_REG, val);
+		if ((ctrl->val < ADV7180_BRI_MIN) ||
+					(ctrl->val > ADV7180_BRI_MAX))
+			ret = -ERANGE;
+		else
+			ret = i2c_smbus_write_byte_data(client,
+							ADV7180_BRI_REG,
+							val);
 		break;
 	case V4L2_CID_HUE:
 		/*Hue is inverted according to HSL chart */
-		ret = i2c_smbus_write_byte_data(client, ADV7180_HUE_REG, -val);
+		if ((ctrl->val < ADV7180_HUE_MIN) ||
+					(ctrl->val > ADV7180_HUE_MAX))
+			ret = -ERANGE;
+		else
+			ret = i2c_smbus_write_byte_data(client,
+							ADV7180_HUE_REG,
+							-val);
 		break;
 	case V4L2_CID_CONTRAST:
-		ret = i2c_smbus_write_byte_data(client, ADV7180_CON_REG, val);
+		if ((ctrl->val < ADV7180_CON_MIN) ||
+					(ctrl->val > ADV7180_CON_MAX))
+			ret = -ERANGE;
+		else
+			ret = i2c_smbus_write_byte_data(client,
+							ADV7180_CON_REG,
+							val);
 		break;
 	case V4L2_CID_SATURATION:
 		/*
 		 *This could be V4L2_CID_BLUE_BALANCE/V4L2_CID_RED_BALANCE
 		 *Let's not confuse the user, everybody understands saturation
 		 */
-		ret = i2c_smbus_write_byte_data(client, ADV7180_SD_SAT_CB_REG,
-						val);
-		if (ret < 0)
-			break;
-		ret = i2c_smbus_write_byte_data(client, ADV7180_SD_SAT_CR_REG,
-						val);
+		if ((ctrl->val < ADV7180_SAT_MIN) ||
+					(ctrl->val > ADV7180_SAT_MAX))
+			ret = -ERANGE;
+		else {
+			ret = i2c_smbus_write_byte_data(client,
+							ADV7180_SD_SAT_CB_REG,
+							val);
+			if (ret < 0)
+				break;
+
+			ret = i2c_smbus_write_byte_data(client,
+							ADV7180_SD_SAT_CR_REG,
+							val);
+		}
 		break;
 	default:
 		ret = -EINVAL;
@@ -365,6 +560,12 @@ static const struct v4l2_ctrl_ops adv7180_ctrl_ops = {
 	.s_ctrl = adv7180_s_ctrl,
 };
 
+/*
+ * adv7180_init_controls() - Init controls
+ * @state: pointer to private state structure
+ *
+ * Init ADV7180 supported control handler.
+ */
 static int adv7180_init_controls(struct adv7180_state *state)
 {
 	v4l2_ctrl_handler_init(&state->ctrl_hdl, 4);
@@ -392,20 +593,135 @@ static int adv7180_init_controls(struct adv7180_state *state)
 
 	return 0;
 }
+
+/*
+ * adv7180_exit_controls() - Cleanup controls
+ * @state: pointer to private state structure
+ *
+ * Free ADV7180 supported control handler.
+ */
 static void adv7180_exit_controls(struct adv7180_state *state)
 {
 	v4l2_ctrl_handler_free(&state->ctrl_hdl);
+}
+
+static int adv7180_set_params(struct i2c_client *client, u32 *width,
+			     u32 *height,
+			     enum v4l2_mbus_pixelcode code)
+{
+	struct v4l2_subdev *sd = i2c_get_clientdata(client);
+	struct adv7180_state *state = to_state(sd);
+	int i;
+	long status;
+
+	/*
+	 * select format
+	 */
+	for (i = 0; i < ARRAY_SIZE(adv7180_cfmts); i++) {
+		if (code == adv7180_cfmts[i].code) {
+			state->cfmt = adv7180_cfmts + i;
+			break;
+		}
+	}
+	if (i >= ARRAY_SIZE(adv7180_cfmts))
+		return -EINVAL;			/* no match format */
+
+	status = i2c_smbus_read_byte_data(client, ADV7180_STATUS1_REG);
+	if (status < 0) {
+		dev_info(&client->dev, "Not detect any video input signal\n");
+	} else {
+		if (status & ADV7180_STATUS1_IN_LOCK) {
+			if (((status & ADV7180_STATUS1_AUTOD_NTSC_4_43)
+				 == ADV7180_STATUS1_AUTOD_NTSC_4_43) ||
+				  ((status & ADV7180_STATUS1_AUTOD_MASK)
+				  == ADV7180_STATUS1_AUTOD_NTSM_M_J)) {
+				dev_info(&client->dev,
+				"Detected the NTSC video input signal\n");
+			} else if (status & ADV7180_STATUS1_PAL_SIGNAL) {
+				dev_info(&client->dev,
+				"Detected the PAL video input signal\n");
+			}
+		} else {
+			dev_info(&client->dev,
+				"Not detect any video input signal\n");
+		}
+	}
+
+	/*
+	 * set window size
+	 */
+	*width = ADV7180_MAX_WIDTH;	/* fixed value */
+	*height = ADV7180_MAX_HEIGHT;	/* fixed value */
+
+	return 0;
+}
+
+/*
+ * adv7180_g_fmt() - V4L2 decoder i/f handler for g_mbus_fmt
+ * @sd: pointer to standard V4L2 sub-device structure
+ * @mf: pointer to mediabus format structure
+ *
+ * Negotiate the image capture size and mediabus format.
+ * Get the data format.
+ */
+static int adv7180_g_fmt(struct v4l2_subdev *sd,
+			struct v4l2_mbus_framefmt *mf)
+{
+	struct adv7180_state *state = to_state(sd);
+
+	mf->width	= ADV7180_MAX_WIDTH;	/* fixed value */
+	mf->height	= ADV7180_MAX_HEIGHT;	/* fixed value */
+	mf->code	= state->cfmt->code;
+	mf->colorspace	= state->cfmt->colorspace;
+	mf->field	= V4L2_FIELD_NONE;
+
+	return 0;
+}
+
+/*
+ * adv7180_s_fmt() - V4L2 decoder i/f handler for s_mbus_fmt
+ * @sd: pointer to standard V4L2 sub-device structure
+ * @mf: pointer to mediabus format structure
+ *
+ * Negotiate the image capture size and mediabus format.
+ * Try a format.
+ */
+static int adv7180_s_fmt(struct v4l2_subdev *sd,
+			struct v4l2_mbus_framefmt *mf)
+{
+	struct i2c_client *client = v4l2_get_subdevdata(sd);
+	struct adv7180_state *state = to_state(sd);
+	int ret;
+
+	ret = adv7180_set_params(client, &mf->width, &mf->height,
+				    mf->code);
+
+	if (!ret)
+		mf->colorspace = state->cfmt->colorspace;
+
+	return ret;
 }
 
 static const struct v4l2_subdev_video_ops adv7180_video_ops = {
 	.querystd = adv7180_querystd,
 	.g_input_status = adv7180_g_input_status,
 	.s_routing = adv7180_s_routing,
+	.s_stream	= adv7180_s_stream,
+	.g_mbus_fmt	= adv7180_g_fmt,
+	.s_mbus_fmt	= adv7180_s_fmt,
+	.try_mbus_fmt	= adv7180_try_fmt,
+	.cropcap	= adv7180_cropcap,
+	.g_crop		= adv7180_g_crop,
+	.enum_mbus_fmt	= adv7180_enum_fmt,
+	.g_mbus_config	= adv7180_g_mbus_config,
 };
 
 static const struct v4l2_subdev_core_ops adv7180_core_ops = {
 	.g_chip_ident = adv7180_g_chip_ident,
 	.s_std = adv7180_s_std,
+	.queryctrl = v4l2_subdev_queryctrl,
+	.g_ctrl = v4l2_subdev_g_ctrl,
+	.s_ctrl = v4l2_subdev_s_ctrl,
 };
 
 static const struct v4l2_subdev_ops adv7180_ops = {
@@ -446,6 +762,13 @@ static irqreturn_t adv7180_irq(int irq, void *devid)
 	return IRQ_HANDLED;
 }
 
+/*
+ * init_device - Init a ADV7180 device
+ * @client: pointer to i2c_client structure
+ * @state: pointer to private state structure
+ *
+ * Initialize the ADV7180 device
+ */
 static int init_device(struct i2c_client *client, struct adv7180_state *state)
 {
 	int ret;
@@ -522,7 +845,7 @@ static int init_device(struct i2c_client *client, struct adv7180_state *state)
 		if (ret < 0)
 			return ret;
 
-		/* enable AD change interrupts interrupts */
+		/* enable AD change interrupts */
 		ret = i2c_smbus_write_byte_data(client, ADV7180_IMR3_ADI,
 						ADV7180_IRQ3_AD_CHANGE);
 		if (ret < 0)
@@ -541,6 +864,13 @@ static int init_device(struct i2c_client *client, struct adv7180_state *state)
 	return 0;
 }
 
+/*
+ * adv7180_probe - Probe a ADV7180 device
+ * @client: pointer to i2c_client structure
+ * @id: pointer to i2c_device_id structure
+ *
+ * Initialize the ADV7180 device
+ */
 static int adv7180_probe(struct i2c_client *client,
 			 const struct i2c_device_id *id)
 {
@@ -553,7 +883,7 @@ static int adv7180_probe(struct i2c_client *client,
 		return -EIO;
 
 	v4l_info(client, "chip found @ 0x%02x (%s)\n",
-		 client->addr, client->adapter->name);
+		 client->addr << 1, client->adapter->name);
 
 	state = kzalloc(sizeof(struct adv7180_state), GFP_KERNEL);
 	if (state == NULL) {
@@ -566,6 +896,7 @@ static int adv7180_probe(struct i2c_client *client,
 	mutex_init(&state->mutex);
 	state->autodetect = true;
 	state->input = 0;
+	state->cfmt = &adv7180_cfmts[0];
 	sd = &state->sd;
 	v4l2_i2c_subdev_init(sd, client, &adv7180_ops);
 
@@ -588,6 +919,12 @@ err:
 	return ret;
 }
 
+/*
+ * adv7180_remove - Remove ADV7180 device support
+ * @client: pointer to i2c_client structure
+ *
+ * Reset the ADV7180 device
+ */
 static int adv7180_remove(struct i2c_client *client)
 {
 	struct v4l2_subdev *sd = i2c_get_clientdata(client);
@@ -605,6 +942,7 @@ static int adv7180_remove(struct i2c_client *client)
 		}
 	}
 
+	v4l2_ctrl_handler_free(&state->ctrl_hdl);
 	mutex_destroy(&state->mutex);
 	v4l2_device_unregister_subdev(sd);
 	kfree(to_state(sd));
@@ -617,6 +955,13 @@ static const struct i2c_device_id adv7180_id[] = {
 };
 
 #ifdef CONFIG_PM
+/*
+ * adv7180_suspend - Suspend ADV7180 device
+ * @client: pointer to i2c_client structure
+ * @state: power management state
+ *
+ * Power down the ADV7180 device
+ */
 static int adv7180_suspend(struct i2c_client *client, pm_message_t state)
 {
 	int ret;
@@ -628,6 +973,12 @@ static int adv7180_suspend(struct i2c_client *client, pm_message_t state)
 	return 0;
 }
 
+/*
+ * adv7180_resume - Resume ADV7180 device
+ * @client: pointer to i2c_client structure
+ *
+ * Power on and initialize the ADV7180 device
+ */
 static int adv7180_resume(struct i2c_client *client)
 {
 	struct v4l2_subdev *sd = i2c_get_clientdata(client);
