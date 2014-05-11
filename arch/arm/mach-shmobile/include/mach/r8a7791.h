@@ -89,7 +89,6 @@ void r8a7791_add_dt_devices(void);
 void r8a7791_clock_init(void);
 void r8a7791_pinmux_init(void);
 void r8a7791_pm_init(void);
-void r8a7791_init_early(void);
 extern struct smp_operations r8a7791_smp_ops;
 
 #ifdef CONFIG_PM
