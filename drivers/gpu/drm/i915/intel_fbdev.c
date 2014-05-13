@@ -289,6 +289,7 @@ static bool intel_fb_initial_config(struct drm_fb_helper *fb_helper,
 		struct drm_connector *connector;
 		struct drm_encoder *encoder;
 		struct drm_fb_helper_crtc *new_crtc;
+		struct drm_display_mode *current_mode;
 
 		fb_conn = fb_helper->connector_info[i];
 		connector = fb_conn->connector;
@@ -334,18 +335,34 @@ static bool intel_fb_initial_config(struct drm_fb_helper *fb_helper,
 							   height);
 			intel_mode_from_pipe_config(&encoder->crtc->hwmode,
 						    &to_intel_crtc(encoder->crtc)->config);
-			modes[i] = &encoder->crtc->hwmode;
+			current_mode = &encoder->crtc->hwmode;
 
 			if (preferred &&
-			    !drm_mode_same_size(preferred, modes[i])) {
+			    !drm_mode_same_size(preferred, current_mode)) {
 				DRM_DEBUG_KMS("using preferred mode %s "
 					      "instead of current mode %s "
 					      "on connector %d\n",
 					      preferred->name,
-					      modes[i]->name,
+					      current_mode->name,
 					      fb_conn->connector->base.id);
 				modes[i] = preferred;
 			}
+		}
+
+		/* No preferred mode marked by the EDID? Are there any modes? */
+		if (!modes[i] && !list_empty(&connector->modes)) {
+			DRM_DEBUG_KMS("using first mode listed on connector %s\n",
+				      drm_get_connector_name(connector));
+			modes[i] = list_first_entry(&connector->modes,
+						    struct drm_display_mode,
+						    head);
+		}
+
+		/* last resort: use current mode */
+		if (!modes[i]) {
+			DRM_DEBUG_KMS("looking for current mode on connector %s\n",
+					drm_get_connector_name(connector));
+			modes[i] = current_mode;
 		}
 
 		crtcs[i] = new_crtc;
