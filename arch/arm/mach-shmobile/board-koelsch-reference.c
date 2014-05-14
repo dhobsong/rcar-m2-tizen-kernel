@@ -214,14 +214,6 @@ static const struct clk_name clk_names[] __initconst = {
  * This is a really crude hack to work around core platform clock issues
  */
 static const struct clk_name clk_enables[] __initconst = {
-	{ "ether", NULL, "ee700000.ethernet" },
-	{ "i2c2", NULL, "e6530000.i2c" },
-	{ "msiof0", NULL, "e6e20000.spi" },
-	{ "qspi_mod", NULL, "e6b10000.spi" },
-	{ "sdhi0", NULL, "ee100000.sd" },
-	{ "sdhi1", NULL, "ee140000.sd" },
-	{ "sdhi2", NULL, "ee160000.sd" },
-	{ "thermal", NULL, "e61f0000.thermal" },
 	{ "hsusb", NULL, "renesas_usbhs" },
 	{ "ehci", NULL, "pci-rcar-gen2.1" },
 	{ "ssi", NULL, "rcar_sound" },
