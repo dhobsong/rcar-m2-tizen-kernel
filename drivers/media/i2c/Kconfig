@@ -194,6 +194,17 @@ config VIDEO_ADV7183
 	  To compile this driver as a module, choose M here: the
 	  module will be called adv7183.
 
+config VIDEO_ADV7612
+	tristate "Analog Devices ADV7612 HDMI receiver"
+	depends on VIDEO_V4L2 && I2C
+	---help---
+	  Support for the Analog Devices ADV7612 HDMI receiver.
+	  Video capture data is the HD digital signal that is
+	  received by the Analog Devices ADV7612 HDMI receiver.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called adv7612.
+
 config VIDEO_ADV7604
 	tristate "Analog Devices ADV7604 decoder"
 	depends on VIDEO_V4L2 && I2C && VIDEO_V4L2_SUBDEV_API
