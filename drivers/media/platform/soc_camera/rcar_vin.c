@@ -69,6 +69,8 @@
 #define VNMC_INF_YUV8_BT656	(0 << 16)
 #define VNMC_INF_YUV8_BT601	(1 << 16)
 #define VNMC_INF_YUV16		(5 << 16)
+#define VNMC_INF_RGB888		(6 << 16)
+#define VNMC_INF_RGB_MASK	(6 << 16)
 #define VNMC_VUP		(1 << 10)
 #define VNMC_IM_ODD		(0 << 3)
 #define VNMC_IM_ODD_EVEN	(1 << 3)
@@ -267,6 +269,10 @@ static int rcar_vin_setup(struct rcar_vin_priv *priv)
 
 	/* input interface */
 	switch (icd->current_fmt->code) {
+	case V4L2_MBUS_FMT_RGB888_1X24:
+		/* BT.601/BT.709 24-bit RGB-888 */
+		vnmc |= VNMC_INF_RGB888;
+		break;
 	case V4L2_MBUS_FMT_YUYV8_1X16:
 		/* BT.601/BT.1358 16bit YCbCr422 */
 		vnmc |= VNMC_INF_YUV16;
@@ -319,6 +325,9 @@ static int rcar_vin_setup(struct rcar_vin_priv *priv)
 	/* If input and output use the same colorspace, use bypass mode */
 	if (output_is_yuv)
 		vnmc |= VNMC_BPS;
+
+	if (vnmc & VNMC_INF_RGB_MASK)
+		vnmc ^= VNMC_BPS;
 
 	/* progressive or interlaced mode */
 	interrupts = progressive ? VNIE_FIE | VNIE_EFE : VNIE_EFE;
@@ -1003,6 +1012,7 @@ static int rcar_vin_get_formats(struct soc_camera_device *icd, unsigned int idx,
 	switch (code) {
 	case V4L2_MBUS_FMT_YUYV8_1X16:
 	case V4L2_MBUS_FMT_YUYV8_2X8:
+	case V4L2_MBUS_FMT_RGB888_1X24:
 		if (cam->extra_fmt)
 			break;
 
