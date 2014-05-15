@@ -1,7 +1,6 @@
 #ifndef __ASM_R8A7779_H__
 #define __ASM_R8A7779_H__
 
-#include <linux/sh_clk.h>
 #include <linux/pm_domain.h>
 #include <mach/pm-rcar.h>
 
