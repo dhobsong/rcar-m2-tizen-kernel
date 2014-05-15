@@ -3808,6 +3808,22 @@ static const unsigned int vin3_clk_mux[] = {
 	VI3_CLK_MARK,
 };
 
+/* - SSP ------------------------------------------------------------------- */
+static const unsigned int ssp_pins[] = {
+	RCAR_GP_PIN(4,	9),
+	RCAR_GP_PIN(4, 10),
+	RCAR_GP_PIN(4, 11),
+	RCAR_GP_PIN(4, 12),
+	RCAR_GP_PIN(4, 13),
+};
+static const unsigned int ssp_mux[] = {
+	STP_IVCXO27_0_MARK,
+	STP_ISCLK_0_MARK,
+	STP_ISD_0_MARK,
+	STP_ISEN_0_MARK,
+	STP_ISSYNC_0_MARK,
+};
+
 static const struct sh_pfc_pin_group pinmux_groups[] = {
 	SH_PFC_PIN_GROUP(audio_clk_a),
 	SH_PFC_PIN_GROUP(audio_clk_b),
@@ -4081,6 +4097,7 @@ static const struct sh_pfc_pin_group pinmux_groups[] = {
 	SH_PFC_PIN_GROUP(vin3_field),
 	SH_PFC_PIN_GROUP(vin3_clkenb),
 	SH_PFC_PIN_GROUP(vin3_clk),
+	SH_PFC_PIN_GROUP(ssp),
 };
 
 static const char * const audio_clk_groups[] = {
@@ -4493,6 +4510,10 @@ static const char * const vin3_groups[] = {
 	"vin3_clk",
 };
 
+static const char * const ssp_groups[] = {
+	"ssp",
+};
+
 static const struct sh_pfc_function pinmux_functions[] = {
 	SH_PFC_FUNCTION(audio_clk),
 	SH_PFC_FUNCTION(du),
@@ -4540,6 +4561,7 @@ static const struct sh_pfc_function pinmux_functions[] = {
 	SH_PFC_FUNCTION(vin1),
 	SH_PFC_FUNCTION(vin2),
 	SH_PFC_FUNCTION(vin3),
+	SH_PFC_FUNCTION(ssp),
 };
 
 static const struct pinmux_cfg_reg pinmux_config_regs[] = {
