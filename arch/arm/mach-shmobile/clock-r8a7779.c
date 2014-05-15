@@ -23,6 +23,7 @@
 #include <linux/io.h>
 #include <linux/sh_clk.h>
 #include <linux/clkdev.h>
+#include <linux/sh_timer.h>
 #include <mach/clock.h>
 #include <mach/common.h>
 #include <mach/r8a7779.h>
@@ -262,4 +263,14 @@ void __init r8a7779_clock_init(void)
 		shmobile_clk_init();
 	else
 		panic("failed to setup r8a7779 clocks\n");
+}
+
+/* do nothing for !CONFIG_SMP or !CONFIG_HAVE_TWD */
+void __init __weak r8a7779_register_twd(void) { }
+
+void __init r8a7779_earlytimer_init(void)
+{
+	r8a7779_clock_init();
+	r8a7779_register_twd();
+	shmobile_earlytimer_init();
 }
