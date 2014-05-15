@@ -401,13 +401,32 @@ static const struct resource powervr_resources[] __initconst = {
 	DEFINE_RES_IRQ(gic_spi(119)),
 };
 
-#define r8a7790_register_pvrsrvkm()					\
+#define __r8a7790_register_pvrsrvkm()					\
 	platform_device_register_simple("pvrsrvkm", -1,			\
 					powervr_resources,		\
 					ARRAY_SIZE(powervr_resources))
 
+#define CPG_BASE	0xe6150000
+#define CPG_LEN		0x1000
+#define RGXCR		0x0B4
+
+void __init r8a7790_register_pvrsrvkm(void)
+{
+	void __iomem *cpg_base;
+	unsigned int val;
+
+	cpg_base = ioremap(CPG_BASE, CPG_LEN);
+	val = ioread32(cpg_base + RGXCR);
+	iowrite32(val | (1 << 16), cpg_base + RGXCR);
+	iounmap(cpg_base);
+	__r8a7790_register_pvrsrvkm();
+}
+
 void __init r8a7790_add_dt_devices(void)
 {
+	r8a7790_pm_init();
+	r8a7790_init_pm_domains();
+
 	r8a7790_register_scif(0);
 	r8a7790_register_scif(1);
 	r8a7790_register_scif(2);
@@ -422,14 +441,11 @@ void __init r8a7790_add_dt_devices(void)
 	r8a7790_register_audio_dmac(0);
 	r8a7790_register_audio_dmac(1);
 	r8a7790_register_audmapp();
+	r8a7790_register_pvrsrvkm();
 }
 
 void __init r8a7790_add_standard_devices(void)
 {
-	r8a7790_pm_init();
-
-	r8a7790_init_pm_domains();
-
 	r8a7790_add_dt_devices();
 	r8a7790_register_irqc(0);
 	r8a7790_register_thermal();
@@ -444,7 +460,6 @@ void __init r8a7790_add_standard_devices(void)
 	r8a7790_register_msiof(1);
 	r8a7790_register_msiof(2);
 	r8a7790_register_msiof(3);
-	r8a7790_register_pvrsrvkm();
 }
 
 void __init r8a7790_init_early(void)

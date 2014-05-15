@@ -1,6 +1,7 @@
 /*
  * Lager board support - Reference DT implementation
  *
+ * Copyright (C) 2014  Renesas Electronics Corporation
  * Copyright (C) 2013  Renesas Solutions Corp.
  * Copyright (C) 2013  Simon Horman
  *
@@ -215,6 +216,7 @@ static const struct clk_name clk_enables[] __initconst = {
 	{ "scu", NULL, "rcar_sound" },
 	{ "dmal", NULL, "sh-dma-engine.0" },
 	{ "dmah", NULL, "sh-dma-engine.1" },
+	{ "pvrsrvkm", NULL, "pvrsrvkm" },
 };
 
 /* USBHS */

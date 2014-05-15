@@ -445,16 +445,6 @@ static struct clk_lookup lookups[] = {
 
 };
 
-static void __init r8a7790_rgx_control_init(void)
-{
-	unsigned int val;
-
-#define RGXCR		0x0B4
-
-	val = ioread32(r8a7790_cpg_base + RGXCR);
-	iowrite32(val | (1 << 16), r8a7790_cpg_base + RGXCR);
-}
-
 #define R8A7790_CLOCK_ROOT(e, m, p0, p1, p30, p31)		\
 	extal_clk.rate	= e * 1000 * 1000;			\
 	main_clk.parent	= m;					\
@@ -515,6 +505,4 @@ void __init r8a7790_clock_init(void)
 		shmobile_clk_init();
 	else
 		panic("failed to setup r8a7790 clocks\n");
-
-	r8a7790_rgx_control_init();
 }
