@@ -27,6 +27,8 @@
 #include <linux/platform_data/rcar-du.h>
 #include <linux/platform_data/usb-rcar-gen2-phy.h>
 #include <linux/platform_data/vsp1.h>
+#include <linux/spi/flash.h>
+#include <linux/spi/spi.h>
 #include <linux/usb/phy.h>
 #include <linux/usb/renesas_usbhs.h>
 #include <mach/clock.h>
@@ -460,6 +462,26 @@ static void __init koelsch_add_usb_devices(void)
 	koelsch_add_usb1_host();
 }
 
+/* MSIOF spidev */
+static const struct spi_board_info spi_bus[] __initconst = {
+	{
+		.modalias	= "spidev",
+		.max_speed_hz	= 6000000,
+		.mode		= SPI_MODE_3,
+		.bus_num	= 1,
+		.chip_select	= 0,
+	},
+	{
+		.modalias	= "spidev",
+		.max_speed_hz	= 6000000,
+		.mode		= SPI_MODE_3,
+		.bus_num	= 2,
+		.chip_select	= 0,
+	},
+};
+
+#define koelsch_add_msiof_device spi_register_board_info
+
 static void __init koelsch_add_standard_devices(void)
 {
 	shmobile_clk_workaround(clk_names, ARRAY_SIZE(clk_names), false);
@@ -471,6 +493,7 @@ static void __init koelsch_add_standard_devices(void)
 	koelsch_add_usb_devices();
 	koelsch_add_rsnd_device();
 	koelsch_add_vsp1_devices();
+	koelsch_add_msiof_device(spi_bus, ARRAY_SIZE(spi_bus));
 }
 
 static const char * const koelsch_boards_compat_dt[] __initconst = {
