@@ -244,6 +244,15 @@ static const struct clk_name clk_names[] __initconst = {
 	{ "vsp1-sy", NULL, "vsp1.1" },
 	{ "vsp1-du0", NULL, "vsp1.2" },
 	{ "vsp1-du1", NULL, "vsp1.3" },
+	{ "vcp1", NULL, "vcp2" },
+	{ "vcp0", NULL, "vcp1" },
+	{ "vpc1", NULL, "vpc2" },
+	{ "vpc0", NULL, "vpc1" },
+	{ "ssp1", NULL, "ssp_dev" },
+	{ "2ddmac", NULL, "tddmac" },
+	{ "fdp2", NULL, "fdp2" },
+	{ "fdp1", NULL, "fdp1" },
+	{ "fdp0", NULL, "fdp0" },
 };
 
 /*
