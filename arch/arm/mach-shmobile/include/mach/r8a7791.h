@@ -3,6 +3,7 @@
 
 #include <linux/pm_domain.h>
 #include <mach/pm-rcar.h>
+#include <mach/rcar-gen2.h>
 
 struct platform_device;
 
