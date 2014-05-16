@@ -21,7 +21,6 @@ static inline struct rcar_sysc_ch *to_r8a7779_ch(struct generic_pm_domain *d)
 	return &container_of(d, struct r8a7779_pm_domain, genpd)->ch;
 }
 
-extern void r8a7779_init_delay(void);
 extern void r8a7779_init_irq_extpin(int irlm);
 extern void r8a7779_init_irq_extpin_dt(int irlm);
 extern void r8a7779_init_irq_dt(void);
