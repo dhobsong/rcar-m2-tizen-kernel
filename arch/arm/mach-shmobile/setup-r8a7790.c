@@ -453,9 +453,6 @@ void __init r8a7790_add_standard_devices(void)
 	r8a7790_register_i2c(1);
 	r8a7790_register_i2c(2);
 	r8a7790_register_i2c(3);
-	r8a7790_register_audio_dmac(0);
-	r8a7790_register_audio_dmac(1);
-	r8a7790_register_audmapp();
 	r8a7790_register_msiof(0);
 	r8a7790_register_msiof(1);
 	r8a7790_register_msiof(2);
