@@ -427,9 +427,6 @@ void __init r8a7791_add_standard_devices(void)
 	r8a7791_add_dt_devices();
 	r8a7791_register_irqc(0);
 	r8a7791_register_thermal();
-	r8a7791_register_audio_dmac(0);
-	r8a7791_register_audio_dmac(1);
-	r8a7791_register_audmapp();
 	r8a7791_register_msiof(0);
 	r8a7791_register_msiof(1);
 	r8a7791_register_msiof(2);
