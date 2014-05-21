@@ -23,6 +23,10 @@
 #include "rcar_du_lvdsenc.h"
 #include "rcar_lvds_regs.h"
 
+#ifdef R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND
+static DEFINE_SPINLOCK(lvdsenc_lock);
+#endif
+
 struct rcar_du_lvdsenc {
 	struct rcar_du_device *dev;
 
@@ -48,6 +52,10 @@ int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 	u32 lvdhcr;
 	u32 pllcr;
 	int ret;
+#ifdef R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND
+	unsigned long flags;
+	unsigned int wait_loop, i;
+#endif
 
 	if (lvds->dpms == DRM_MODE_DPMS_ON)
 		return 0;
@@ -101,6 +109,62 @@ int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 		lvdcr0 |= LVDCR0_DUSEL;
 	rcar_lvds_write(lvds, LVDCR0, lvdcr0);
 
+#ifdef R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND
+	if (rcar_du_needs(rcrtc->group->dev, RCAR_DU_QUIRK_LVDS_CH_DATA_GAP)) {
+		/* caluculate waiting loop number */
+		if (freq < 61000)
+			wait_loop = WAIT_PS_TIME_UNDER_61MHZ /
+				 rcrtc->group->dev->info->cpu_clk_time_ps;
+		else if (freq <= 121000)
+			wait_loop = WAIT_PS_TIME_UPPER_61MHZ /
+				 rcrtc->group->dev->info->cpu_clk_time_ps;
+		else
+			wait_loop = WAIT_PS_TIME_UPPER_121MHZ /
+				 rcrtc->group->dev->info->cpu_clk_time_ps;
+
+		/* Turn the PLL on, wait for the startup delay,
+			 and turn the output on. */
+		lvdcr0 |= LVDCR0_PLLEN;
+		rcar_lvds_write(lvds, LVDCR0, lvdcr0);
+
+		usleep_range(100, 150);
+
+		/* 1 loop is four CPU instruction */
+		wait_loop = wait_loop / 4;
+
+		lvdcr0 |= LVDCR0_LVRES;
+
+		spin_lock_irqsave(&lvdsenc_lock, flags);
+
+		writel_relaxed(lvdcr0, lvds->mmio + LVDCR0);
+
+		/* Waiting for workaround */
+		for (i = 0; i < wait_loop; i++)
+			asm("nop");
+
+		/* Turn all the channels on. */
+		writel_relaxed(LVDCR1_CHSTBY(3) | LVDCR1_CHSTBY(2) |
+			       LVDCR1_CHSTBY(1) | LVDCR1_CHSTBY(0) |
+			       LVDCR1_CLKSTBY, lvds->mmio + LVDCR1);
+
+		spin_unlock_irqrestore(&lvdsenc_lock, flags);
+	} else {
+		/* Turn all the channels on. */
+		rcar_lvds_write(lvds, LVDCR1, LVDCR1_CHSTBY(3) |
+				 LVDCR1_CHSTBY(2) | LVDCR1_CHSTBY(1) |
+				 LVDCR1_CHSTBY(0) | LVDCR1_CLKSTBY);
+
+		/* Turn the PLL on, wait for the startup delay,
+			 and turn the output on. */
+		lvdcr0 |= LVDCR0_PLLEN;
+		rcar_lvds_write(lvds, LVDCR0, lvdcr0);
+
+		usleep_range(100, 150);
+
+		lvdcr0 |= LVDCR0_LVRES;
+		rcar_lvds_write(lvds, LVDCR0, lvdcr0);
+	}
+#else
 	/* Turn all the channels on. */
 	rcar_lvds_write(lvds, LVDCR1, LVDCR1_CHSTBY(3) | LVDCR1_CHSTBY(2) |
 			LVDCR1_CHSTBY(1) | LVDCR1_CHSTBY(0) | LVDCR1_CLKSTBY);
@@ -110,6 +174,7 @@ int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 	 */
 	lvdcr0 |= LVDCR0_PLLEN;
 	rcar_lvds_write(lvds, LVDCR0, lvdcr0);
+#endif
 
 	usleep_range(100, 150);
 

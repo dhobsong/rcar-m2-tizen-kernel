@@ -18,6 +18,12 @@
 #include <linux/module.h>
 #include <linux/platform_data/rcar-du.h>
 
+#ifdef R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND
+#define WAIT_PS_TIME_UNDER_61MHZ	165000
+#define WAIT_PS_TIME_UPPER_61MHZ	83000
+#define WAIT_PS_TIME_UPPER_121MHZ	60000
+#endif
+
 struct rcar_drm_crtc;
 struct rcar_du_lvdsenc;
 

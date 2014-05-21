@@ -30,10 +30,13 @@
 #include "rcar_du_regs.h"
 #include "rcar_du_lvdsenc.h"
 
-#ifdef R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
+#if defined(R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND) || \
+	defined(R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND)
 #define PRODUCT_REGISTER	0xFF000044
 #define PRODUCT_CUT_MASK	(0x00007FF0)
 #define PRODUCT_H2_BIT		(0x45 << 8)
+#define PRODUCT_M2_BIT		(0x47 << 8)
+#define CUT_ES2X_BIT		(0x00000010)
 #endif
 /* -----------------------------------------------------------------------------
  * DRM operations
@@ -65,7 +68,8 @@ static int rcar_du_load(struct drm_device *dev, unsigned long flags)
 	struct rcar_du_platform_data *pdata = pdev->dev.platform_data;
 	struct rcar_du_device *rcdu;
 	struct resource *mem;
-#ifdef R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
+#if defined(R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND) || \
+	defined(R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND)
 	void __iomem *product_reg;
 #endif
 	int ret;
@@ -88,15 +92,36 @@ static int rcar_du_load(struct drm_device *dev, unsigned long flags)
 	dev->dev_private = rcdu;
 	rcdu->dpad0_source = rcdu->info->drgbs_bit;
 
-#ifdef R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
+#if defined(R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND) || \
+	defined(R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND)
+
 	product_reg = ioremap_nocache(PRODUCT_REGISTER, 0x04);
 	if (!product_reg)
 		return -ENOMEM;
 
+#ifdef R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
 	/* Add the workaround of LVDS lane mis-connection in R-Car H2 ES1.x. */
 	if ((readl(product_reg) & PRODUCT_CUT_MASK) == PRODUCT_H2_BIT)
 		rcdu->info->quirks = rcdu->info->quirks |
 					 RCAR_DU_QUIRK_LVDS_LANES;
+#endif
+#ifdef R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND
+	/* Add the workaround of LVDS CH data gap
+		in R-Car H2 ES2.x. and R-Car M2 ES2.x. */
+	if ((readl(product_reg) & PRODUCT_CUT_MASK)
+		 == (PRODUCT_H2_BIT | CUT_ES2X_BIT)) {
+		rcdu->info->cpu_clk_time_ps = 1000000000000 / 1400000000;
+		rcdu->info->quirks = rcdu->info->quirks |
+					 RCAR_DU_QUIRK_LVDS_CH_DATA_GAP;
+
+	} else if ((readl(product_reg) & PRODUCT_CUT_MASK)
+		 == (PRODUCT_M2_BIT | CUT_ES2X_BIT)) {
+		rcdu->info->cpu_clk_time_ps = 1000000000000 / 1500000000;
+		rcdu->info->quirks = rcdu->info->quirks |
+					 RCAR_DU_QUIRK_LVDS_CH_DATA_GAP;
+	} else
+		rcdu->info->cpu_clk_time_ps = 0;
+#endif
 	iounmap(product_reg);
 #endif
 
@@ -277,7 +302,8 @@ static int rcar_du_remove(struct platform_device *pdev)
 	return 0;
 }
 
-#ifdef R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
+#if defined(R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND) || \
+	defined(R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND)
 static struct rcar_du_device_info rcar_du_r8a7779_info = {
 #else
 static const struct rcar_du_device_info rcar_du_r8a7779_info = {
@@ -300,7 +326,8 @@ static const struct rcar_du_device_info rcar_du_r8a7779_info = {
 	.num_lvds = 0,
 };
 
-#ifdef R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
+#if defined(R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND) || \
+	defined(R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND)
 static struct rcar_du_device_info rcar_du_r8a7790_info = {
 #else
 static const struct rcar_du_device_info rcar_du_r8a7790_info = {
@@ -346,7 +373,8 @@ static const struct rcar_du_device_info rcar_du_r8a7790_info = {
 	.interlace = false,
 };
 
-#ifdef R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
+#if defined(R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND) || \
+	defined(R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND)
 static struct rcar_du_device_info rcar_du_r8a7791_info = {
 #else
 static const struct rcar_du_device_info rcar_du_r8a7791_info = {

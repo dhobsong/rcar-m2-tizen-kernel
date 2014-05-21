@@ -28,6 +28,7 @@ struct rcar_du_device;
 struct rcar_du_lvdsenc;
 
 #define R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
+#define R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND
 
 #define RCAR_DU_FEATURE_CRTC_IRQ_CLOCK	(1 << 0)	/* Per-CRTC IRQ and clock */
 #define RCAR_DU_FEATURE_DEFR8		(1 << 1)	/* Has DEFR8 register */
@@ -38,6 +39,9 @@ struct rcar_du_lvdsenc;
 #define RCAR_DU_QUIRK_ALIGN_128B	(1 << 0)	/* Align pitches to 128 bytes */
 #ifdef R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
 #define RCAR_DU_QUIRK_LVDS_LANES	(1 << 1)	/* LVDS lanes 1 and 3 inverted */
+#endif
+#ifdef R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND
+#define RCAR_DU_QUIRK_LVDS_CH_DATA_GAP	(1 << 2)	/* LVDS data gap */
 #endif
 
 /*
@@ -73,12 +77,14 @@ struct rcar_du_device_info {
 	unsigned int max_xres;
 	unsigned int max_yres;
 	bool interlace;
+	unsigned int cpu_clk_time_ps;
 };
 
 struct rcar_du_device {
 	struct device *dev;
 	const struct rcar_du_platform_data *pdata;
-#ifdef R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND
+#if defined(R8A7790_ES1_DU_LVDS_LANE_MISCONNECTION_WORKAROUND) || \
+	defined(R8A779X_ES2_DU_LVDS_CH_DATA_GAP_WORKAROUND)
 	struct rcar_du_device_info *info;
 #else
 	const struct rcar_du_device_info *info;
