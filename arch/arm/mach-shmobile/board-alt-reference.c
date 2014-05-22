@@ -82,6 +82,60 @@ static struct rcar_du_crtc_data alt_du_crtcs[] = {
 	},
 };
 
+#ifdef CONFIG_DRM_RCAR_LVDS
+static int alt_lvds_backlight_on(void)
+{
+	int ret;
+	struct device_node *np;
+	int gpio;
+
+	np = of_find_node_by_path("/gpio@e6055000");
+	if (np) {
+		gpio = of_get_gpio(np, 23);
+		of_node_put(np);
+	} else {
+		pr_warn("Error: Unable to set backlight to ON\n");
+		ret = -ENOTSUPP;
+		goto error2;
+	}
+
+	gpio_request_one(gpio, GPIOF_INIT_HIGH, NULL);
+	if (!gpio_get_value(gpio)) {
+		pr_warn("Error: LVDS backlight is not enable\n");
+		ret = -ENOTSUPP;
+		goto error;
+	}
+
+	return 0;
+ error:
+	gpio_free(gpio);
+ error2:
+	return ret;
+}
+
+static int alt_lvds_backlight_off(void)
+{
+	int ret;
+	struct device_node *np;
+	int gpio;
+
+	np = of_find_node_by_path("/gpio@e6055000");
+	if (np) {
+		gpio = of_get_gpio(np, 23);
+		of_node_put(np);
+	} else {
+		pr_warn("Error: Unable to set backlight to OFF\n");
+		ret = -ENOTSUPP;
+		goto error2;
+	}
+
+	gpio_free(gpio);
+
+	return 0;
+ error2:
+	return ret;
+}
+#endif
 static struct rcar_du_platform_data alt_du_pdata = {
 	.encoders = alt_du_encoders,
 	.num_encoders = ARRAY_SIZE(alt_du_encoders),
@@ -89,6 +143,10 @@ static struct rcar_du_platform_data alt_du_pdata = {
 	.num_crtcs = ARRAY_SIZE(alt_du_crtcs),
 #ifdef CONFIG_DRM_FBDEV_CRTC
 	.fbdev_crtc = 0,
+#endif
+#ifdef CONFIG_DRM_RCAR_LVDS
+	.backlight_on = alt_lvds_backlight_on,
+	.backlight_off = alt_lvds_backlight_off,
 #endif
 };
 
