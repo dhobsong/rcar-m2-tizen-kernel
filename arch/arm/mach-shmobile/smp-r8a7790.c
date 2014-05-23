@@ -22,6 +22,7 @@
 #include <mach/common.h>
 #include <mach/pm-rcar.h>
 #include <mach/r8a7790.h>
+#include <mach/platsmp-apmu.h>
 
 #define RST		0xe6160000
 #define CA15BAR		0x0020
@@ -48,13 +49,26 @@ static struct rcar_sysc_ch r8a7790_ca7_scu = {
 	.isr_bit = 21, /* CA7-SCU */
 };
 
+static struct rcar_apmu_config r8a7790_apmu_config[] = {
+	{
+		.iomem = DEFINE_RES_MEM(0xe6152000, 0x88),
+		.cpus = { 0, 1, 2, 3 },
+	},
+	{
+		.iomem = DEFINE_RES_MEM(0xe6151000, 0x88),
+		.cpus = { 0x100, 0x0101, 0x102, 0x103 },
+	}
+};
+
 static void __init r8a7790_smp_prepare_cpus(unsigned int max_cpus)
 {
 	void __iomem *p;
 	u32 bar, val;
 
 	/* let APMU code install data related to shmobile_boot_vector */
-	shmobile_smp_apmu_prepare_cpus(max_cpus);
+	shmobile_smp_apmu_prepare_cpus(max_cpus,
+				       r8a7790_apmu_config,
+				       ARRAY_SIZE(r8a7790_apmu_config));
 
 	/* MERAM for jump stub, because BAR requires 256KB aligned address */
 	p = ioremap_nocache(MERAM, shmobile_boot_size);
