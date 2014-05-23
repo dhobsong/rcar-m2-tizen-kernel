@@ -1492,6 +1492,219 @@ static const unsigned int intc_irq3_pins[] = {
 static const unsigned int intc_irq3_mux[] = {
 	IRQ3_MARK,
 };
+/* - MSIOF0 ----------------------------------------------------------------- */
+static const unsigned int msiof0_clk_pins[] = {
+	/* SCK */
+	RCAR_GP_PIN(4, 4),
+};
+static const unsigned int msiof0_clk_mux[] = {
+	MSIOF0_SCK_MARK,
+};
+static const unsigned int msiof0_sync_pins[] = {
+	/* SYNC */
+	RCAR_GP_PIN(4, 5),
+};
+static const unsigned int msiof0_sync_mux[] = {
+	MSIOF0_SYNC_MARK,
+};
+static const unsigned int msiof0_ss1_pins[] = {
+	/* SS1 */
+	RCAR_GP_PIN(4, 6),
+};
+static const unsigned int msiof0_ss1_mux[] = {
+	MSIOF0_SS1_MARK,
+};
+static const unsigned int msiof0_ss2_pins[] = {
+	/* SS2 */
+	RCAR_GP_PIN(4, 7),
+};
+static const unsigned int msiof0_ss2_mux[] = {
+	MSIOF0_SS2_MARK,
+};
+static const unsigned int msiof0_rx_pins[] = {
+	/* RXD */
+	RCAR_GP_PIN(4, 2),
+};
+static const unsigned int msiof0_rx_mux[] = {
+	MSIOF0_RXD_MARK,
+};
+static const unsigned int msiof0_tx_pins[] = {
+	/* TXD */
+	RCAR_GP_PIN(4, 3),
+};
+static const unsigned int msiof0_tx_mux[] = {
+	MSIOF0_TXD_MARK,
+};
+/* - MSIOF1 ----------------------------------------------------------------- */
+static const unsigned int msiof1_clk_pins[] = {
+	/* SCK */
+	RCAR_GP_PIN(0, 26),
+};
+static const unsigned int msiof1_clk_mux[] = {
+	MSIOF1_SCK_MARK,
+};
+static const unsigned int msiof1_sync_pins[] = {
+	/* SYNC */
+	RCAR_GP_PIN(0, 27),
+};
+static const unsigned int msiof1_sync_mux[] = {
+	MSIOF1_SYNC_MARK,
+};
+static const unsigned int msiof1_ss1_pins[] = {
+	/* SS1 */
+	RCAR_GP_PIN(0, 28),
+};
+static const unsigned int msiof1_ss1_mux[] = {
+	MSIOF1_SS1_MARK,
+};
+static const unsigned int msiof1_ss2_pins[] = {
+	/* SS2 */
+	RCAR_GP_PIN(0, 29),
+};
+static const unsigned int msiof1_ss2_mux[] = {
+	MSIOF1_SS2_MARK,
+};
+static const unsigned int msiof1_rx_pins[] = {
+	/* RXD */
+	RCAR_GP_PIN(0, 24),
+};
+static const unsigned int msiof1_rx_mux[] = {
+	MSIOF1_RXD_MARK,
+};
+static const unsigned int msiof1_tx_pins[] = {
+	/* TXD */
+	RCAR_GP_PIN(0, 25),
+};
+static const unsigned int msiof1_tx_mux[] = {
+	MSIOF1_TXD_MARK,
+};
+static const unsigned int msiof1_clk_b_pins[] = {
+	/* SCK */
+	RCAR_GP_PIN(5, 3),
+};
+static const unsigned int msiof1_clk_b_mux[] = {
+	MSIOF1_SCK_B_MARK,
+};
+static const unsigned int msiof1_sync_b_pins[] = {
+	/* SYNC */
+	RCAR_GP_PIN(5, 4),
+};
+static const unsigned int msiof1_sync_b_mux[] = {
+	MSIOF1_SYNC_B_MARK,
+};
+static const unsigned int msiof1_ss1_b_pins[] = {
+	/* SS1 */
+	RCAR_GP_PIN(5, 5),
+};
+static const unsigned int msiof1_ss1_b_mux[] = {
+	MSIOF1_SS1_B_MARK,
+};
+static const unsigned int msiof1_ss2_b_pins[] = {
+	/* SS2 */
+	RCAR_GP_PIN(5, 6),
+};
+static const unsigned int msiof1_ss2_b_mux[] = {
+	MSIOF1_SS2_B_MARK,
+};
+static const unsigned int msiof1_rx_b_pins[] = {
+	/* RXD */
+	RCAR_GP_PIN(5, 1),
+};
+static const unsigned int msiof1_rx_b_mux[] = {
+	MSIOF1_RXD_B_MARK,
+};
+static const unsigned int msiof1_tx_b_pins[] = {
+	/* TXD */
+	RCAR_GP_PIN(5, 2),
+};
+static const unsigned int msiof1_tx_b_mux[] = {
+	MSIOF1_TXD_B_MARK,
+};
+/* - MSIOF2 ----------------------------------------------------------------- */
+static const unsigned int msiof2_clk_pins[] = {
+	/* SCK */
+	RCAR_GP_PIN(1, 0),
+};
+static const unsigned int msiof2_clk_mux[] = {
+	MSIOF2_SCK_MARK,
+};
+static const unsigned int msiof2_sync_pins[] = {
+	/* SYNC */
+	RCAR_GP_PIN(1, 1),
+};
+static const unsigned int msiof2_sync_mux[] = {
+	MSIOF2_SYNC_MARK,
+};
+static const unsigned int msiof2_ss1_pins[] = {
+	/* SS1 */
+	RCAR_GP_PIN(1, 2),
+};
+static const unsigned int msiof2_ss1_mux[] = {
+	MSIOF2_SS1_MARK,
+};
+static const unsigned int msiof2_ss2_pins[] = {
+	/* SS2 */
+	RCAR_GP_PIN(1, 3),
+};
+static const unsigned int msiof2_ss2_mux[] = {
+	MSIOF2_SS2_MARK,
+};
+static const unsigned int msiof2_rx_pins[] = {
+	/* RXD */
+	RCAR_GP_PIN(0, 30),
+};
+static const unsigned int msiof2_rx_mux[] = {
+	MSIOF2_RXD_MARK,
+};
+static const unsigned int msiof2_tx_pins[] = {
+	/* TXD */
+	RCAR_GP_PIN(0, 31),
+};
+static const unsigned int msiof2_tx_mux[] = {
+	MSIOF2_TXD_MARK,
+};
+static const unsigned int msiof2_clk_b_pins[] = {
+	/* SCK */
+	RCAR_GP_PIN(3, 15),
+};
+static const unsigned int msiof2_clk_b_mux[] = {
+	MSIOF2_SCK_B_MARK,
+};
+static const unsigned int msiof2_sync_b_pins[] = {
+	/* SYNC */
+	RCAR_GP_PIN(3, 16),
+};
+static const unsigned int msiof2_sync_b_mux[] = {
+	MSIOF2_SYNC_B_MARK,
+};
+static const unsigned int msiof2_ss1_b_pins[] = {
+	/* SS1 */
+	RCAR_GP_PIN(3, 17),
+};
+static const unsigned int msiof2_ss1_b_mux[] = {
+	MSIOF2_SS1_B_MARK,
+};
+static const unsigned int msiof2_ss2_b_pins[] = {
+	/* SS2 */
+	RCAR_GP_PIN(3, 18),
+};
+static const unsigned int msiof2_ss2_b_mux[] = {
+	MSIOF2_SS2_B_MARK,
+};
+static const unsigned int msiof2_rx_b_pins[] = {
+	/* RXD */
+	RCAR_GP_PIN(3, 13),
+};
+static const unsigned int msiof2_rx_b_mux[] = {
+	MSIOF2_RXD_B_MARK,
+};
+static const unsigned int msiof2_tx_b_pins[] = {
+	/* TXD */
+	RCAR_GP_PIN(3, 14),
+};
+static const unsigned int msiof2_tx_b_mux[] = {
+	MSIOF2_TXD_B_MARK,
+};
 /* - SCIF0 ------------------------------------------------------------------ */
 static const unsigned int scif0_data_pins[] = {
 	/* RX, TX */
@@ -1989,6 +2202,36 @@ static const struct sh_pfc_pin_group pinmux_groups[] = {
 	SH_PFC_PIN_GROUP(intc_irq1),
 	SH_PFC_PIN_GROUP(intc_irq2),
 	SH_PFC_PIN_GROUP(intc_irq3),
+	SH_PFC_PIN_GROUP(msiof0_clk),
+	SH_PFC_PIN_GROUP(msiof0_sync),
+	SH_PFC_PIN_GROUP(msiof0_ss1),
+	SH_PFC_PIN_GROUP(msiof0_ss2),
+	SH_PFC_PIN_GROUP(msiof0_rx),
+	SH_PFC_PIN_GROUP(msiof0_tx),
+	SH_PFC_PIN_GROUP(msiof1_clk),
+	SH_PFC_PIN_GROUP(msiof1_sync),
+	SH_PFC_PIN_GROUP(msiof1_ss1),
+	SH_PFC_PIN_GROUP(msiof1_ss2),
+	SH_PFC_PIN_GROUP(msiof1_rx),
+	SH_PFC_PIN_GROUP(msiof1_tx),
+	SH_PFC_PIN_GROUP(msiof1_clk_b),
+	SH_PFC_PIN_GROUP(msiof1_sync_b),
+	SH_PFC_PIN_GROUP(msiof1_ss1_b),
+	SH_PFC_PIN_GROUP(msiof1_ss2_b),
+	SH_PFC_PIN_GROUP(msiof1_rx_b),
+	SH_PFC_PIN_GROUP(msiof1_tx_b),
+	SH_PFC_PIN_GROUP(msiof2_clk),
+	SH_PFC_PIN_GROUP(msiof2_sync),
+	SH_PFC_PIN_GROUP(msiof2_ss1),
+	SH_PFC_PIN_GROUP(msiof2_ss2),
+	SH_PFC_PIN_GROUP(msiof2_rx),
+	SH_PFC_PIN_GROUP(msiof2_tx),
+	SH_PFC_PIN_GROUP(msiof2_clk_b),
+	SH_PFC_PIN_GROUP(msiof2_sync_b),
+	SH_PFC_PIN_GROUP(msiof2_ss1_b),
+	SH_PFC_PIN_GROUP(msiof2_ss2_b),
+	SH_PFC_PIN_GROUP(msiof2_rx_b),
+	SH_PFC_PIN_GROUP(msiof2_tx_b),
 	SH_PFC_PIN_GROUP(scif0_data),
 	SH_PFC_PIN_GROUP(scif0_clk),
 	SH_PFC_PIN_GROUP(scif0_data_b),
@@ -2090,6 +2333,45 @@ static const char * const intc_groups[] = {
 	"intc_irq1",
 	"intc_irq2",
 	"intc_irq3",
+};
+
+static const char * const msiof0_groups[] = {
+	"msiof0_clk",
+	"msiof0_sync",
+	"msiof0_ss1",
+	"msiof0_ss2",
+	"msiof0_rx",
+	"msiof0_tx",
+};
+
+static const char * const msiof1_groups[] = {
+	"msiof1_clk",
+	"msiof1_sync",
+	"msiof1_ss1",
+	"msiof1_ss2",
+	"msiof1_rx",
+	"msiof1_tx",
+	"msiof1_clk_b",
+	"msiof1_sync_b",
+	"msiof1_ss1_b",
+	"msiof1_ss2_b",
+	"msiof1_rx_b",
+	"msiof1_tx_b",
+};
+
+static const char * const msiof2_groups[] = {
+	"msiof2_clk",
+	"msiof2_sync",
+	"msiof2_ss1",
+	"msiof2_ss2",
+	"msiof2_rx",
+	"msiof2_tx",
+	"msiof2_clk_b",
+	"msiof2_sync_b",
+	"msiof2_ss1_b",
+	"msiof2_ss2_b",
+	"msiof2_rx_b",
+	"msiof2_tx_b",
 };
 
 static const char * const scif0_groups[] = {
@@ -2208,6 +2490,9 @@ static const struct sh_pfc_function pinmux_functions[] = {
 	SH_PFC_FUNCTION(hscif1),
 	SH_PFC_FUNCTION(hscif2),
 	SH_PFC_FUNCTION(intc),
+	SH_PFC_FUNCTION(msiof0),
+	SH_PFC_FUNCTION(msiof1),
+	SH_PFC_FUNCTION(msiof2),
 	SH_PFC_FUNCTION(scif0),
 	SH_PFC_FUNCTION(scif1),
 	SH_PFC_FUNCTION(scif2),
