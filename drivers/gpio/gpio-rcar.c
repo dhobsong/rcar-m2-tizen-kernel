@@ -1,6 +1,7 @@
 /*
  * Renesas R-Car GPIO Support
  *
+ *  Copyright (C) 2014 Renesas Electronics Corporation
  *  Copyright (C) 2013 Magnus Damm
  *
  * This program is free software; you can redistribute it and/or modify
@@ -302,6 +303,11 @@ static const struct of_device_id gpio_rcar_of_table[] = {
 		},
 	}, {
 		.compatible = "renesas,gpio-r8a7791",
+		.data = (void *)&(const struct gpio_rcar_info) {
+			.has_both_edge_trigger = true,
+		},
+	}, {
+		.compatible = "renesas,gpio-r8a7794",
 		.data = (void *)&(const struct gpio_rcar_info) {
 			.has_both_edge_trigger = true,
 		},
