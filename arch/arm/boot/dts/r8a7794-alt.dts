@@ -160,9 +160,21 @@
 	clock-frequency = <20000000>;
 };
 
+&i2c1 {
+	pinctrl-0 = <&i2c1_pins>;
+	pinctrl-names = "default";
+
+	status = "okay";
+};
+
 &pfc {
 	pinctrl-0 = <&scif2_pins &usb0_pins &usb1_pins>;
 	pinctrl-names = "default";
+
+	i2c1_pins: i2c1 {
+		renesas,groups = "i2c1";
+		renesas,function = "i2c1";
+	};
 
 	scif2_pins: serial2 {
 		renesas,groups = "scif2_data";
