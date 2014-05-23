@@ -69,6 +69,8 @@ static const struct clk_name clk_names[] __initconst = {
  */
 static const struct clk_name clk_enables[] __initconst = {
 	{ "ether", NULL, "ee700000.ethernet" },
+	{ "sdhi0", NULL, "ee100000.sd" },
+	{ "sdhi1", NULL, "ee140000.sd" },
 };
 
 static void __init alt_add_standard_devices(void)
