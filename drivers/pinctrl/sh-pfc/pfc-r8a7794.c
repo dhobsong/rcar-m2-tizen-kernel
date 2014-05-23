@@ -1369,6 +1369,100 @@ static const unsigned int eth_rmii_b_mux[] = {
 	ETH_RXD0_B_MARK, ETH_RXD1_B_MARK, ETH_RX_ER_B_MARK, ETH_CRS_DV_B_MARK,
 	ETH_TXD0_B_MARK, ETH_TXD1_B_MARK, ETH_TX_EN_B_MARK, ETH_REFCLK_B_MARK,
 };
+/* - HSCIF0 ----------------------------------------------------------------- */
+static const unsigned int hscif0_data_pins[] = {
+	/* RX, TX */
+	RCAR_GP_PIN(3, 25), RCAR_GP_PIN(3, 26),
+};
+static const unsigned int hscif0_data_mux[] = {
+	HSCIF0_HRX_MARK, HSCIF0_HTX_MARK,
+};
+static const unsigned int hscif0_clk_pins[] = {
+	/* SCK */
+	RCAR_GP_PIN(3, 29),
+};
+static const unsigned int hscif0_clk_mux[] = {
+	HSCIF0_HSCK_MARK,
+};
+static const unsigned int hscif0_ctrl_pins[] = {
+	/* RTS, CTS */
+	RCAR_GP_PIN(3, 28), RCAR_GP_PIN(3, 27),
+};
+static const unsigned int hscif0_ctrl_mux[] = {
+	HSCIF0_HRTS_N_MARK, HSCIF0_HCTS_N_MARK,
+};
+static const unsigned int hscif0_data_b_pins[] = {
+	/* RX, TX */
+	RCAR_GP_PIN(0, 30), RCAR_GP_PIN(0, 31),
+};
+static const unsigned int hscif0_data_b_mux[] = {
+	HSCIF0_HRX_B_MARK, HSCIF0_HTX_B_MARK,
+};
+static const unsigned int hscif0_clk_b_pins[] = {
+	/* SCK */
+	RCAR_GP_PIN(1, 0),
+};
+static const unsigned int hscif0_clk_b_mux[] = {
+	HSCIF0_HSCK_B_MARK,
+};
+/* - HSCIF1 ----------------------------------------------------------------- */
+static const unsigned int hscif1_data_pins[] = {
+	/* RX, TX */
+	RCAR_GP_PIN(4, 8), RCAR_GP_PIN(4, 9),
+};
+static const unsigned int hscif1_data_mux[] = {
+	HSCIF1_HRX_MARK, HSCIF1_HTX_MARK,
+};
+static const unsigned int hscif1_clk_pins[] = {
+	/* SCK */
+	RCAR_GP_PIN(4, 10),
+};
+static const unsigned int hscif1_clk_mux[] = {
+	HSCIF1_HSCK_MARK,
+};
+static const unsigned int hscif1_ctrl_pins[] = {
+	/* RTS, CTS */
+	RCAR_GP_PIN(4, 12), RCAR_GP_PIN(4, 11),
+};
+static const unsigned int hscif1_ctrl_mux[] = {
+	HSCIF1_HRTS_N_MARK, HSCIF1_HCTS_N_MARK,
+};
+static const unsigned int hscif1_data_b_pins[] = {
+	/* RX, TX */
+	RCAR_GP_PIN(5, 13), RCAR_GP_PIN(5, 14),
+};
+static const unsigned int hscif1_data_b_mux[] = {
+	HSCIF1_HRX_B_MARK, HSCIF1_HTX_B_MARK,
+};
+static const unsigned int hscif1_ctrl_b_pins[] = {
+	/* RTS, CTS */
+	RCAR_GP_PIN(5, 16), RCAR_GP_PIN(5, 15),
+};
+static const unsigned int hscif1_ctrl_b_mux[] = {
+	HSCIF1_HRTS_N_B_MARK, HSCIF1_HCTS_N_B_MARK,
+};
+/* - HSCIF2 ----------------------------------------------------------------- */
+static const unsigned int hscif2_data_pins[] = {
+	/* RX, TX */
+	RCAR_GP_PIN(0, 8), RCAR_GP_PIN(0, 9),
+};
+static const unsigned int hscif2_data_mux[] = {
+	HSCIF2_HRX_MARK, HSCIF2_HTX_MARK,
+};
+static const unsigned int hscif2_clk_pins[] = {
+	/* SCK */
+	RCAR_GP_PIN(0, 10),
+};
+static const unsigned int hscif2_clk_mux[] = {
+	HSCIF2_HSCK_MARK,
+};
+static const unsigned int hscif2_ctrl_pins[] = {
+	/* RTS, CTS */
+	RCAR_GP_PIN(0, 12), RCAR_GP_PIN(0, 11),
+};
+static const unsigned int hscif2_ctrl_mux[] = {
+	HSCIF2_HRTS_N_MARK, HSCIF2_HCTS_N_MARK,
+};
 /* - INTC ------------------------------------------------------------------- */
 static const unsigned int intc_irq0_pins[] = {
 	/* IRQ */
@@ -1878,6 +1972,19 @@ static const struct sh_pfc_pin_group pinmux_groups[] = {
 	SH_PFC_PIN_GROUP(eth_magic_b),
 	SH_PFC_PIN_GROUP(eth_mdio_b),
 	SH_PFC_PIN_GROUP(eth_rmii_b),
+	SH_PFC_PIN_GROUP(hscif0_data),
+	SH_PFC_PIN_GROUP(hscif0_clk),
+	SH_PFC_PIN_GROUP(hscif0_ctrl),
+	SH_PFC_PIN_GROUP(hscif0_data_b),
+	SH_PFC_PIN_GROUP(hscif0_clk_b),
+	SH_PFC_PIN_GROUP(hscif1_data),
+	SH_PFC_PIN_GROUP(hscif1_clk),
+	SH_PFC_PIN_GROUP(hscif1_ctrl),
+	SH_PFC_PIN_GROUP(hscif1_data_b),
+	SH_PFC_PIN_GROUP(hscif1_ctrl_b),
+	SH_PFC_PIN_GROUP(hscif2_data),
+	SH_PFC_PIN_GROUP(hscif2_clk),
+	SH_PFC_PIN_GROUP(hscif2_ctrl),
 	SH_PFC_PIN_GROUP(intc_irq0),
 	SH_PFC_PIN_GROUP(intc_irq1),
 	SH_PFC_PIN_GROUP(intc_irq2),
@@ -1954,6 +2061,28 @@ static const char * const eth_groups[] = {
 	"eth_magic",
 	"eth_mdio",
 	"eth_rmii",
+};
+
+static const char * const hscif0_groups[] = {
+	"hscif0_data",
+	"hscif0_clk",
+	"hscif0_ctrl",
+	"hscif0_data_b",
+	"hscif0_clk_b",
+};
+
+static const char * const hscif1_groups[] = {
+	"hscif1_data",
+	"hscif1_clk",
+	"hscif1_ctrl",
+	"hscif1_data_b",
+	"hscif1_ctrl_b",
+};
+
+static const char * const hscif2_groups[] = {
+	"hscif2_data",
+	"hscif2_clk",
+	"hscif2_ctrl",
 };
 
 static const char * const intc_groups[] = {
@@ -2075,6 +2204,9 @@ static const char * const scifb2_groups[] = {
 
 static const struct sh_pfc_function pinmux_functions[] = {
 	SH_PFC_FUNCTION(eth),
+	SH_PFC_FUNCTION(hscif0),
+	SH_PFC_FUNCTION(hscif1),
+	SH_PFC_FUNCTION(hscif2),
 	SH_PFC_FUNCTION(intc),
 	SH_PFC_FUNCTION(scif0),
 	SH_PFC_FUNCTION(scif1),
