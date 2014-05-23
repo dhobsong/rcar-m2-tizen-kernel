@@ -145,6 +145,15 @@
 		states = <3300000 1
 			  1800000 0>;
 	};
+
+	fixedregulator3v3: fixedregulator@0 {
+		compatible = "regulator-fixed";
+		regulator-name = "fixed-3.3V";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		regulator-boot-on;
+		regulator-always-on;
+	};
 };
 
 &extal_clk {
@@ -178,6 +187,11 @@
 	sdhi1_pins: sd1 {
 		renesas,gpios = "sdhi1_data4", "sdhi1_ctrl";
 		renesas,function = "sdhi1";
+	};
+
+	mmc0_pins: mmc0 {
+		renesas,groups = "mmc_data8", "mmc_ctrl";
+		renesas,function = "mmc";
 	};
 };
 
@@ -246,5 +260,15 @@
 	vqmmc-supply = <&vccq_sdhi1>;
 	cd-gpios = <&gpio6 14 GPIO_ACTIVE_LOW>;
 	wp-gpios = <&gpio6 15 GPIO_ACTIVE_HIGH>;
+	status = "okay";
+};
+
+&mmcif0 {
+	pinctrl-0 = <&mmc0_pins>;
+	pinctrl-names = "default";
+
+	vmmc-supply = <&fixedregulator3v3>;
+	bus-width = <8>;
+	non-removable;
 	status = "okay";
 };
