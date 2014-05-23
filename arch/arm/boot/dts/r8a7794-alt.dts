@@ -161,7 +161,7 @@
 };
 
 &pfc {
-	pinctrl-0 = <&scif2_pins>;
+	pinctrl-0 = <&scif2_pins &usb0_pins &usb1_pins>;
 	pinctrl-names = "default";
 
 	scif2_pins: serial2 {
@@ -192,6 +192,16 @@
 	mmc0_pins: mmc0 {
 		renesas,groups = "mmc_data8", "mmc_ctrl";
 		renesas,function = "mmc";
+	};
+
+	usb0_pins: usb0 {
+		renesas,groups = "usb0";
+		renesas,function = "usb0";
+	};
+
+	usb1_pins: usb1 {
+		renesas,groups = "usb1";
+		renesas,function = "usb1";
 	};
 };
 
