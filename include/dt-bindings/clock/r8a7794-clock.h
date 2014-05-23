@@ -43,6 +43,9 @@
 #define R8A7794_CLK_SCIFB2		16
 
 /* MSTP3 */
+#define R8A7794_CLK_SDHI2		11
+#define R8A7794_CLK_SDHI1		12
+#define R8A7794_CLK_SDHI0		14
 #define R8A7794_CLK_CMT1		29
 
 /* MSTP5 */
