@@ -116,6 +116,7 @@ static struct rcar_du_platform_data lager_du_pdata = {
 #ifdef CONFIG_DRM_FBDEV_CRTC
 	.fbdev_crtc = 0,
 #endif
+	.i2c_ch = 2,
 };
 
 static const struct resource du_resources[] __initconst = {
