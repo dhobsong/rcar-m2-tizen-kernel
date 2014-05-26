@@ -275,7 +275,7 @@ int rcar_du_encoder_init(struct rcar_du_device *rcdu,
 		return ret;
 
 	if (type == RCAR_DU_ENCODER_HDMI) {
-		adapter = i2c_get_adapter(2);
+		adapter = i2c_get_adapter(rcdu->pdata->i2c_ch);
 		if (adapter == NULL) {
 			DRM_ERROR("No adapter available!\n");
 			return -EINVAL;

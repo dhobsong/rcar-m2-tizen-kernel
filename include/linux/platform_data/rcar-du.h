@@ -87,6 +87,7 @@ struct rcar_du_platform_data {
 #endif
 	int (*backlight_on)(void);
 	int (*backlight_off)(void);
+	unsigned int i2c_ch;
 };
 
 #endif /* __RCAR_DU_H__ */
