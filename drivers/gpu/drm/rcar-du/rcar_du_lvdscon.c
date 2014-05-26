@@ -97,6 +97,12 @@ int rcar_du_lvds_connector_init(struct rcar_du_device *rcdu,
 	struct drm_connector *connector;
 	int ret;
 
+	if (rcdu->pdata->backlight_on) {
+		ret = rcdu->pdata->backlight_on();
+		if (ret < 0)
+			return ret;
+	}
+
 	lvdscon = devm_kzalloc(rcdu->dev, sizeof(*lvdscon), GFP_KERNEL);
 	if (lvdscon == NULL)
 		return -ENOMEM;

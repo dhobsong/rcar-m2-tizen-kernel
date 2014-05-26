@@ -53,6 +53,9 @@ static int rcar_du_unload(struct drm_device *dev)
 	dev->irq_enabled = 0;
 	dev->dev_private = NULL;
 
+	if (rcdu->pdata->backlight_off)
+		rcdu->pdata->backlight_off();
+
 	return 0;
 }
 

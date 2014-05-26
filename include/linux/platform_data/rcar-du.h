@@ -85,6 +85,8 @@ struct rcar_du_platform_data {
 #ifdef CONFIG_DRM_FBDEV_CRTC
 	unsigned int fbdev_crtc;
 #endif
+	int (*backlight_on)(void);
+	int (*backlight_off)(void);
 };
 
 #endif /* __RCAR_DU_H__ */
