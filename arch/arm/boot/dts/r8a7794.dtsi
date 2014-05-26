@@ -19,6 +19,7 @@
 	#size-cells = <2>;
 
 	aliases {
+		spi0 = &qspi;
 		spi1 = &msiof0;
 		spi2 = &msiof1;
 		spi3 = &msiof2;
@@ -585,6 +586,14 @@
 			clock-output-names =
 				"ether";
 		};
+		mstp9_clks: mstp9_clks@e6150994 {
+			compatible = "renesas,r8a7794-mstp-clocks", "renesas,cpg-mstp-clocks";
+			reg = <0 0xe6150994 0 4>, <0 0xe61509a4 0 4>;
+			clocks = <&cpg_clocks R8A7794_CLK_QSPI>;
+			#clock-cells = <1>;
+			renesas,clock-indices = <R8A7794_CLK_QSPI_MOD>;
+			clock-output-names = "qspi_mod";
+		};
 		mstp11_clks: mstp11_clks@e615099c {
 			compatible = "renesas,r8a7794-mstp-clocks", "renesas,cpg-mstp-clocks";
 			reg = <0 0xe615099c 0 4>, <0 0xe61509ac 0 4>;
@@ -595,6 +604,17 @@
 			>;
 			clock-output-names = "scifa3", "scifa4", "scifa5";
 		};
+	};
+
+	qspi: spi@e6b10000 {
+		compatible = "renesas,qspi-r8a7794", "renesas,qspi";
+		reg = <0 0xe6b10000 0 0x2c>;
+		interrupts = <0 184 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&mstp9_clks R8A7794_CLK_QSPI_MOD>;
+		num-cs = <1>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		status = "disabled";
 	};
 
 	msiof0: spi@e6e20000 {
