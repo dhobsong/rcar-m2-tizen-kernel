@@ -87,6 +87,7 @@ static struct rcar_du_platform_data koelsch_du_pdata = {
 #ifdef CONFIG_DRM_FBDEV_CRTC
 	.fbdev_crtc = 1,
 #endif
+	.i2c_ch = 2,
 };
 
 static const struct resource du_resources[] __initconst = {
