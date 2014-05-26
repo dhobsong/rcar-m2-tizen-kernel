@@ -148,6 +148,7 @@ static struct rcar_du_platform_data alt_du_pdata = {
 	.backlight_on = alt_lvds_backlight_on,
 	.backlight_off = alt_lvds_backlight_off,
 #endif
+	.i2c_ch = 1,
 };
 
 static const struct resource du_resources[] __initconst = {
