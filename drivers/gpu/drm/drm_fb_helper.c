@@ -795,6 +795,7 @@ int drm_fb_helper_set_par(struct fb_info *info)
 	unsigned int bytes_per_pixel;
 	unsigned int match_flag;
 	unsigned int pre_pixfmt;
+	unsigned int vrefresh = 0;
 #endif
 
 #if !defined(CONFIG_DRM_FBDEV_CRTC)
@@ -868,13 +869,19 @@ int drm_fb_helper_set_par(struct fb_info *info)
 			fb_helper->first_hotplug = true;
 		}
 
+		if ((var->xres == cmdline_mode->xres) &&
+			(var->yres == cmdline_mode->yres))
+			vrefresh = cmdline_mode->refresh;
+
 		match_flag = 0;
 		list_for_each_entry(ref_disp_mode, &disp_conn->modes, head) {
 			if (((var->vmode & FB_VMODE_MASK) == true) &&
 			    !(ref_disp_mode->flags & DRM_MODE_FLAG_INTERLACE))
 				continue;
-			if ((var->xres == ref_disp_mode->hdisplay)
-			    && (var->yres == ref_disp_mode->vdisplay)) {
+			if (((var->xres == ref_disp_mode->hdisplay)
+				&& (var->yres == ref_disp_mode->vdisplay))
+				&& ((vrefresh == 0)
+				|| (vrefresh == ref_disp_mode->vrefresh))) {
 				match_flag = 1;
 				break;
 			}
