@@ -168,8 +168,14 @@
 };
 
 &pfc {
-	pinctrl-0 = <&scif2_pins &usb0_pins &usb1_pins>;
+	pinctrl-0 = <&du_pins &scif2_pins &usb0_pins &usb1_pins>;
 	pinctrl-names = "default";
+
+	du_pins: du {
+		renesas,groups = "du0_rgb888", "du0_sync", "du0_clk_out",
+				 "du1_rgb666", "du1_sync", "du1_clk_out";
+		renesas,function = "du";
+	};
 
 	i2c1_pins: i2c1 {
 		renesas,groups = "i2c1";
