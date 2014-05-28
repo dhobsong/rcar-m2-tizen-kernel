@@ -270,7 +270,7 @@ static const char * const alt_boards_compat_dt[] __initconst = {
 DT_MACHINE_START(ALT_DT, "alt")
 	.smp		= smp_ops(r8a7794_smp_ops),
 	.init_early	= r8a7794_init_early,
-	.init_time	= rcar_gen2_timer_init,
+	.init_time	= r8a7794_timer_init,
 	.init_machine	= alt_add_standard_devices,
 	.init_late	= shmobile_init_late,
 	.dt_compat	= alt_boards_compat_dt,
