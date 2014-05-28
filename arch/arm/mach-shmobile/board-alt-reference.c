@@ -38,6 +38,81 @@
 #include <sound/rcar_snd.h>
 #include <sound/simple_card.h>
 
+/* DU */
+static struct rcar_du_encoder_data alt_du_encoders[] = {
+#if defined(CONFIG_DRM_ADV7511) || defined(CONFIG_DRM_ADV7511_MODULE)
+	{
+		.type = RCAR_DU_ENCODER_HDMI,
+		.output = RCAR_DU_OUTPUT_DPAD0,
+	},
+#elif defined(CONFIG_DRM_RCAR_LVDS)
+	{
+		.type = RCAR_DU_ENCODER_NONE,
+		.output = RCAR_DU_OUTPUT_LVDS0,
+		.connector.lvds.panel = {
+			.width_mm = 210,
+			.height_mm = 158,
+			.mode = {
+				.clock = 65000,
+				.hdisplay = 1024,
+				.hsync_start = 1048,
+				.hsync_end = 1184,
+				.htotal = 1344,
+				.vdisplay = 768,
+				.vsync_start = 771,
+				.vsync_end = 777,
+				.vtotal = 806,
+				.flags = 0,
+			},
+		},
+	},
+#endif
+	{
+		.type = RCAR_DU_ENCODER_VGA,
+		.output = RCAR_DU_OUTPUT_DPAD1,
+	},
+};
+
+static struct rcar_du_crtc_data alt_du_crtcs[] = {
+	{
+		.exclk = 148500000,
+	},
+	{
+		.exclk = 74250000,
+	},
+};
+
+static struct rcar_du_platform_data alt_du_pdata = {
+	.encoders = alt_du_encoders,
+	.num_encoders = ARRAY_SIZE(alt_du_encoders),
+	.crtcs = alt_du_crtcs,
+	.num_crtcs = ARRAY_SIZE(alt_du_crtcs),
+#ifdef CONFIG_DRM_FBDEV_CRTC
+	.fbdev_crtc = 0,
+#endif
+};
+
+static const struct resource du_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfeb00000, 0x40000),
+	DEFINE_RES_IRQ(gic_spi(256)),
+	DEFINE_RES_IRQ(gic_spi(268)),
+};
+
+static void __init alt_add_du_device(void)
+{
+	struct platform_device_info info = {
+		.name = "rcar-du-r8a7794",
+		.id = -1,
+		.res = du_resources,
+		.num_res = ARRAY_SIZE(du_resources),
+		.data = &alt_du_pdata,
+		.size_data = sizeof(alt_du_pdata),
+		.dma_mask = DMA_BIT_MASK(32),
+	};
+
+	platform_device_register_full(&info);
+}
+
 /*
  * This is a really crude hack to provide clkdev support to platform
  * devices until they get moved to DT.
@@ -62,6 +137,8 @@ static const struct clk_name clk_names[] __initconst = {
 	{ "scifa4", NULL, "sh-sci.15" },
 	{ "scifa5", NULL, "sh-sci.16" },
 	{ "hscif2", NULL, "sh-sci.17" },
+	{ "du0", "du.0", "rcar-du-r8a7794" },
+	{ "du1", "du.1", "rcar-du-r8a7794" },
 	{ "hsusb", NULL, "usb_phy_rcar_gen2" },
 };
 
@@ -115,6 +192,7 @@ static void __init alt_add_standard_devices(void)
 	shmobile_clk_workaround(clk_enables, ARRAY_SIZE(clk_enables), true);
 	r8a7794_add_dt_devices();
 	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
+	alt_add_du_device();
 
 	platform_device_register_resndata(&platform_bus, "usb_phy_rcar_gen2",
 					  -1, usbhs_phy_resources,
