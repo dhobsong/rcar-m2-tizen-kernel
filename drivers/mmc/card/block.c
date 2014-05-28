@@ -1329,8 +1329,23 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
 
 		/* Some controllers can't do multiblock reads due to hw bugs */
 		if (card->host->caps2 & MMC_CAP2_NO_MULTI_READ &&
-		    rq_data_dir(req) == READ)
-			brq->data.blocks = 1;
+		    rq_data_dir(req) == READ) {
+
+			if (card->host->caps2 & MMC_CAP2_2BLKS_LIMIT) {
+				/*
+				 * In some controllers, when performing a
+				 * multiple block read of one or two blocks,
+				 * depending on the timing with which the
+				 * response register is read, the response
+				 * value may not be read properly.
+				 * Use single block read for this HW bug
+				 */
+				if (brq->data.blocks == 2)
+					brq->data.blocks = 1;
+			} else {
+				brq->data.blocks = 1;
+			}
+		}
 	}
 
 	if (brq->data.blocks > 1 || do_rel_wr) {
