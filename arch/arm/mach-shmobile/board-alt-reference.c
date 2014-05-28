@@ -212,6 +212,7 @@ static const struct clk_name clk_enables[] __initconst = {
 	{ "sdhi1", NULL, "ee140000.sd" },
 	{ "hsusb", NULL, "renesas_usbhs" },
 	{ "ehci", NULL, "pci-rcar-gen2.1" },
+	{ "pvrsrvkm", NULL, "pvrsrvkm" },
 };
 
 /* USBHS PHY */
