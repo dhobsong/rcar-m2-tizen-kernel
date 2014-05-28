@@ -176,8 +176,22 @@ static const struct resource cmt00_resources[] __initconst = {
 					  &cmt##idx##_platform_data,	\
 					  sizeof(struct sh_timer_config))
 
+/* POWERVR */
+static const struct resource powervr_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfd800000, 0x10000),
+	DEFINE_RES_IRQ(gic_spi(119)),
+};
+
+#define r8a7794_register_pvrsrvkm()					\
+	platform_device_register_simple("pvrsrvkm", -1,			\
+					powervr_resources,		\
+					ARRAY_SIZE(powervr_resources))
+
 void __init r8a7794_add_dt_devices(void)
 {
+	r8a7794_pm_init();
+	r8a7794_init_pm_domains();
+
 	r8a7794_register_scif(0);
 	r8a7794_register_scif(1);
 	r8a7794_register_scif(2);
@@ -190,14 +204,11 @@ void __init r8a7794_add_dt_devices(void)
 	r8a7794_register_scif(9);
 	r8a7794_register_scif(10);
 	r8a7794_register_cmt(00);
+	r8a7794_register_pvrsrvkm();
 }
 
 void __init r8a7794_add_standard_devices(void)
 {
-	r8a7794_pm_init();
-
-	r8a7794_init_pm_domains();
-
 	r8a7794_add_dt_devices();
 	r8a7794_register_irqc(0);
 }
