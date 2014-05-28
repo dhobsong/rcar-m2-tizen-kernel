@@ -25,4 +25,23 @@ config DRM_I2C_NXP_TDA998X
 	help
 	  Support for NXP Semiconductors TDA998X HDMI encoders.
 
+config DRM_ADV7511
+	tristate "ADV7511 encoder"
+	select REGMAP_I2C
+	select HDMI
+	help
+	  Choose this option if you want to select ADV7511
+	  encoder
+	  If you want to use ADV7511, you select y.
+	  If you don't want to use ADV7511, you select n.
+
+config DRM_ADV7511_DVI_OUTPUT
+	bool "ADV7511 DVI output mode"
+	depends on DRM_ADV7511
+	help
+	  Choose this option if you want to select DVI mode for
+	  ADV7511 encoder.
+	  If you want to use DVI mode, you select y.
+	  If you want to use HDMI mode, you select n.
+
 endmenu
