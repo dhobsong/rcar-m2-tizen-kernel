@@ -17,6 +17,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <linux/clk/shmobile.h>
+#include <linux/clocksource.h>
 #include <linux/irq.h>
 #include <linux/kernel.h>
 #include <linux/of_platform.h>
@@ -207,6 +209,50 @@ void __init r8a7794_init_early(void)
 #endif
 }
 
+#define CNTCR 0
+#define CNTFID0 0x20
+
+void __init r8a7794_timer_init(void)
+{
+#if defined(CONFIG_ARM_ARCH_TIMER) || defined(CONFIG_COMMON_CLK)
+	u32 mode = rcar_gen2_read_mode_pins();
+#endif
+#ifdef CONFIG_ARM_ARCH_TIMER
+	void __iomem *base;
+	u32 freq;
+
+	/* The arch timer frequency equals ZS / 8 */
+	freq = 260000000 / 8;
+
+	/* Remap "armgcnt address map" space */
+	base = ioremap(0xe6080000, PAGE_SIZE);
+
+	/*
+	 * Update the timer if it is either not running, or is not at the
+	 * right frequency. The timer is only configurable in secure mode
+	 * so this avoids an abort if the loader started the timer and
+	 * entered the kernel in non-secure mode.
+	 */
+
+	if ((ioread32(base + CNTCR) & 1) == 0 ||
+	    ioread32(base + CNTFID0) != freq) {
+		/* Update registers with correct frequency */
+		iowrite32(freq, base + CNTFID0);
+		asm volatile("mcr p15, 0, %0, c14, c0, 0" : : "r" (freq));
+
+		/* make sure arch timer is started by setting bit 0 of CNTCR */
+		iowrite32(1, base + CNTCR);
+	}
+
+	iounmap(base);
+#endif /* CONFIG_ARM_ARCH_TIMER */
+
+#ifdef CONFIG_COMMON_CLK
+	rcar_gen2_clocks_init(mode);
+#endif
+	clocksource_of_init();
+}
+
 #ifdef CONFIG_USE_OF
 
 static const char * const r8a7794_boards_compat_dt[] __initconst = {
@@ -217,7 +263,7 @@ static const char * const r8a7794_boards_compat_dt[] __initconst = {
 DT_MACHINE_START(R8A7794_DT, "Generic R8A7794 (Flattened Device Tree)")
 	.smp		= smp_ops(r8a7794_smp_ops),
 	.init_early	= r8a7794_init_early,
-	.init_time	= rcar_gen2_timer_init,
+	.init_time	= r8a7794_timer_init,
 	.dt_compat	= r8a7794_boards_compat_dt,
 MACHINE_END
 #endif /* CONFIG_USE_OF */

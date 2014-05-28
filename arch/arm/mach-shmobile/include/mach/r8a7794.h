@@ -24,6 +24,7 @@ void r8a7794_clock_init(void);
 void r8a7794_pinmux_init(void);
 void r8a7794_pm_init(void);
 void r8a7794_init_early(void);
+void r8a7794_timer_init(void);
 extern struct smp_operations r8a7794_smp_ops;
 
 #ifdef CONFIG_PM
