@@ -36,6 +36,7 @@ enum rcar_lvds_input {
 int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 			  struct rcar_du_crtc *rcrtc);
 void rcar_du_lvdsenc_stop(struct rcar_du_lvdsenc *lvds);
+int rcar_du_lvdsenc_stop_suspend(struct rcar_du_lvdsenc *lvds);
 
 #if IS_ENABLED(CONFIG_DRM_RCAR_LVDS)
 int rcar_du_lvdsenc_init(struct rcar_du_device *rcdu);

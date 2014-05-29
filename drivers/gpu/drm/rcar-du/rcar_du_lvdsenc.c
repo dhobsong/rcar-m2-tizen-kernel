@@ -60,6 +60,8 @@ int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 	if (lvds->dpms == DRM_MODE_DPMS_ON)
 		return 0;
 
+	rcrtc->lvds_ch = lvds->index;
+
 	/* software reset release */
 	if ((lvds->dev->info->lvds0_crtc) || (lvds->dev->info->lvds1_crtc)) {
 		void __iomem *srstclr7_reg;
@@ -198,10 +200,10 @@ int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 	return 0;
 }
 
-void rcar_du_lvdsenc_stop(struct rcar_du_lvdsenc *lvds)
+int rcar_du_lvdsenc_stop_suspend(struct rcar_du_lvdsenc *lvds)
 {
 	if (lvds->dpms == DRM_MODE_DPMS_OFF)
-		return;
+		return -1;
 
 	rcar_lvds_write(lvds, LVDCR0, 0);
 	rcar_lvds_write(lvds, LVDCR1, 0);
@@ -223,6 +225,22 @@ void rcar_du_lvdsenc_stop(struct rcar_du_lvdsenc *lvds)
 	}
 
 	lvds->dpms = DRM_MODE_DPMS_OFF;
+
+	return 0;
+}
+
+void rcar_du_lvdsenc_stop(struct rcar_du_lvdsenc *lvds)
+{
+	int ret;
+	unsigned int i;
+
+	ret = rcar_du_lvdsenc_stop_suspend(lvds);
+	if (ret < 0)
+		return;
+
+	for (i = 0; i < lvds->dev->pdata->num_crtcs; ++i)
+		if (lvds->index == lvds->dev->crtcs[i].lvds_ch)
+			lvds->dev->crtcs[i].lvds_ch = -1;
 }
 
 int rcar_du_lvdsenc_dpms(struct rcar_du_lvdsenc *lvds,
