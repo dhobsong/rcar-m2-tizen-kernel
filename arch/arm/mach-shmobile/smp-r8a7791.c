@@ -77,6 +77,7 @@ static void __init r8a7791_smp_prepare_cpus(unsigned int max_cpus)
 	}
 
 	r8a7791_pm_init();
+	shmobile_smp_apmu_suspend_init();
 }
 
 struct smp_operations r8a7791_smp_ops __initdata = {
