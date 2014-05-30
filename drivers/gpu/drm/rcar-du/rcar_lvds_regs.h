@@ -66,4 +66,12 @@
 #define LVDCHCR_CHSEL_CH(n, c)		((((c) - (n)) & 3) << ((n) * 4))
 #define LVDCHCR_CHSEL_MASK(n)		(3 << ((n) * 4))
 
+/* -----------------------------------------------------------------------------
+ * Reset register
+ */
+#define SRCR7_REGISTER		0xE61501CC
+#define SRSTCLR7_REGISTER	0xE615095C
+#define SRCR7_LVDS0		(1 << 26)
+#define SRCR7_LVDS1		(1 << 25)
+
 #endif /* __RCAR_LVDS_REGS_H__ */

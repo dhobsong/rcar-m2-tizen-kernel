@@ -60,6 +60,19 @@ int rcar_du_lvdsenc_start(struct rcar_du_lvdsenc *lvds,
 	if (lvds->dpms == DRM_MODE_DPMS_ON)
 		return 0;
 
+	/* software reset release */
+	if ((lvds->dev->info->lvds0_crtc) || (lvds->dev->info->lvds1_crtc)) {
+		void __iomem *srstclr7_reg;
+		u32 srstclr7_lvds = 0;
+		if (lvds->dev->info->lvds0_crtc & (0x01 << rcrtc->index))
+			srstclr7_lvds |= SRCR7_LVDS0;
+		if (lvds->dev->info->lvds1_crtc & (0x01 << rcrtc->index))
+			srstclr7_lvds |= SRCR7_LVDS1;
+		srstclr7_reg = ioremap_nocache(SRSTCLR7_REGISTER, 0x04);
+		writel_relaxed(srstclr7_lvds, srstclr7_reg);
+		iounmap(srstclr7_reg);
+	}
+
 	ret = clk_prepare_enable(lvds->clock);
 	if (ret < 0)
 		return ret;
@@ -194,6 +207,20 @@ void rcar_du_lvdsenc_stop(struct rcar_du_lvdsenc *lvds)
 	rcar_lvds_write(lvds, LVDCR1, 0);
 
 	clk_disable_unprepare(lvds->clock);
+
+	/* software reset */
+	if ((lvds->dev->info->lvds0_crtc) || (lvds->dev->info->lvds1_crtc)) {
+		void __iomem *srcr7_reg;
+		u32 srcr7_lvds = 0;
+		if (lvds->index == 0)
+			srcr7_lvds |= SRCR7_LVDS0;
+		if (lvds->index == 1)
+			srcr7_lvds |= SRCR7_LVDS1;
+		srcr7_reg = ioremap_nocache(SRCR7_REGISTER, 0x04);
+		writel_relaxed(readl_relaxed(srcr7_reg) |
+			       srcr7_lvds, srcr7_reg);
+		iounmap(srcr7_reg);
+	}
 
 	lvds->dpms = DRM_MODE_DPMS_OFF;
 }
