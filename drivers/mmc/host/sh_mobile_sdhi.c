@@ -55,7 +55,7 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen1_compatible = {
 static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_WRPROTECT_DISABLE,
 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
-	.capabilities2	= MMC_CAP2_NO_MULTI_READ,
+	.capabilities2	= MMC_CAP2_NO_2BLKS_READ,
 };
 
 static const struct of_device_id sh_mobile_sdhi_of_match[] = {
