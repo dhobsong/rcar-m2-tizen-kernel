@@ -173,7 +173,7 @@
 };
 
 &pfc {
-	pinctrl-0 = <&du_pins &scif2_pins &usb0_pins &usb1_pins>;
+	pinctrl-0 = <&du_pins &scif2_pins &usb0_pins &usb1_pins &vin0_pins>;
 	pinctrl-names = "default";
 
 	du_pins: du {
@@ -225,6 +225,12 @@
 	usb1_pins: usb1 {
 		renesas,groups = "usb1";
 		renesas,function = "usb1";
+	};
+
+	vin0_pins: vin0 {
+		renesas,groups = "vin0_data8", "vin0_sync", "vin0_field",
+				 "vin0_clkenb", "vin0_clk";
+		renesas,function = "vin0";
 	};
 };
 
