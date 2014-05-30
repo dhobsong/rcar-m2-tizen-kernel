@@ -75,6 +75,8 @@ static void __init r8a7791_smp_prepare_cpus(unsigned int max_cpus)
 		writel_relaxed((val | 0x01f80000), p + CA15DBGRCR);
 		iounmap(p);
 	}
+
+	r8a7791_pm_init();
 }
 
 struct smp_operations r8a7791_smp_ops __initdata = {
