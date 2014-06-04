@@ -1,3 +1,6 @@
+* Tue Jun 03 2014 Jin Song <jin.kyu.song@linux.intel.com> 3.14.2
+- Port fastboot patches. 'i915.fastboot=1' enables the feature.
+
 * Mon May 19 2014 Jin Song <jin.kyu.song@linux.intel.com> 3.14.2
 - Upgrade to version 3.14.2.
 
