@@ -56,6 +56,9 @@
 #define AUDIO_DMAC_SSI_SLAVE(_id, _addr, t, r)			\
 	AUDIO_DMAC_SLAVE(SSI##_id, _addr, 0x8, 0xc, t, r)
 
+#define AUDIO_DMAC_SSIU_SLAVE(_id, _addr, t, r)		\
+	AUDIO_DMAC_SLAVE(SSIU##_id, _addr, 0, 0, t, r)
+
 static const struct sh_dmae_slave_config r8a7791_audio_dmac_slaves[] = {
 	AUDIO_DMAC_SCU_SLAVE(0, 0xec000000, 0x85, 0x9a),
 	AUDIO_DMAC_SCU_SLAVE(1, 0xec000400, 0x87, 0x9c),
@@ -77,6 +80,16 @@ static const struct sh_dmae_slave_config r8a7791_audio_dmac_slaves[] = {
 	AUDIO_DMAC_SSI_SLAVE(7, 0xec2411c0, 0x0f, 0x10),
 	AUDIO_DMAC_SSI_SLAVE(8, 0xec241200, 0x11, 0x12),
 	AUDIO_DMAC_SSI_SLAVE(9, 0xec241240, 0x13, 0x14),
+	AUDIO_DMAC_SSIU_SLAVE(0, 0, 0x15, 0x16),
+	AUDIO_DMAC_SSIU_SLAVE(1, 0, 0x49, 0x4a),
+	AUDIO_DMAC_SSIU_SLAVE(2, 0, 0x63, 0x64),
+	AUDIO_DMAC_SSIU_SLAVE(3, 0, 0x6f, 0x70),
+	AUDIO_DMAC_SSIU_SLAVE(4, 0, 0x71, 0x72),
+	AUDIO_DMAC_SSIU_SLAVE(5, 0, 0x73, 0x74),
+	AUDIO_DMAC_SSIU_SLAVE(6, 0, 0x75, 0x76),
+	AUDIO_DMAC_SSIU_SLAVE(7, 0, 0x79, 0x7a),
+	AUDIO_DMAC_SSIU_SLAVE(8, 0, 0x7b, 0x7c),
+	AUDIO_DMAC_SSIU_SLAVE(9, 0, 0x7d, 0x7e),
 };
 
 #define DMAE_CHANNEL(a, b)			\
