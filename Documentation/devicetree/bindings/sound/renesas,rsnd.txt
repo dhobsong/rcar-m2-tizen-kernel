@@ -15,6 +15,7 @@ SSI subnode properties:
 - interrupts			: Should contain SSI interrupt for PIO transfer
 - shared-pin			: if shared clock pin
 - pio-transfer			: use PIO transfer mode
+- no-busif			: BUSIF is not ussed when [mem -> SSI] via DMA case
 
 DAI subnode properties:
 - playback			: list of playback modules
