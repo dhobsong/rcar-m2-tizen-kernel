@@ -473,6 +473,32 @@
 		status = "disabled";
 	};
 
+	usbphy: usb-phy@e6590100 {
+		compatible = "renesas,usb-phy-r8a7790";
+		reg = <0 0xe6590100 0 0x100>;
+		#phy-cells = <2>;
+		clocks = <&mstp7_clks R8A7790_CLK_HSUSB>;
+		clock-names = "usbhs";
+		status = "disabled";
+
+		usb-phy@0,0 {
+			renesas,phy-select = <0 0>;
+			renesas,ugctrl2-masks = <0x00000030 0x00000010>;
+		};
+		usb-phy@0,1 {
+			renesas,phy-select = <0 1>;
+			renesas,ugctrl2-masks = <0x00000030 0x00000030>;
+		};
+		usb-phy@1,0 {
+			renesas,phy-select = <1 0>;
+			renesas,ugctrl2-masks = <0x80000000 0x00000000>;
+		};
+		usb-phy@1,1 {
+			renesas,phy-select = <1 1>;
+			renesas,ugctrl2-masks = <0x80000000 0x80000000>;
+		};
+	};
+
 	clocks {
 		#address-cells = <2>;
 		#size-cells = <2>;
