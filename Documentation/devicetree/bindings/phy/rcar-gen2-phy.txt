@@ -1,0 +1,60 @@
+* Renesas R-Car generation 2 USB PHY
+
+This file provides information on what the device node for the R-Car generation
+2 USB PHY contains.
+
+Required properties:
+- compatible: "renesas,usb-phy-r8a7790" if the device is a part of R8A7790 SoC.
+	      "renesas,usb-phy-r8a7791" if the device is a part of R8A7791 SoC.
+- reg: offset and length of the register block.
+- #phy-cells: see phy-bindings.txt in the same directory, must be 2.
+- clocks: clock phandle and specifier pair.
+- clock-names: string, clock input name, must be "usbhs".
+
+The phandle's first argument in the PHY specifier identifies the USB channel,
+the second one is the USB controller selector and depends on the first:
+
++-----------+---------------+---------------+
+|\ Selector |               |               |
++ --------- +       0       |       1       |
+| Channel  \|               |               |
++-----------+---------------+---------------+
+| 0         | PCI EHCI/OHCI | HS-USB        |
+| 1         | PCI EHCI/OHCI | xHCI          |
++-----------+---------------+---------------+
+
+The USB PHY device tree node should be the subnodes corresponding to the USB
+channels and the controllers connected to them. These subnodes must contain the
+following properties:
+- renesas,phy-select: the first cell identifies the USB channel, the second cell
+  is the USB controller selector; see the table above for the values.
+- renesas,ugctrl2-masks: the first cell is the UGCTRL2 mask corresponding to
+  the USB channel, the second cell is the UGCTRL2 value corresponding to the
+  USB controller selected for that channel.
+
+Example (Lager board):
+
+	usb-phy@e6590100 {
+		compatible = "renesas,usb-phy-r8a7790";
+		reg = <0 0xe6590100 0 0x100>;
+		#phy-cells = <2>;
+		clocks = <&mstp7_clks R8A7790_CLK_HSUSB>;
+		clock-names = "usbhs";
+
+		usb-phy@0,0 {
+			renesas,phy-select = <0 0>;
+			renesas,ugctrl2-masks = <0x00000030 0x00000010>;
+		};
+		usb-phy@0,1 {
+			renesas,phy-select = <0 1>;
+			renesas,ugctrl2-masks = <0x00000030 0x00000030>;
+		};
+		usb-phy@1,0 {
+			renesas,phy-select = <1 0>;
+			renesas,ugctrl2-masks = <0x80000000 0x00000000>;
+		};
+		usb-phy@1,1 {
+			renesas,phy-select = <1 1>;
+			renesas,ugctrl2-masks = <0x80000000 0x80000000>;
+		};
+	};
