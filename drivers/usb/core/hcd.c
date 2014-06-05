@@ -41,8 +41,10 @@
 #include <linux/workqueue.h>
 #include <linux/pm_runtime.h>
 
+#include <linux/phy/phy.h>
 #include <linux/usb.h>
 #include <linux/usb/hcd.h>
+#include <linux/usb/phy.h>
 
 #include "usb.h"
 
@@ -2477,6 +2479,30 @@ int usb_add_hcd(struct usb_hcd *hcd,
 	int retval;
 	struct usb_device *rhdev;
 
+	if (IS_ENABLED(CONFIG_GENERIC_PHY)) {
+		struct phy *phy = phy_get(hcd->self.controller, "usb");
+
+		if (IS_ERR(phy)) {
+			retval = PTR_ERR(phy);
+			if (retval == -EPROBE_DEFER)
+				goto err_phy;
+		} else {
+			retval = phy_init(phy);
+			if (retval) {
+				phy_put(phy);
+				goto err_phy;
+			}
+			retval = phy_power_on(phy);
+			if (retval) {
+				phy_exit(phy);
+				phy_put(phy);
+				goto err_phy;
+			}
+			hcd->gen_phy = phy;
+			hcd->remove_phy = 1;
+		}
+	}
+
 	dev_info(hcd->self.controller, "%s\n", hcd->product_desc);
 
 	/* Keep old behaviour if authorized_default is not in [0, 1]. */
@@ -2492,7 +2518,7 @@ int usb_add_hcd(struct usb_hcd *hcd,
 	 */
 	if ((retval = hcd_buffer_create(hcd)) != 0) {
 		dev_dbg(hcd->self.controller, "pool alloc failed\n");
-		return retval;
+		goto err_create_buf;
 	}
 
 	if ((retval = usb_register_bus(&hcd->self)) < 0)
@@ -2616,6 +2642,19 @@ err_allocate_root_hub:
 	usb_deregister_bus(&hcd->self);
 err_register_bus:
 	hcd_buffer_destroy(hcd);
+err_create_buf:
+	if (IS_ENABLED(CONFIG_GENERIC_PHY) && hcd->gen_phy) {
+		phy_power_off(hcd->gen_phy);
+		phy_exit(hcd->gen_phy);
+		phy_put(hcd->gen_phy);
+		hcd->gen_phy = NULL;
+	}
+err_phy:
+	if (hcd->remove_phy && hcd->phy) {
+		usb_phy_shutdown(hcd->phy);
+		usb_put_phy(hcd->phy);
+		hcd->phy = NULL;
+	}
 	return retval;
 } 
 EXPORT_SYMBOL_GPL(usb_add_hcd);
@@ -2678,6 +2717,18 @@ void usb_remove_hcd(struct usb_hcd *hcd)
 	usb_put_dev(hcd->self.root_hub);
 	usb_deregister_bus(&hcd->self);
 	hcd_buffer_destroy(hcd);
+	if (hcd->remove_phy && hcd->phy) {
+		usb_phy_shutdown(hcd->phy);
+		usb_put_phy(hcd->phy);
+		hcd->phy = NULL;
+	}
+
+	if (IS_ENABLED(CONFIG_GENERIC_PHY) && hcd->gen_phy) {
+		phy_power_off(hcd->gen_phy);
+		phy_exit(hcd->gen_phy);
+		phy_put(hcd->gen_phy);
+		hcd->gen_phy = NULL;
+	}
 }
 EXPORT_SYMBOL_GPL(usb_remove_hcd);
 
