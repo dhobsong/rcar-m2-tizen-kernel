@@ -37,6 +37,7 @@
 #include <linux/mfd/tmio.h>
 #include <linux/mmc/host.h>
 #include <linux/mmc/mmc.h>
+#include <linux/mmc/sdio.h>
 #include <linux/mmc/slot-gpio.h>
 #include <linux/mmc/tmio.h>
 #include <linux/module.h>
@@ -306,6 +307,7 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
 	struct mmc_data *data = host->data;
 	int c = cmd->opcode;
 	u32 irq_mask = TMIO_MASK_CMD;
+	struct tmio_mmc_data *pdata = host->pdata;
 
 	/* CMD12 is handled by hardware */
 	if (cmd->opcode == MMC_STOP_TRANSMISSION && !cmd->arg) {
@@ -336,6 +338,12 @@ static int tmio_mmc_start_command(struct tmio_mmc_host *host, struct mmc_command
 		if (data->blocks > 1) {
 			sd_ctrl_write16(host, CTL_STOP_INTERNAL_ACTION, 0x100);
 			c |= TRANSFER_MULTI;
+			if (cmd->opcode == SD_IO_RW_EXTENDED) {
+				/* Disable auto CMD12 at IO_RW_EXTENDED
+				  multiple block transfer */
+				if (pdata->disable_auto_cmd12)
+					pdata->disable_auto_cmd12(&c);
+			}
 		}
 		if (data->flags & MMC_DATA_READ)
 			c |= TRANSFER_READ;
