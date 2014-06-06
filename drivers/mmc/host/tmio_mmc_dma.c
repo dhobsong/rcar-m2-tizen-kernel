@@ -1,6 +1,7 @@
 /*
  * linux/drivers/mmc/tmio_mmc_dma.c
  *
+ * Copyright (C) 2014 Renesas Electronics Corporation
  * Copyright (C) 2010-2011 Guennadi Liakhovetski
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,7 +75,8 @@ static void tmio_mmc_start_dma_rx(struct tmio_mmc_host *host)
 
 	if (sg->length < TMIO_MMC_MIN_DMA_LEN) {
 		host->force_pio = true;
-		return;
+		ret = 0;
+		goto pio;
 	}
 
 	tmio_mmc_disable_mmc_irqs(host, TMIO_STAT_RXRDY);
@@ -151,7 +153,8 @@ static void tmio_mmc_start_dma_tx(struct tmio_mmc_host *host)
 
 	if (sg->length < TMIO_MMC_MIN_DMA_LEN) {
 		host->force_pio = true;
-		return;
+		ret = 0;
+		goto pio;
 	}
 
 	tmio_mmc_disable_mmc_irqs(host, TMIO_STAT_TXRQ);
