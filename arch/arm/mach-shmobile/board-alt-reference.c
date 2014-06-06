@@ -19,6 +19,7 @@
 
 #include <linux/dma-mapping.h>
 #include <linux/gpio.h>
+#include <linux/i2c.h>
 #include <linux/kernel.h>
 #include <linux/of_gpio.h>
 #include <linux/of_platform.h>
@@ -246,6 +247,41 @@ static void __init alt_add_usb1_device(void)
 	platform_device_register_full(&pci1_info);
 }
 
+/* POWER IC */
+static struct i2c_board_info poweric_i2c[] = {
+	{ I2C_BOARD_INFO("da9063", 0x58), },
+};
+
+static void alt_restart(char mode, const char *cmd)
+{
+	struct i2c_adapter *adap;
+	struct i2c_client *client;
+	u8 val;
+	int busnum = 8;
+
+	adap = i2c_get_adapter(busnum);
+	if (!adap) {
+		pr_err("failed to get adapter i2c%d\n", busnum);
+		return;
+	}
+
+	client = i2c_new_device(adap, &poweric_i2c[0]);
+	if (!client)
+		pr_err("failed to register %s to i2c%d\n",
+		       poweric_i2c[0].type, busnum);
+
+	i2c_put_adapter(adap);
+
+	val = i2c_smbus_read_byte_data(client, 0x13);
+
+	if (val < 0)
+		pr_err("couldn't access da9063\n");
+
+	val |= 0x02;
+
+	i2c_smbus_write_byte_data(client, 0x13, val);
+}
+
 static void __init alt_add_standard_devices(void)
 {
 	shmobile_clk_workaround(clk_names, ARRAY_SIZE(clk_names), false);
@@ -274,5 +310,6 @@ DT_MACHINE_START(ALT_DT, "alt")
 	.init_time	= r8a7794_timer_init,
 	.init_machine	= alt_add_standard_devices,
 	.init_late	= shmobile_init_late,
+	.restart	= alt_restart,
 	.dt_compat	= alt_boards_compat_dt,
 MACHINE_END
