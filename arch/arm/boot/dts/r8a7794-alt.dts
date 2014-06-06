@@ -167,6 +167,11 @@
 	status = "okay";
 };
 
+&i2c8 {
+	status = "okay";
+	clock-frequency = <100000>;
+};
+
 &pfc {
 	pinctrl-0 = <&du_pins &scif2_pins &usb0_pins &usb1_pins>;
 	pinctrl-names = "default";
