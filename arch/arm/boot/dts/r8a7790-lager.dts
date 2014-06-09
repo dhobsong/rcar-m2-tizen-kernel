@@ -374,8 +374,25 @@
 	status = "okay";
 };
 
-&i2c2 {
-	status = "okay";
+&cpu0 {
+	cpu0-supply = <&vdd_dvfs>;
+};
+
+&i2c0	{
+	status = "ok";
+};
+
+&i2c1	{
+	status = "ok";
+	pinctrl-0 = <&i2c1_pins>;
+	pinctrl-names = "default";
+};
+
+&i2c2	{
+	status = "ok";
+	pinctrl-0 = <&i2c2_pins>;
+	pinctrl-names = "default";
+
 	snd_codec: ak4643 {
 		#sound-dai-cells = <0>;
 		compatible = "asahi-kasei,ak4643";
@@ -397,28 +414,4 @@
 		regulator-boot-on;
 		regulator-always-on;
 	};
-};
-
-&cpu0 {
-	cpu0-supply = <&vdd_dvfs>;
-};
-
-&i2c0	{
-	status = "ok";
-};
-
-&i2c1	{
-	status = "ok";
-	pinctrl-0 = <&i2c1_pins>;
-	pinctrl-names = "default";
-};
-
-&i2c2	{
-	status = "ok";
-	pinctrl-0 = <&i2c2_pins>;
-	pinctrl-names = "default";
-};
-
-&i2c3	{
-	status = "ok";
 };
