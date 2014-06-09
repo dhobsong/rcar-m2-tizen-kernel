@@ -29,7 +29,7 @@
 #define CA7BAR		0x0030
 #define CA15RESCNT	0x0040
 #define CA7RESCNT	0x0044
-#define MERAM		0xe8080000
+#define RAM		0xe63c0000
 #define CCI_BASE	0xf0090000
 #define CCI_SLAVE3	0x4000
 #define CCI_SLAVE4	0x5000
@@ -70,14 +70,14 @@ static void __init r8a7790_smp_prepare_cpus(unsigned int max_cpus)
 				       r8a7790_apmu_config,
 				       ARRAY_SIZE(r8a7790_apmu_config));
 
-	/* MERAM for jump stub, because BAR requires 256KB aligned address */
-	p = ioremap_nocache(MERAM, shmobile_boot_size);
+	/* RAM for jump stub, because BAR requires 256KB aligned address */
+	p = ioremap_nocache(RAM, shmobile_boot_size);
 	memcpy_toio(p, shmobile_boot_vector, shmobile_boot_size);
 	iounmap(p);
 
 	/* setup reset vectors */
 	p = ioremap_nocache(RST, 0x63);
-	bar = (MERAM >> 8) & 0xfffffc00;
+	bar = (RAM >> 8) & 0xfffffc00;
 	writel_relaxed(bar, p + CA15BAR);
 	writel_relaxed(bar, p + CA7BAR);
 	writel_relaxed(bar | 0x10, p + CA15BAR);
