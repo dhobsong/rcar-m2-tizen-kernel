@@ -25,7 +25,7 @@
 #define CA7BAR		0x0030
 #define CA15RESCNT	0x0040
 #define CA7RESCNT	0x0044
-#define RAM		0xe6300000
+#define RAM		0xe63c0000
 #define APMU		0xe6151000
 #define CA7DBGRCR	0x0180
 
