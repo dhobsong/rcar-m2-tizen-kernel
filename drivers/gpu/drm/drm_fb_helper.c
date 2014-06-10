@@ -824,9 +824,9 @@ int drm_fb_helper_set_par(struct fb_info *info)
 	struct drm_fb_helper *fb_helper = info->par;
 	struct drm_device *dev = fb_helper->dev;
 	struct fb_var_screeninfo *var = &info->var;
+#if defined(CONFIG_DRM_FBDEV_CRTC)
 	int ret;
 	int i;
-#if defined(CONFIG_DRM_FBDEV_CRTC)
 	struct drm_display_mode *disp_set_mode;
 	struct drm_display_mode *ref_disp_mode = NULL;
 	struct drm_connector *disp_conn = NULL;
