@@ -4040,6 +4040,22 @@ static const unsigned int vin2_clk_pins[] = {
 static const unsigned int vin2_clk_mux[] = {
 	VI2_CLK_MARK,
 };
+/* - SSP ------------------------------------------------------------------- */
+static const unsigned int ssp_pins[] = {
+	RCAR_GP_PIN(5, 25),
+	RCAR_GP_PIN(5, 26),
+	RCAR_GP_PIN(5, 27),
+	RCAR_GP_PIN(5, 28),
+	RCAR_GP_PIN(5, 29),
+};
+
+static const unsigned int ssp_mux[] = {
+	STP_IVCXO27_0_MARK,
+	STP_ISCLK_0_MARK,
+	STP_ISD_0_MARK,
+	STP_ISEN_0_MARK,
+	STP_ISSYNC_0_MARK,
+};
 
 static const struct sh_pfc_pin_group pinmux_groups[] = {
 	SH_PFC_PIN_GROUP(audio_clk_a),
@@ -4316,6 +4332,7 @@ static const struct sh_pfc_pin_group pinmux_groups[] = {
 	SH_PFC_PIN_GROUP(ssi9_ctrl_b),
 	SH_PFC_PIN_GROUP(usb0),
 	SH_PFC_PIN_GROUP(usb1),
+	SH_PFC_PIN_GROUP(ssp),
 	VIN_DATA_PIN_GROUP(vin0_data, 24),
 	VIN_DATA_PIN_GROUP(vin0_data, 20),
 	SH_PFC_PIN_GROUP(vin0_data18),
@@ -4737,6 +4754,10 @@ static const char * const usb1_groups[] = {
 	"usb1",
 };
 
+static const char * const ssp_groups[] = {
+	"ssp",
+};
+
 static const char * const vin0_groups[] = {
 	"vin0_data24",
 	"vin0_data20",
@@ -4821,6 +4842,7 @@ static const struct sh_pfc_function pinmux_functions[] = {
 	SH_PFC_FUNCTION(ssi),
 	SH_PFC_FUNCTION(usb0),
 	SH_PFC_FUNCTION(usb1),
+	SH_PFC_FUNCTION(ssp),
 	SH_PFC_FUNCTION(vin0),
 	SH_PFC_FUNCTION(vin1),
 	SH_PFC_FUNCTION(vin2),
