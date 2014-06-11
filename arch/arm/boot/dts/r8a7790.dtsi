@@ -332,6 +332,7 @@
 		clocks = <&mstp3_clks R8A7790_CLK_SDHI0>;
 		cap-sd-highspeed;
 		dma-xmit-sz = <32>;
+		renesas,clk-rate = <195000000>;
 		status = "disabled";
 	};
 
@@ -343,6 +344,7 @@
 		clocks = <&mstp3_clks R8A7790_CLK_SDHI1>;
 		cap-sd-highspeed;
 		dma-xmit-sz = <32>;
+		renesas,clk-rate = <195000000>;
 		status = "disabled";
 	};
 
@@ -354,6 +356,7 @@
 		clocks = <&mstp3_clks R8A7790_CLK_SDHI2>;
 		cap-sd-highspeed;
 		dma-xmit-sz = <32>;
+		renesas,clk-rate = <97500000>;
 		status = "disabled";
 	};
 
@@ -365,6 +368,7 @@
 		clocks = <&mstp3_clks R8A7790_CLK_SDHI3>;
 		cap-sd-highspeed;
 		dma-xmit-sz = <32>;
+		renesas,clk-rate = <97500000>;
 		status = "disabled";
 	};
 
