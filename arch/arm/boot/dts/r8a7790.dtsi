@@ -331,6 +331,7 @@
 		dma-names = "tx", "rx";
 		clocks = <&mstp3_clks R8A7790_CLK_SDHI0>;
 		cap-sd-highspeed;
+		dma-xmit-sz = <32>;
 		status = "disabled";
 	};
 
@@ -341,6 +342,7 @@
 		interrupts = <0 166 IRQ_TYPE_LEVEL_HIGH>;
 		clocks = <&mstp3_clks R8A7790_CLK_SDHI1>;
 		cap-sd-highspeed;
+		dma-xmit-sz = <32>;
 		status = "disabled";
 	};
 
@@ -351,6 +353,7 @@
 		interrupts = <0 167 IRQ_TYPE_LEVEL_HIGH>;
 		clocks = <&mstp3_clks R8A7790_CLK_SDHI2>;
 		cap-sd-highspeed;
+		dma-xmit-sz = <32>;
 		status = "disabled";
 	};
 
@@ -361,6 +364,7 @@
 		interrupts = <0 168 IRQ_TYPE_LEVEL_HIGH>;
 		clocks = <&mstp3_clks R8A7790_CLK_SDHI3>;
 		cap-sd-highspeed;
+		dma-xmit-sz = <32>;
 		status = "disabled";
 	};
 
