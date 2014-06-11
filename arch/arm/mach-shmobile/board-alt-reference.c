@@ -203,6 +203,16 @@ static const struct clk_name clk_names[] __initconst = {
 	{ "du1", "du.1", "rcar-du-r8a7794" },
 	{ "hsusb", NULL, "usb_phy_rcar_gen2" },
 	{ "vin0", NULL, "r8a7794-vin.0" },
+	{ "vsps", NULL, NULL },
+#if defined(CONFIG_VIDEO_RENESAS_VSP1)
+	{ "vsp1-du0", NULL, "vsp1.2" },
+#else
+	{ "vsp1-du0", NULL, NULL },
+#endif
+	{ "vcp0", NULL, "vcp1" },
+	{ "vpc0", NULL, "vpc1" },
+	{ "2ddmac", NULL, "tddmac" },
+	{ "fdp0", NULL, "fdp0" },
 };
 
 /*
