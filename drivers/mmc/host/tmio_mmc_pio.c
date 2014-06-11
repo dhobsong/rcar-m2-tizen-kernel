@@ -146,12 +146,15 @@ static void tmio_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
 static void tmio_mmc_set_clock(struct tmio_mmc_host *host, int new_clock)
 {
 	u32 clk = 0, clock;
+	struct tmio_mmc_data *pdata = host->pdata;
 
 	if (new_clock) {
 		for (clock = host->mmc->f_min, clk = 0x80000080;
 			new_clock >= (clock<<1); clk >>= 1)
 			clock <<= 1;
 		clk |= 0x100;
+		if ((pdata->flags & TMIO_MMC_CLK_ACTUAL) && ((clk>>22) & 1))
+			clk |= 0xff;
 	}
 
 	if (host->set_clk_div)

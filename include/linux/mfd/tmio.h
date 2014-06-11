@@ -92,6 +92,9 @@
 /* Add SDIO status reserved bits for SH Mobile series. */
 #define TMIO_MMC_SDIO_STATUS_QUIRK	(1 << 9)
 
+/* Actual clock rate. */
+#define TMIO_MMC_CLK_ACTUAL		(1 << 10)
+
 int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
 int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
 void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);
