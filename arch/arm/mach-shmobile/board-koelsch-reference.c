@@ -646,7 +646,7 @@ static void __init koelsch_add_vsp1_devices(void)
 	};
 	unsigned int i;
 
-	for (i = 0; i < ARRAY_SIZE(vsp1_resources); ++i) {
+	for (i = 1; i < ARRAY_SIZE(vsp1_resources); ++i) {
 		info.id = i + 1;
 		info.data = koelsch_vsp1_pdata[i];
 		info.res = vsp1_resources[i];
