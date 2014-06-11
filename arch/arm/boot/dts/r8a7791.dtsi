@@ -771,9 +771,9 @@
 				R8A7791_CLK_VSP1_DU1 R8A7791_CLK_VSP1_DU0 R8A7791_CLK_VSP1_S
 			>;
 			clock-output-names =
-				"vcp0", "vpc0", "ssp1", "tmu1", "pvrsrvkm",
-				"2ddmac", "fdp1", "fdp0", "tmu3", "tmu2",
-				"cmt0", "tmu0", "vsp1-du1", "vsp1-du0", "vsp1-sy";
+				"vcp0", "vpc0", "ssp_dev", "tmu1", "pvrsrvkm",
+				"tddmac", "fdp1", "fdp0", "tmu3", "tmu2",
+				"cmt0", "tmu0", "vsp1-du1", "vsp1-du0", "vsps";
 		};
 		mstp2_clks: mstp2_clks@e6150138 {
 			compatible = "renesas,r8a7791-mstp-clocks", "renesas,cpg-mstp-clocks";
