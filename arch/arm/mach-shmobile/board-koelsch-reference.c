@@ -209,15 +209,14 @@ static const struct clk_name clk_names[] __initconst = {
 	{ "dvc0", "dvc.0", "rcar_sound" },
 	{ "vin0", NULL, "r8a7791-vin.0" },
 	{ "vin1", NULL, "r8a7791-vin.1" },
-	{ "vsp1-sy", NULL, "vsp1.1" },
+	{ "vsps", NULL, NULL },
 	{ "vsp1-du0", NULL, "vsp1.2" },
 	{ "vsp1-du1", NULL, "vsp1.3" },
-	{ "vcp0", NULL, "vcp1" },
-	{ "vpc0", NULL, "vpc1" },
-	{ "ssp1", NULL, "ssp_dev" },
-	{ "2ddmac", NULL, "tddmac" },
-	{ "fdp1", NULL, "fdp1" },
-	{ "fdp0", NULL, "fdp0" },
+	{ "vcp0", NULL, NULL },
+	{ "vpc0", NULL, NULL },
+	{ "tddmac", NULL, NULL },
+	{ "fdp1", NULL, NULL },
+	{ "fdp0", NULL, NULL },
 };
 
 /*
@@ -231,6 +230,7 @@ static const struct clk_name clk_enables[] __initconst = {
 	{ "dmal", NULL, "sh-dma-engine.0" },
 	{ "dmah", NULL, "sh-dma-engine.1" },
 	{ "pvrsrvkm", NULL, "pvrsrvkm" },
+	{ "ssp_dev", NULL, "ssp_dev" },
 };
 
 /* Local DMA slave IDs */
