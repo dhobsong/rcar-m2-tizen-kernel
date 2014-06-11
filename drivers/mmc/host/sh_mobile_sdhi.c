@@ -91,7 +91,8 @@ static const struct sh_mobile_sdhi_of_data of_rcar_gen1_compatible = {
 };
 
 static const struct sh_mobile_sdhi_of_data of_rcar_gen2_compatible = {
-	.tmio_flags	= TMIO_MMC_CLK_NO_SLEEP | TMIO_MMC_HAS_IDLE_WAIT |
+	.tmio_flags	= TMIO_MMC_CLK_ACTUAL | TMIO_MMC_CLK_NO_SLEEP |
+			  TMIO_MMC_HAS_IDLE_WAIT |
 			  TMIO_MMC_SDIO_STATUS_QUIRK,
 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
 	.capabilities2	= MMC_CAP2_NO_2BLKS_READ,
@@ -193,6 +194,18 @@ static void sh_mobile_sdhi_disable_auto_cmd12(int *val)
 static void sh_mobile_sdhi_cd_wakeup(const struct platform_device *pdev)
 {
 	mmc_detect_change(platform_get_drvdata(pdev), msecs_to_jiffies(100));
+}
+
+static void sh_mobile_sdhi_set_clk_div(struct platform_device *pdev, int clk)
+{
+	struct mmc_host *mmc = dev_get_drvdata(&pdev->dev);
+	struct tmio_mmc_host *host = mmc_priv(mmc);
+
+	if (clk) {
+		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~0x0100 &
+				sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, 0x00ff);
+	}
 }
 
 static int sh_mobile_sdhi_get_xmit_size(unsigned int type, int shift)
@@ -314,6 +327,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
 	mmc_data->write16_hook = sh_mobile_sdhi_write16_hook;
 	mmc_data->disable_auto_cmd12 = sh_mobile_sdhi_disable_auto_cmd12;
+	mmc_data->set_clk_div = sh_mobile_sdhi_set_clk_div;
 	if (p) {
 		mmc_data->flags = p->tmio_flags;
 		mmc_data->ocr_mask = p->tmio_ocr_mask;
