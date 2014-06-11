@@ -312,6 +312,7 @@
 		interrupts = <0 165 IRQ_TYPE_LEVEL_HIGH>;
 		clocks = <&mstp3_clks R8A7791_CLK_SDHI0>;
 		dma-xmit-sz = <32>;
+		renesas,clk-rate = <195000000>;
 		status = "disabled";
 	};
 
@@ -322,6 +323,7 @@
 		interrupts = <0 167 IRQ_TYPE_LEVEL_HIGH>;
 		clocks = <&mstp3_clks R8A7791_CLK_SDHI1>;
 		dma-xmit-sz = <32>;
+		renesas,clk-rate = <97500000>;
 		status = "disabled";
 	};
 
@@ -332,6 +334,7 @@
 		interrupts = <0 168 IRQ_TYPE_LEVEL_HIGH>;
 		clocks = <&mstp3_clks R8A7791_CLK_SDHI2>;
 		dma-xmit-sz = <32>;
+		renesas,clk-rate = <97500000>;
 		status = "disabled";
 	};
 
