@@ -733,7 +733,7 @@ static void __init lager_add_vsp1_devices(void)
 	};
 	unsigned int i;
 
-	for (i = 0; i < ARRAY_SIZE(vsp1_resources); ++i) {
+	for (i = 2; i < ARRAY_SIZE(vsp1_resources); ++i) {
 		info.id = i;
 		info.data = lager_vsp1_pdata[i];
 		info.res = vsp1_resources[i];
