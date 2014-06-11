@@ -399,6 +399,7 @@
 	vmmc-supply = <&vcc_sdhi2>;
 	vqmmc-supply = <&vccq_sdhi2>;
 	cd-gpios = <&gpio6 22 GPIO_ACTIVE_LOW>;
+	toshiba,mmc-wrprotect-disable;
 	status = "okay";
 };
 
