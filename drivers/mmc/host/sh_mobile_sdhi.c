@@ -247,6 +247,7 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
 	unsigned int type;
 	int base, dma_size;
 	int shift = 1; /* 2byte alignment */
+	int clk_rate;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!res)
@@ -276,6 +277,14 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
 		goto eclkget;
 	}
 
+	if (np && !of_property_read_u32(np, "renesas,clk-rate", &clk_rate)) {
+		if (clk_rate) {
+			ret = clk_set_rate(priv->clk, clk_rate);
+			if (ret < 0)
+				dev_err(&pdev->dev,
+					"cannot set clock rate: %d\n", ret);
+		}
+	}
 	mmc_data->clk_enable = sh_mobile_sdhi_clk_enable;
 	mmc_data->clk_disable = sh_mobile_sdhi_clk_disable;
 	mmc_data->capabilities = MMC_CAP_MMC_HIGHSPEED;
