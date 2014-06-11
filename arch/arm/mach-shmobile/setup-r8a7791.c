@@ -405,6 +405,16 @@ static const struct resource powervr_resources[] __initconst = {
 					powervr_resources,		\
 					ARRAY_SIZE(powervr_resources))
 
+/* SSP */
+void __init r8a7791_register_ssp(void)
+{
+	struct platform_device_info info = {
+		.name = "ssp_dev",
+		.id = -1,
+	};
+	platform_device_register_full(&info);
+}
+
 void __init r8a7791_add_dt_devices(void)
 {
 	r8a7791_pm_init();
@@ -442,6 +452,7 @@ void __init r8a7791_add_standard_devices(void)
 	r8a7791_register_msiof(0);
 	r8a7791_register_msiof(1);
 	r8a7791_register_msiof(2);
+	r8a7791_register_ssp();
 }
 
 #ifdef CONFIG_USE_OF
