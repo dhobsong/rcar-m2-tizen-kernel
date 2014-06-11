@@ -1,6 +1,7 @@
 /*
  * SuperH Mobile SDHI
  *
+ * Copyright (C) 2014 Renesas Electronics Corporation
  * Copyright (C) 2009 Magnus Damm
  *
  * This program is free software; you can redistribute it and/or modify
@@ -32,6 +33,10 @@
 #include <linux/delay.h>
 
 #include "tmio_mmc.h"
+
+/* SDHI host controller version */
+#define SDHI_VERSION_CB0D	0xCB0D
+#define SDHI_VERSION_490C	0x490C
 
 #define EXT_ACC           0xe4
 
@@ -249,6 +254,10 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
 	ver = sd_ctrl_read16(host, CTL_VERSION);
 	if (ver == 0xCB0D)
 		sd_ctrl_write16(host, EXT_ACC, 1);
+
+	/* Some controllers check the ILL_FUNC bit. */
+	if (ver == SDHI_VERSION_490C)
+		mmc_data->flags |= TMIO_MMC_CHECK_ILL_FUNC;
 
 	/*
 	 * Allow one or more specific (named) ISRs or
