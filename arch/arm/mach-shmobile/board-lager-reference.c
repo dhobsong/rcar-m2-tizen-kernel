@@ -242,19 +242,18 @@ static const struct clk_name clk_names[] __initconst = {
 	{ "dvc0", "dvc.0", "rcar_sound" },
 	{ "vin0", NULL, "r8a7790-vin.0" },
 	{ "vin1", NULL, "r8a7790-vin.1" },
-	{ "vsp1-rt", NULL, "vsp1.0" },
-	{ "vsp1-sy", NULL, "vsp1.1" },
+	{ "vspr", NULL, NULL },
+	{ "vsps", NULL, NULL },
 	{ "vsp1-du0", NULL, "vsp1.2" },
 	{ "vsp1-du1", NULL, "vsp1.3" },
-	{ "vcp1", NULL, "vcp2" },
-	{ "vcp0", NULL, "vcp1" },
-	{ "vpc1", NULL, "vpc2" },
-	{ "vpc0", NULL, "vpc1" },
-	{ "ssp1", NULL, "ssp_dev" },
-	{ "2ddmac", NULL, "tddmac" },
-	{ "fdp2", NULL, "fdp2" },
-	{ "fdp1", NULL, "fdp1" },
-	{ "fdp0", NULL, "fdp0" },
+	{ "vcp1", NULL, NULL },
+	{ "vcp0", NULL, NULL },
+	{ "vpc1", NULL, NULL },
+	{ "vpc0", NULL, NULL },
+	{ "tddmac", NULL, NULL },
+	{ "fdp2", NULL, NULL },
+	{ "fdp1", NULL, NULL },
+	{ "fdp0", NULL, NULL },
 };
 
 /*
@@ -269,6 +268,7 @@ static const struct clk_name clk_enables[] __initconst = {
 	{ "dmal", NULL, "sh-dma-engine.0" },
 	{ "dmah", NULL, "sh-dma-engine.1" },
 	{ "pvrsrvkm", NULL, "pvrsrvkm" },
+	{ "ssp_dev", NULL, "ssp_dev" },
 };
 
 /* Local DMA slave IDs */
