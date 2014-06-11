@@ -26,7 +26,9 @@
 #include <linux/platform_data/camera-rcar.h>
 #include <linux/platform_data/rcar-du.h>
 #include <linux/platform_data/usb-rcar-gen2-phy.h>
+#if defined(CONFIG_VIDEO_RENESAS_VSP1)
 #include <linux/platform_data/vsp1.h>
+#endif
 #include <linux/spi/flash.h>
 #include <linux/spi/spi.h>
 #include <linux/usb/phy.h>
@@ -347,6 +349,62 @@ static void __init alt_add_camera0_device(void)
 	alt_add_vin_device(0, &vin0_pdata);
 }
 
+/* VSP1 */
+#if defined(CONFIG_VIDEO_RENESAS_VSP1)
+static const struct vsp1_platform_data alt_vsps_pdata __initconst = {
+	.features = 0,
+	.rpf_count = 5,
+	.uds_count = 3,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data alt_vspd0_pdata __initconst = {
+	.features = VSP1_HAS_LIF,
+	.rpf_count = 4,
+	.uds_count = 1,
+	.wpf_count = 4,
+};
+
+static const struct vsp1_platform_data * const alt_vsp1_pdata[] __initconst
+									= {
+	&alt_vsps_pdata,
+	&alt_vspd0_pdata,
+};
+
+static const struct resource vsp1_1_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe928000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(267)),
+};
+
+static const struct resource vsp1_2_resources[] __initconst = {
+	DEFINE_RES_MEM(0xfe930000, 0x8000),
+	DEFINE_RES_IRQ(gic_spi(246)),
+};
+
+static const struct resource * const vsp1_resources[] __initconst = {
+	vsp1_1_resources,
+	vsp1_2_resources,
+};
+
+static void __init alt_add_vsp1_devices(void)
+{
+	struct platform_device_info info = {
+		.name = "vsp1",
+		.size_data = sizeof(*alt_vsp1_pdata[0]),
+		.num_res = 2,
+		.dma_mask = DMA_BIT_MASK(32),
+	};
+	unsigned int i;
+
+	for (i = 1; i < ARRAY_SIZE(vsp1_resources); ++i) {
+		info.id = i + 1;
+		info.data = alt_vsp1_pdata[i];
+		info.res = vsp1_resources[i];
+
+		platform_device_register_full(&info);
+	}
+}
+#endif
 
 static void __init alt_add_standard_devices(void)
 {
@@ -363,6 +421,9 @@ static void __init alt_add_standard_devices(void)
 					  sizeof(usbhs_phy_pdata));
 	alt_add_usb1_device();
 	alt_add_camera0_device();
+#if defined(CONFIG_VIDEO_RENESAS_VSP1)
+	alt_add_vsp1_devices();
+#endif
 }
 
 static const char * const alt_boards_compat_dt[] __initconst = {
