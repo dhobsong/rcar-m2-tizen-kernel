@@ -34,6 +34,13 @@
 
 #include "tmio_mmc.h"
 
+#define R8A7790_ES1_SDHI_WORKAROUND
+
+/* Product device */
+#define PRODUCT_REGISTER	0xFF000044
+#define PRODUCT_CUT_MASK	(0x00007FF0)
+#define PRODUCT_H2_BIT		(0x45 << 8)
+
 /* SDHI host controller version */
 #define SDHI_VERSION_CB0D	0xCB0D
 #define SDHI_VERSION_490C	0x490C
@@ -248,6 +255,9 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
 	int base, dma_size;
 	int shift = 1; /* 2byte alignment */
 	int clk_rate;
+#ifdef R8A7790_ES1_SDHI_WORKAROUND
+	void __iomem *product_reg;
+#endif
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	if (!res)
@@ -279,6 +289,20 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
 
 	if (np && !of_property_read_u32(np, "renesas,clk-rate", &clk_rate)) {
 		if (clk_rate) {
+#ifdef R8A7790_ES1_SDHI_WORKAROUND
+			product_reg = ioremap_nocache(PRODUCT_REGISTER, 0x04);
+			if (!product_reg) {
+				dev_err(&pdev->dev,
+					"Cannot ioremap_nocache\n");
+				goto eclkget;
+			}
+
+			if ((ioread32(product_reg) & PRODUCT_CUT_MASK) ==
+								PRODUCT_H2_BIT)
+				if (clk_rate > 156000000)
+					clk_rate = 156000000;
+			iounmap(product_reg);
+#endif
 			ret = clk_set_rate(priv->clk, clk_rate);
 			if (ret < 0)
 				dev_err(&pdev->dev,
