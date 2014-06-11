@@ -206,21 +206,15 @@ static int __vsp1_video_try_format(struct vsp1_video *video,
 	pix->height = clamp(height, VSP1_VIDEO_MIN_HEIGHT,
 			    VSP1_VIDEO_MAX_HEIGHT);
 
-	/* Compute and clamp the stride and image size. While not documented in
-	 * the datasheet, strides not aligned to a multiple of 128 bytes result
-	 * in image corruption.
-	 */
 	for (i = 0; i < max(info->planes, 2U); ++i) {
 		unsigned int hsub = i > 0 ? info->hsub : 1;
 		unsigned int vsub = i > 0 ? info->vsub : 1;
-		unsigned int align = 128;
 		unsigned int bpl;
 
 		bpl = clamp_t(unsigned int, pix->plane_fmt[i].bytesperline,
-			      pix->width / hsub * info->bpp[i] / 8,
-			      round_down(65535U, align));
+			      pix->width / hsub * info->bpp[i] / 8, 65535U);
 
-		pix->plane_fmt[i].bytesperline = round_up(bpl, align);
+		pix->plane_fmt[i].bytesperline = bpl;
 		pix->plane_fmt[i].sizeimage = pix->plane_fmt[i].bytesperline
 					    * pix->height / vsub;
 	}
