@@ -435,6 +435,16 @@ void __init r8a7790_register_pvrsrvkm(void)
 	__r8a7790_register_pvrsrvkm();
 }
 
+/* SSP */
+void __init r8a7790_register_ssp(void)
+{
+	struct platform_device_info info = {
+		.name = "ssp_dev",
+		.id = -1,
+	};
+	platform_device_register_full(&info);
+}
+
 void __init r8a7790_add_dt_devices(void)
 {
 	r8a7790_pm_init();
@@ -469,6 +479,7 @@ void __init r8a7790_add_standard_devices(void)
 	r8a7790_register_msiof(1);
 	r8a7790_register_msiof(2);
 	r8a7790_register_msiof(3);
+	r8a7790_register_ssp();
 }
 
 #ifdef CONFIG_USE_OF
