@@ -381,9 +381,11 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
 
 	/* Transfer the data */
 	if (data->flags & MMC_DATA_READ)
-		sd_ctrl_read16_rep(host, CTL_SD_DATA_PORT, buf, count >> 1);
+		sd_ctrl_read16_rep(host, CTL_SD_DATA_PORT, buf,
+				   (count + 1) >> 1);
 	else
-		sd_ctrl_write16_rep(host, CTL_SD_DATA_PORT, buf, count >> 1);
+		sd_ctrl_write16_rep(host, CTL_SD_DATA_PORT, buf,
+				    (count + 1) >> 1);
 
 	host->sg_off += count;
 
