@@ -73,6 +73,8 @@
 #define R8A7794_CLK_DU0			24
 
 /* MSTP8 */
+#define R8A7794_CLK_VIN1		10
+#define R8A7794_CLK_VIN0		11
 #define R8A7794_CLK_ETHER		13
 
 /* MSTP9 */
