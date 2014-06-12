@@ -165,10 +165,8 @@
 };
 
 &pfc {
-	pinctrl-0 = <&du_pins &scif0_pins &scif1_pins
-		     &usb0_pins &usb1_pins &usb2_pins
-			&sound_pins
-			&sound_clk_pins>;
+	pinctrl-0 = <&du_pins &scif0_pins &scif1_pins &usb0_pins &usb1_pins &usb2_pins
+		     &sound_pins &sound_clk_pins &vin0_pins &vin1_pins>;
 	pinctrl-names = "default";
 
 	du_pins: du {
@@ -259,6 +257,17 @@
 	i2c3_pins: i2c3 {
 		renesas,groups = "i2c3";
 		renesas,function = "i2c3";
+	};
+
+	vin0_pins: vin0 {
+		renesas,groups = "vin0_data24", "vin0_sync", "vin0_field",
+				 "vin0_clkenb", "vin0_clk";
+		renesas,function = "vin0";
+	};
+
+	vin1_pins: vin1 {
+		renesas,groups = "vin1_data8", "vin1_clk";
+		renesas,function = "vin1";
 	};
 };
 
