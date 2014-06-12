@@ -415,3 +415,7 @@
 		regulator-always-on;
 	};
 };
+
+&usbphy {
+	status = "okay";
+};
