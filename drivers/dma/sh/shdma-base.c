@@ -119,7 +119,7 @@ static dma_cookie_t shdma_tx_submit(struct dma_async_tx_descriptor *tx)
 
 		spin_unlock_irq(&schan->chan_lock);
 		if (ret < 0)
-			dev_err(schan->dev, "%s(): GET = %d\n", __func__, ret);
+			dev_dbg(schan->dev, "%s(): GET = %d\n", __func__, ret);
 
 		pm_runtime_barrier(schan->dev);
 
