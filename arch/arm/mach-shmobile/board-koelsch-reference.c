@@ -25,6 +25,7 @@
 #include <linux/kernel.h>
 #include <linux/of_gpio.h>
 #include <linux/of_platform.h>
+#include <linux/platform_data/camera-rcar.h>
 #include <linux/platform_data/rcar-du.h>
 #include <linux/platform_data/usb-rcar-gen2-phy.h>
 #include <linux/platform_data/vsp1.h>
@@ -37,6 +38,7 @@
 #include <mach/irqs.h>
 #include <mach/rcar-gen2.h>
 #include <mach/r8a7791.h>
+#include <media/soc_camera.h>
 #include <asm/mach/arch.h>
 #include <sound/rcar_snd.h>
 #include <sound/simple_card.h>
@@ -200,6 +202,8 @@ static const struct clk_name clk_names[] __initconst = {
 	{ "src0", "src.0", "rcar_sound" },
 	{ "src1", "src.1", "rcar_sound" },
 	{ "dvc0", "dvc.0", "rcar_sound" },
+	{ "vin0", NULL, "r8a7791-vin.0" },
+	{ "vin1", NULL, "r8a7791-vin.1" },
 	{ "vsp1-sy", NULL, "vsp1.1" },
 	{ "vsp1-du0", NULL, "vsp1.2" },
 	{ "vsp1-du1", NULL, "vsp1.3" },
@@ -382,7 +386,70 @@ static const struct rcar_gen2_phy_platform_data usbhs_phy_pdata __initconst = {
 	.chan0_pci = 0, /* Channel 0 is USBHS */
 	.chan2_pci = 1, /* Channel 2 is PCI USB host */
 };
- 
+
+/* VIN */
+static const struct resource vin_resources[] __initconst = {
+	/* VIN0 */
+	DEFINE_RES_MEM(0xe6ef0000, 0x1000),
+	DEFINE_RES_IRQ(gic_spi(188)),
+	/* VIN1 */
+	DEFINE_RES_MEM(0xe6ef1000, 0x1000),
+	DEFINE_RES_IRQ(gic_spi(189)),
+};
+
+static void __init koelsch_add_vin_device(unsigned idx,
+					struct rcar_vin_platform_data *pdata)
+{
+	struct platform_device_info vin_info = {
+		.parent		= &platform_bus,
+		.name		= "r8a7791-vin",
+		.id		= idx,
+		.res		= &vin_resources[idx * 2],
+		.num_res	= 2,
+		.dma_mask	= DMA_BIT_MASK(32),
+		.data		= pdata,
+		.size_data	= sizeof(*pdata),
+	};
+
+	BUG_ON(idx > 1);
+
+	platform_device_register_full(&vin_info);
+}
+
+#define KOELSCH_CAMERA(idx, name, addr, pdata, flag)			\
+static struct i2c_board_info i2c_cam##idx##_device = {			\
+	I2C_BOARD_INFO(name, addr),					\
+};									\
+									\
+static struct rcar_vin_platform_data vin##idx##_pdata = {		\
+	.flags = flag,							\
+};									\
+									\
+static struct soc_camera_link cam##idx##_link = {			\
+	.bus_id = idx,							\
+	.board_info = &i2c_cam##idx##_device,				\
+	.i2c_adapter_id = 2,						\
+	.module_name = name,						\
+	.priv = pdata,							\
+}
+
+KOELSCH_CAMERA(0, "adv7612", 0x4c, NULL, RCAR_VIN_BT709);
+KOELSCH_CAMERA(1, "adv7180", 0x20, NULL, RCAR_VIN_BT656);
+
+static void __init koelsch_add_camera0_device(void)
+{
+	platform_device_register_data(&platform_bus, "soc-camera-pdrv", 0,
+				      &cam0_link, sizeof(cam0_link));
+	koelsch_add_vin_device(0, &vin0_pdata);
+}
+
+static void __init koelsch_add_camera1_device(void)
+{
+	platform_device_register_data(&platform_bus, "soc-camera-pdrv", 1,
+				      &cam1_link, sizeof(cam1_link));
+	koelsch_add_vin_device(1, &vin1_pdata);
+}
+
 /* VSP1 */
 static const struct vsp1_platform_data koelsch_vsps_pdata __initconst = {
 	.features = 0,
@@ -533,6 +600,8 @@ static void __init koelsch_add_standard_devices(void)
 	koelsch_add_du_device();
 	koelsch_add_usb_devices();
 	koelsch_add_rsnd_device();
+	koelsch_add_camera0_device();
+	koelsch_add_camera1_device();
 	koelsch_add_vsp1_devices();
 	koelsch_add_msiof_device(spi_bus, ARRAY_SIZE(spi_bus));
 }
