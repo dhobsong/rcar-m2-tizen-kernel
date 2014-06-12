@@ -672,7 +672,13 @@ irqreturn_t tmio_mmc_sdio_irq(int irq, void *devid)
 	status = sd_ctrl_read16(host, CTL_SDIO_STATUS);
 	ireg = status & TMIO_SDIO_MASK_ALL & ~host->sdcard_irq_mask;
 
-	sd_ctrl_write16(host, CTL_SDIO_STATUS, status & ~TMIO_SDIO_MASK_ALL);
+	if (pdata->flags & TMIO_MMC_SDIO_STATUS_QUIRK) {
+		sd_ctrl_write16(host, CTL_SDIO_STATUS,
+					(status & ~TMIO_SDIO_MASK_ALL) | 6);
+	} else {
+		sd_ctrl_write16(host, CTL_SDIO_STATUS,
+					status & ~TMIO_SDIO_MASK_ALL);
+	}
 
 	if (mmc->caps & MMC_CAP_SDIO_IRQ && ireg & TMIO_SDIO_STAT_IOIRQ)
 		mmc_signal_sdio_irq(mmc);
