@@ -21,6 +21,7 @@
 
 #include <linux/dma-mapping.h>
 #include <linux/gpio.h>
+#include <linux/i2c.h>
 #include <linux/kernel.h>
 #include <linux/of_gpio.h>
 #include <linux/of_platform.h>
@@ -485,6 +486,41 @@ static const struct spi_board_info spi_bus[] __initconst = {
 	},
 };
 
+/* POWER IC */
+static struct i2c_board_info poweric_i2c[] = {
+	{ I2C_BOARD_INFO("da9063", 0x58), },
+};
+
+static void koelsch_restart(char mode, const char *cmd)
+{
+	struct i2c_adapter *adap;
+	struct i2c_client *client;
+	u8 val;
+	int busnum = 6;
+
+	adap = i2c_get_adapter(busnum);
+	if (!adap) {
+		pr_err("failed to get adapter i2c%d\n", busnum);
+		return;
+	}
+
+	client = i2c_new_device(adap, &poweric_i2c[0]);
+	if (!client)
+		pr_err("failed to register %s to i2c%d\n",
+		       poweric_i2c[0].type, busnum);
+
+	i2c_put_adapter(adap);
+
+	val = i2c_smbus_read_byte_data(client, 0x13);
+
+	if (val < 0)
+		pr_err("couldn't access da9063\n");
+
+	val |= 0x02;
+
+	i2c_smbus_write_byte_data(client, 0x13, val);
+}
+
 #define koelsch_add_msiof_device spi_register_board_info
 
 static void __init koelsch_add_standard_devices(void)
@@ -514,5 +550,6 @@ DT_MACHINE_START(KOELSCH_DT, "koelsch")
 	.init_machine	= koelsch_add_standard_devices,
 	.init_late	= shmobile_init_late,
 	.reserve	= rcar_gen2_reserve,
+	.restart	= koelsch_restart,
 	.dt_compat	= koelsch_boards_compat_dt,
 MACHINE_END
