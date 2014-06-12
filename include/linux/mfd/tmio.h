@@ -83,6 +83,9 @@
  */
 #define TMIO_MMC_HAVE_HIGH_REG		(1 << 6)
 
+/* Some controllers check the ILL_FUNC bit. */
+#define TMIO_MMC_CHECK_ILL_FUNC		(1 << 7)
+
 int tmio_core_mmc_enable(void __iomem *cnf, int shift, unsigned long base);
 int tmio_core_mmc_resume(void __iomem *cnf, int shift, unsigned long base);
 void tmio_core_mmc_pwr(void __iomem *cnf, int shift, int state);

@@ -1,6 +1,7 @@
 /*
  * linux/drivers/mmc/host/tmio_mmc_pio.c
  *
+ * Copyright (C) 2014 Renesas Electronics Corporation
  * Copyright (C) 2011 Guennadi Liakhovetski
  * Copyright (C) 2007 Ian Molton
  * Copyright (C) 2004 Ian Molton
@@ -458,6 +459,7 @@ void tmio_mmc_do_data_irq(struct tmio_mmc_host *host)
 static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
 {
 	struct mmc_data *data;
+	struct tmio_mmc_data *pdata = host->pdata;
 	spin_lock(&host->lock);
 	data = host->data;
 
@@ -473,9 +475,18 @@ static void tmio_mmc_data_irq(struct tmio_mmc_host *host)
 		 * DATAEND interrupt with the BUSY bit set, in this cases
 		 * waiting for one more interrupt fixes the problem.
 		 */
-		if (!(sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_CMD_BUSY)) {
-			tmio_mmc_disable_mmc_irqs(host, TMIO_STAT_DATAEND);
-			tasklet_schedule(&host->dma_complete);
+		if (pdata->flags & TMIO_MMC_CHECK_ILL_FUNC) {
+			if (sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_ILL_FUNC) {
+				tmio_mmc_disable_mmc_irqs(host,
+							  TMIO_STAT_DATAEND);
+				tasklet_schedule(&host->dma_complete);
+			}
+		} else {
+			if (!(sd_ctrl_read32(host, CTL_STATUS) & TMIO_STAT_CMD_BUSY)) {
+				tmio_mmc_disable_mmc_irqs(host,
+							  TMIO_STAT_DATAEND);
+				tasklet_schedule(&host->dma_complete);
+			}
 		}
 	} else if (host->chan_rx && (data->flags & MMC_DATA_READ) && !host->force_pio) {
 		tmio_mmc_disable_mmc_irqs(host, TMIO_STAT_DATAEND);
