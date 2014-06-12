@@ -1,6 +1,7 @@
 /*
  * MMCIF eMMC driver.
  *
+ * Copyright (C) 2014 Renesas Electronics Corporation
  * Copyright (C) 2010 Renesas Solutions Corp.
  * Yusuke Goda <yusuke.goda.sx@renesas.com>
  *
@@ -57,6 +58,7 @@
 #include <linux/mmc/slot-gpio.h>
 #include <linux/mod_devicetable.h>
 #include <linux/mutex.h>
+#include <linux/of_device.h>
 #include <linux/pagemap.h>
 #include <linux/platform_device.h>
 #include <linux/pm_qos.h>
@@ -1370,6 +1372,8 @@ static int sh_mmcif_probe(struct platform_device *pdev)
 	struct resource *res;
 	void __iomem *reg;
 	const char *name;
+	struct device_node *np = pdev->dev.of_node;
+	int clk_rate;
 
 	irq[0] = platform_get_irq(pdev, 0);
 	irq[1] = platform_get_irq(pdev, 1);
@@ -1432,6 +1436,16 @@ static int sh_mmcif_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "cannot get clock: %d\n", ret);
 		goto eclkget;
 	}
+
+	if (np && !of_property_read_u32(np, "renesas,clk-rate", &clk_rate)) {
+		if (clk_rate) {
+			ret = clk_set_rate(host->hclk, clk_rate);
+			if (ret < 0)
+				dev_err(&pdev->dev,
+					"cannot set clock rate: %d\n", ret);
+		}
+	}
+
 	ret = sh_mmcif_clk_update(host);
 	if (ret < 0)
 		goto eclkupdate;
