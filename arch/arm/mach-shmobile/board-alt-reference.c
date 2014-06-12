@@ -23,6 +23,7 @@
 #include <linux/kernel.h>
 #include <linux/of_gpio.h>
 #include <linux/of_platform.h>
+#include <linux/platform_data/camera-rcar.h>
 #include <linux/platform_data/rcar-du.h>
 #include <linux/platform_data/usb-rcar-gen2-phy.h>
 #include <linux/platform_data/vsp1.h>
@@ -35,6 +36,7 @@
 #include <mach/irqs.h>
 #include <mach/rcar-gen2.h>
 #include <mach/r8a7794.h>
+#include <media/soc_camera.h>
 #include <asm/mach/arch.h>
 #include <sound/rcar_snd.h>
 #include <sound/simple_card.h>
@@ -200,6 +202,7 @@ static const struct clk_name clk_names[] __initconst = {
 	{ "du0", "du.0", "rcar-du-r8a7794" },
 	{ "du1", "du.1", "rcar-du-r8a7794" },
 	{ "hsusb", NULL, "usb_phy_rcar_gen2" },
+	{ "vin0", NULL, "r8a7794-vin.0" },
 };
 
 /*
@@ -282,6 +285,59 @@ static void alt_restart(char mode, const char *cmd)
 	i2c_smbus_write_byte_data(client, 0x13, val);
 }
 
+/* VIN */
+static const struct resource vin_resources[] __initconst = {
+	/* VIN0 */
+	DEFINE_RES_MEM(0xe6ef0000, 0x1000),
+	DEFINE_RES_IRQ(gic_spi(188)),
+};
+
+static void __init alt_add_vin_device(unsigned idx,
+					struct rcar_vin_platform_data *pdata)
+{
+	struct platform_device_info vin_info = {
+		.parent		= &platform_bus,
+		.name		= "r8a7794-vin",
+		.id		= idx,
+		.res		= &vin_resources[idx * 2],
+		.num_res	= 2,
+		.dma_mask	= DMA_BIT_MASK(32),
+		.data		= pdata,
+		.size_data	= sizeof(*pdata),
+	};
+
+	BUG_ON(idx > 1);
+
+	platform_device_register_full(&vin_info);
+}
+
+#define ALT_CAMERA(idx, name, addr, pdata, flag)			\
+static struct i2c_board_info i2c_cam##idx##_device = {			\
+	I2C_BOARD_INFO(name, addr),					\
+};									\
+									\
+static struct rcar_vin_platform_data vin##idx##_pdata = {		\
+	.flags = flag,							\
+};									\
+									\
+static struct soc_camera_link cam##idx##_link = {			\
+	.bus_id = idx,							\
+	.board_info = &i2c_cam##idx##_device,				\
+	.i2c_adapter_id = 1,						\
+	.module_name = name,						\
+	.priv = pdata,							\
+}
+
+ALT_CAMERA(0, "adv7180", 0x20, NULL, RCAR_VIN_BT656);
+
+static void __init alt_add_camera0_device(void)
+{
+	platform_device_register_data(&platform_bus, "soc-camera-pdrv", 0,
+				      &cam0_link, sizeof(cam0_link));
+	alt_add_vin_device(0, &vin0_pdata);
+}
+
+
 static void __init alt_add_standard_devices(void)
 {
 	shmobile_clk_workaround(clk_names, ARRAY_SIZE(clk_names), false);
@@ -296,6 +352,7 @@ static void __init alt_add_standard_devices(void)
 					  &usbhs_phy_pdata,
 					  sizeof(usbhs_phy_pdata));
 	alt_add_usb1_device();
+	alt_add_camera0_device();
 }
 
 static const char * const alt_boards_compat_dt[] __initconst = {
