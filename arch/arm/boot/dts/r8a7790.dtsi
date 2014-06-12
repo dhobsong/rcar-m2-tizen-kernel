@@ -304,6 +304,7 @@
 		dma-names = "tx", "rx";
 		clocks = <&mstp3_clks R8A7790_CLK_MMCIF0>;
 		reg-io-width = <4>;
+		renesas,clk-rate = <97500000>;
 		status = "disabled";
 	};
 
@@ -314,6 +315,7 @@
 		dma-names = "tx", "rx";
 		clocks = <&mstp3_clks R8A7790_CLK_MMCIF1>;
 		reg-io-width = <4>;
+		renesas,clk-rate = <97500000>;
 		status = "disabled";
 	};
 
