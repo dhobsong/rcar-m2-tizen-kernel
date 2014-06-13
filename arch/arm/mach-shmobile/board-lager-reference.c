@@ -23,6 +23,8 @@
 #include <linux/gpio.h>
 #include <linux/i2c.h>
 #include <linux/init.h>
+#include <linux/mmc/host.h>
+#include <linux/mmc/sh_mmcif.h>
 #include <linux/of_gpio.h>
 #include <linux/of_platform.h>
 #include <linux/platform_data/camera-rcar.h>
@@ -270,6 +272,10 @@ static const struct clk_name clk_enables[] __initconst = {
 /* Local DMA slave IDs */
 enum {
 	RCAR_DMA_SLAVE_LAGER_INVALID = 0,
+	SYS_DMAC_SLAVE_MMCIF0_TX = 64,
+	SYS_DMAC_SLAVE_MMCIF0_RX,
+	SYS_DMAC_SLAVE_MMCIF1_TX,
+	SYS_DMAC_SLAVE_MMCIF1_RX,
 };
 
 #define DMAE_CHANNEL(a, b)			\
@@ -295,6 +301,8 @@ enum {
 }
 
 static const struct sh_dmae_slave_config r8a7790_sys_dmac_slaves[] = {
+	SYS_DMAC_SLAVE(MMCIF0, 32, 0xee200000, 0x34, 0x34, 0xd1, 0xd2),
+	SYS_DMAC_SLAVE(MMCIF1, 32, 0xee220000, 0x34, 0x34, 0xe1, 0xe2),
 };
 
 static const struct sh_dmae_channel r8a7790_sys_dmac_channels[] = {
@@ -355,6 +363,15 @@ static void __init lager_add_dmac_prototype(void)
 {
 	r8a7790_register_sys_dmac(0);
 }
+
+static struct sh_mmcif_plat_data mmcif1_pdata = {
+	.caps		= MMC_CAP_4_BIT_DATA |
+			  MMC_CAP_8_BIT_DATA |
+			  MMC_CAP_NONREMOVABLE,
+	.ccs_unsupported = true,
+	.slave_id_tx	= SYS_DMAC_SLAVE_MMCIF1_TX,
+	.slave_id_rx	= SYS_DMAC_SLAVE_MMCIF1_RX,
+};
 
 /* USBHS */
 static const struct resource usbhs_resources[] __initconst = {
@@ -743,13 +760,20 @@ static void lager_restart(char mode, const char *cmd)
 	i2c_smbus_write_byte_data(client, 0x13, val);
 }
 
+static struct of_dev_auxdata lager_auxdata_lookup[] __initdata = {
+	OF_DEV_AUXDATA("renesas,mmcif-r8a7790", 0xee220000, "sh_mmcif",
+			&mmcif1_pdata),
+	{},
+};
+
 static void __init lager_add_standard_devices(void)
 {
 	shmobile_clk_workaround(clk_names, ARRAY_SIZE(clk_names), false);
 	shmobile_clk_workaround(clk_enables, ARRAY_SIZE(clk_enables), true);
 	r8a7790_add_dt_devices();
 	lager_add_dmac_prototype();
-	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
+	of_platform_populate(NULL, of_default_bus_match_table,
+			     lager_auxdata_lookup, NULL);
 
 	lager_add_du_device();
 	platform_device_register_resndata(&platform_bus, "usb_phy_rcar_gen2",
