@@ -1,6 +1,7 @@
 /*
  * Header for the new SH dmaengine driver
  *
+ * Copyright (C) 2014  Renesas Electronics Corporation
  * Copyright (C) 2010 Guennadi Liakhovetski <g.liakhovetski@gmx.de>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -102,10 +103,20 @@ struct sh_dmae_pdata {
 /* Definitions for the SuperH DMAC */
 #define DM_INC	0x00004000
 #define DM_DEC	0x00008000
+#if defined(CONFIG_ARCH_R8A7790) || defined(CONFIG_ARCH_R8A7791) || \
+	defined(CONFIG_ARCH_R8A7794)
+#define DM_FIX	0x00000000
+#else
 #define DM_FIX	0x0000c000
+#endif
 #define SM_INC	0x00001000
 #define SM_DEC	0x00002000
+#if defined(CONFIG_ARCH_R8A7790) || defined(CONFIG_ARCH_R8A7791) || \
+	defined(CONFIG_ARCH_R8A7794)
+#define SM_FIX	0x00000000
+#else
 #define SM_FIX	0x00003000
+#endif
 #define CHCR_DE	0x00000001
 #define CHCR_TE	0x00000002
 #define CHCR_IE	0x00000004
