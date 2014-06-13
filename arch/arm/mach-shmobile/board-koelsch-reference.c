@@ -31,7 +31,9 @@
 #include <linux/platform_data/camera-rcar.h>
 #include <linux/platform_data/rcar-du.h>
 #include <linux/platform_data/usb-rcar-gen2-phy.h>
+#if defined(CONFIG_VIDEO_RENESAS_VSP1)
 #include <linux/platform_data/vsp1.h>
+#endif
 #include <linux/sh_dma.h>
 #include <linux/spi/flash.h>
 #include <linux/spi/spi.h>
@@ -210,8 +212,13 @@ static const struct clk_name clk_names[] __initconst = {
 	{ "vin0", NULL, "r8a7791-vin.0" },
 	{ "vin1", NULL, "r8a7791-vin.1" },
 	{ "vsps", NULL, NULL },
+#if defined(CONFIG_VIDEO_RENESAS_VSP1)
 	{ "vsp1-du0", NULL, "vsp1.2" },
 	{ "vsp1-du1", NULL, "vsp1.3" },
+#else
+	{ "vsp1-du0", NULL, NULL },
+	{ "vsp1-du1", NULL, NULL },
+#endif
 	{ "vcp0", NULL, NULL },
 	{ "vpc0", NULL, NULL },
 	{ "tddmac", NULL, NULL },
@@ -587,6 +594,7 @@ static void __init koelsch_add_camera1_device(void)
 }
 
 /* VSP1 */
+#if defined(CONFIG_VIDEO_RENESAS_VSP1)
 static const struct vsp1_platform_data koelsch_vsps_pdata __initconst = {
 	.features = 0,
 	.rpf_count = 5,
@@ -654,6 +662,7 @@ static void __init koelsch_add_vsp1_devices(void)
 		platform_device_register_full(&info);
 	}
 }
+#endif
 
 static const struct resource usbhs_phy_resources[] __initconst = {
 	DEFINE_RES_MEM(0xe6590100, 0x100),
@@ -750,7 +759,9 @@ static void __init koelsch_add_standard_devices(void)
 	koelsch_add_rsnd_device();
 	koelsch_add_camera0_device();
 	koelsch_add_camera1_device();
+#if defined(CONFIG_VIDEO_RENESAS_VSP1)
 	koelsch_add_vsp1_devices();
+#endif
 	koelsch_add_msiof_device(spi_bus, ARRAY_SIZE(spi_bus));
 }
 
