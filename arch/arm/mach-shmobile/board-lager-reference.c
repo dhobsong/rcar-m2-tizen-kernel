@@ -23,8 +23,10 @@
 #include <linux/gpio.h>
 #include <linux/i2c.h>
 #include <linux/init.h>
+#include <linux/mfd/tmio.h>
 #include <linux/mmc/host.h>
 #include <linux/mmc/sh_mmcif.h>
+#include <linux/mmc/sh_mobile_sdhi.h>
 #include <linux/of_gpio.h>
 #include <linux/of_platform.h>
 #include <linux/platform_data/camera-rcar.h>
@@ -276,6 +278,10 @@ enum {
 	SYS_DMAC_SLAVE_MMCIF0_RX,
 	SYS_DMAC_SLAVE_MMCIF1_TX,
 	SYS_DMAC_SLAVE_MMCIF1_RX,
+	SYS_DMAC_SLAVE_SDHI0_TX,
+	SYS_DMAC_SLAVE_SDHI0_RX,
+	SYS_DMAC_SLAVE_SDHI2_TX,
+	SYS_DMAC_SLAVE_SDHI2_RX,
 };
 
 #define DMAE_CHANNEL(a, b)			\
@@ -303,6 +309,8 @@ enum {
 static const struct sh_dmae_slave_config r8a7790_sys_dmac_slaves[] = {
 	SYS_DMAC_SLAVE(MMCIF0, 32, 0xee200000, 0x34, 0x34, 0xd1, 0xd2),
 	SYS_DMAC_SLAVE(MMCIF1, 32, 0xee220000, 0x34, 0x34, 0xe1, 0xe2),
+	SYS_DMAC_SLAVE(SDHI0, 16, 0xee100000, 0x60, 0x2060, 0xcd, 0xce),
+	SYS_DMAC_SLAVE(SDHI2, 16, 0xee140000, 0x30, 0x2030, 0xc1, 0xc2),
 };
 
 static const struct sh_dmae_channel r8a7790_sys_dmac_channels[] = {
@@ -371,6 +379,28 @@ static struct sh_mmcif_plat_data mmcif1_pdata = {
 	.ccs_unsupported = true,
 	.slave_id_tx	= SYS_DMAC_SLAVE_MMCIF1_TX,
 	.slave_id_rx	= SYS_DMAC_SLAVE_MMCIF1_RX,
+};
+
+static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
+	.dma_slave_tx   = SYS_DMAC_SLAVE_SDHI0_TX,
+	.dma_slave_rx   = SYS_DMAC_SLAVE_SDHI0_RX,
+	.dma_rx_offset  = 0x2000,
+
+	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+			  MMC_CAP_POWER_OFF_CARD,
+	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
+			  TMIO_MMC_WRPROTECT_DISABLE,
+};
+
+static struct sh_mobile_sdhi_info sdhi2_info __initdata = {
+	.dma_slave_tx   = SYS_DMAC_SLAVE_SDHI2_TX,
+	.dma_slave_rx   = SYS_DMAC_SLAVE_SDHI2_RX,
+	.dma_rx_offset  = 0x2000,
+
+	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+			  MMC_CAP_POWER_OFF_CARD,
+	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
+			  TMIO_MMC_WRPROTECT_DISABLE,
 };
 
 /* USBHS */
@@ -763,6 +793,10 @@ static void lager_restart(char mode, const char *cmd)
 static struct of_dev_auxdata lager_auxdata_lookup[] __initdata = {
 	OF_DEV_AUXDATA("renesas,mmcif-r8a7790", 0xee220000, "sh_mmcif",
 			&mmcif1_pdata),
+	OF_DEV_AUXDATA("renesas,sdhi-r8a7790", 0xee100000, "sdhi0",
+			&sdhi0_info),
+	OF_DEV_AUXDATA("renesas,sdhi-r8a7790", 0xee140000, "sdhi2",
+			&sdhi2_info),
 	{},
 };
 
