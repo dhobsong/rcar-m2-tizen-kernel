@@ -165,6 +165,7 @@
 	pinctrl-names = "default";
 
 	status = "okay";
+	clock-frequency = <400000>;
 };
 
 &i2c8 {
