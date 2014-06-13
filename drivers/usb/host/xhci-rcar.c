@@ -53,7 +53,7 @@ MODULE_FIRMWARE(FIRMWARE_NAME);
 #define RCAR_USB3_CONF3_VAL	0x13802007
 
 /* USB3.0 Polarity */
-#define RCAR_USB3_RX_POL_VAL	0x00020000
+#define RCAR_USB3_RX_POL_VAL	0x00200000
 #define RCAR_USB3_TX_POL_VAL	0x00000010
 
 void xhci_rcar_start(struct usb_hcd *hcd)
