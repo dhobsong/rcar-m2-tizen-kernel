@@ -71,6 +71,7 @@ struct sh_dmae_channel {
  * @chclr_present:	DMAC has one or several CHCLR registers
  * @chclr_bitwise:	channel CHCLR registers are bitwise
  * @slave_only:		DMAC cannot be used for MEMCPY
+ * @fourty_bits_addr:	Hardware support dealing with 40 bit addresses
  */
 struct sh_dmae_pdata {
 	const struct sh_dmae_slave_config *slave;
@@ -93,6 +94,7 @@ struct sh_dmae_pdata {
 	unsigned int chclr_present:1;
 	unsigned int chclr_bitwise:1;
 	unsigned int slave_only:1;
+	unsigned int fourty_bits_addr:1;
 };
 
 /* DMAOR definitions */
