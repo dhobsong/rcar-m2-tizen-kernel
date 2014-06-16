@@ -454,6 +454,7 @@
 		dma-names = "tx", "rx";
 		interrupts = <0 169 IRQ_TYPE_LEVEL_HIGH>;
 		clocks = <&mstp3_clks R8A7794_CLK_MMCIF0>;
+		renesas,clk-rate = <97500000>;
 		reg-io-width = <4>;
 		status = "disabled";
 	};
