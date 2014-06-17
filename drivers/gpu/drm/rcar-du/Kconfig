@@ -14,3 +14,13 @@ config DRM_RCAR_LVDS
 	help
 	  Enable support the R-Car Display Unit embedded LVDS encoders
 	  (currently only on R8A7790).
+
+config DRM_RCAR_DESKTOP_TURN_OFF
+	bool "R-Car DU turn off desktop layer"
+	depends on DRM_RCAR_DU
+	default n
+	help
+	  Choose this option if you want to turn off desktop layer.
+
+	  If you want to turn off desktop layer, you select y.
+	  If you want to turn on desktop layer, you select n.

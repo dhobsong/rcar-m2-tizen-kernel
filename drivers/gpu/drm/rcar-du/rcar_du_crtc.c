@@ -219,16 +219,32 @@ void rcar_du_crtc_update_planes(struct drm_crtc *crtc)
 		struct rcar_du_plane *plane = planes[i];
 		unsigned int index = plane->hwindex;
 
+#ifdef CONFIG_DRM_RCAR_DESKTOP_TURN_OFF
+		if (!plane->fb_plane) {
+			prio -= 4;
+			dspr |= (index + 1) << prio;
+			dptsr |= DPTSR_PnDK(index) | DPTSR_PnTS(index);
+		}
+#else
 		prio -= 4;
 		dspr |= (index + 1) << prio;
-		dptsr |= DPTSR_PnDK(index) |  DPTSR_PnTS(index);
+		dptsr |= DPTSR_PnDK(index) | DPTSR_PnTS(index);
+#endif
 
 		if (plane->format->planes == 2) {
 			index = (index + 1) % 8;
 
+#ifdef CONFIG_DRM_RCAR_DESKTOP_TURN_OFF
+			if (!plane->fb_plane) {
+				prio -= 4;
+				dspr |= (index + 1) << prio;
+				dptsr |= DPTSR_PnDK(index) | DPTSR_PnTS(index);
+			}
+#else
 			prio -= 4;
 			dspr |= (index + 1) << prio;
-			dptsr |= DPTSR_PnDK(index) |  DPTSR_PnTS(index);
+			dptsr |= DPTSR_PnDK(index) | DPTSR_PnTS(index);
+#endif
 		}
 	}
 
