@@ -211,7 +211,6 @@ static const struct clk_name clk_names[] __initconst = {
 #else
 	{ "vsp1-du0", NULL, NULL },
 #endif
-	{ "vcp0", NULL, "vcp1" },
 	{ "vpc0", NULL, "vpc1" },
 	{ "2ddmac", NULL, "tddmac" },
 	{ "fdp0", NULL, "fdp0" },
@@ -229,6 +228,7 @@ static const struct clk_name clk_enables[] __initconst = {
 	{ "hsusb", NULL, "renesas_usbhs" },
 	{ "ehci", NULL, "pci-rcar-gen2.1" },
 	{ "pvrsrvkm", NULL, "pvrsrvkm" },
+	{ "vcp0", NULL, "vcp1" },
 };
 
 /* USBHS PHY */
