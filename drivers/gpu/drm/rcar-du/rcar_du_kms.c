@@ -312,5 +312,9 @@ int rcar_du_modeset_init(struct rcar_du_device *rcdu)
 
 	rcdu->fbdev = fbdev;
 
+#ifdef CONFIG_DRM_FBDEV_CRTC
+	dev_info(dev->dev, "CRTC[%d] used by FBDev\n", rcdu->ddev->fbdev_crtc);
+#endif
+
 	return 0;
 }
