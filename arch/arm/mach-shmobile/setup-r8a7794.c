@@ -22,6 +22,7 @@
 #include <linux/irq.h>
 #include <linux/kernel.h>
 #include <linux/of_platform.h>
+#include <linux/platform_data/dma-rcar-audmapp.h>
 #include <linux/platform_data/gpio-rcar.h>
 #include <linux/platform_data/irq-renesas-irqc.h>
 #include <linux/serial_sci.h>
@@ -140,6 +141,45 @@ static struct resource r8a7794_audio_dmac_resources[] = {
 		&r8a7794_audio_dmac_resources[id],	3,	\
 		&r8a7794_audio_dmac_platform_data,		\
 		sizeof(r8a7794_audio_dmac_platform_data))
+
+/* Audio DMAC peri peri */
+#define AUDMAPP_CFG(id, _src, _dst, _chcr)				\
+	{ .slave_id = AUDIOPP_DMAC_SLAVE_##id,				\
+	.src = _src, .dst = _dst, .chcr = _chcr << 16}
+
+static struct audmapp_slave_config r8a7794_audmapp_slaves[] = {
+	AUDMAPP_CFG(SCU1_TO_SSI1, 0xec304400, 0xec401000, 0x2e04),
+	AUDMAPP_CFG(SCU2_TO_SSI2, 0xec304800, 0xec402000, 0x2f08),
+	AUDMAPP_CFG(SCU3_TO_SSI3, 0xec304c00, 0xec403000, 0x300c),
+	AUDMAPP_CFG(SCU4_TO_SSI4, 0xec305000, 0xec404000, 0x310d),
+	AUDMAPP_CFG(SCU5_TO_SSI5, 0xec305400, 0xec405000, 0x320e),
+	AUDMAPP_CFG(SCU6_TO_SSI6, 0xec305800, 0xec406000, 0x330f),
+	AUDMAPP_CFG(CMD0_TO_SSI0, 0xec308000, 0xec400000, 0x3700),
+
+	AUDMAPP_CFG(SSI1_TO_SCU1, 0xec401000, 0xec300400, 0x042e),
+	AUDMAPP_CFG(SSI2_TO_SCU2, 0xec402000, 0xec300800, 0x082f),
+	AUDMAPP_CFG(SSI3_TO_SCU3, 0xec403000, 0xec300c00, 0x0c30),
+	AUDMAPP_CFG(SSI4_TO_SCU4, 0xec404000, 0xec301000, 0x0d31),
+	AUDMAPP_CFG(SSI5_TO_SCU5, 0xec405000, 0xec301400, 0x0e32),
+	AUDMAPP_CFG(SSI6_TO_SCU6, 0xec406000, 0xec301800, 0x0f33),
+};
+
+struct audmapp_pdata r8a7794_audmapp_platform_data = {
+	.slave		= r8a7794_audmapp_slaves,
+	.slave_num	= ARRAY_SIZE(r8a7794_audmapp_slaves),
+};
+
+static const struct resource r8a7794_audmapp_resources[] __initconst = {
+	DEFINE_RES_MEM(0xec740000, 0x200),
+};
+
+#define r8a7794_register_audmapp()				\
+	platform_device_register_resndata(&platform_bus,	\
+		"rcar-audmapp-engine", -1,			\
+		r8a7794_audmapp_resources,			\
+		ARRAY_SIZE(r8a7794_audmapp_resources),		\
+		&r8a7794_audmapp_platform_data,			\
+		sizeof(r8a7794_audmapp_platform_data));
 
 static const struct resource pfc_resources[] __initconst = {
 	DEFINE_RES_MEM(0xe6060000, 0x250),
@@ -312,6 +352,7 @@ void __init r8a7794_add_dt_devices(void)
 	r8a7794_register_cmt(00);
 	r8a7794_register_pvrsrvkm();
 	r8a7794_register_audio_dmac(0);
+	r8a7794_register_audmapp();
 }
 
 void __init r8a7794_add_standard_devices(void)
