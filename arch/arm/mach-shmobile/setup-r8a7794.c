@@ -35,6 +35,112 @@
 #include <mach/rcar-gen2.h>
 #include <asm/mach/arch.h>
 
+/* Audio-DMAC */
+#define AUDIO_DMAC_SLAVE(_id, _addr, toffset, roffset, t, r)	\
+{								\
+	.slave_id	= AUDIO_DMAC_SLAVE_## _id ##_TX,	\
+	.addr		= _addr + toffset,			\
+	.chcr		= CHCR_TX(XMIT_SZ_32BIT),		\
+	.mid_rid	= t,					\
+}, {								\
+	.slave_id	= AUDIO_DMAC_SLAVE_## _id ##_RX,	\
+	.addr		= _addr + roffset,			\
+	.chcr		= CHCR_RX(XMIT_SZ_32BIT),		\
+	.mid_rid	= r,					\
+}
+
+#define AUDIO_DMAC_SCU_SLAVE(_id, _addr, t, r)			\
+	AUDIO_DMAC_SLAVE(SCU##_id, _addr, 0x0, 0x4000, t, r)
+
+#define AUDIO_DMAC_SSI_SLAVE(_id, _addr, t, r)			\
+	AUDIO_DMAC_SLAVE(SSI##_id, _addr, 0x8, 0xc, t, r)
+
+#define AUDIO_DMAC_SSIU_SLAVE(_id, _addr, t, r)		\
+	AUDIO_DMAC_SLAVE(SSIU##_id, _addr, 0, 0, t, r)
+
+static const struct sh_dmae_slave_config r8a7794_audio_dmac_slaves[] = {
+	AUDIO_DMAC_SCU_SLAVE(1, 0xec000400, 0x87, 0x9c),
+	AUDIO_DMAC_SCU_SLAVE(2, 0xec000800, 0x89, 0x9e),
+	AUDIO_DMAC_SCU_SLAVE(3, 0xec000c00, 0x8b, 0xa0),
+	AUDIO_DMAC_SCU_SLAVE(4, 0xec001000, 0x8d, 0xb0),
+	AUDIO_DMAC_SCU_SLAVE(5, 0xec001400, 0x8f, 0xb2),
+	AUDIO_DMAC_SCU_SLAVE(6, 0xec001800, 0x91, 0xb4),
+	AUDIO_DMAC_SSI_SLAVE(0, 0xec241000, 0x01, 0x02),
+	AUDIO_DMAC_SSI_SLAVE(1, 0xec241040, 0x03, 0x04),
+	AUDIO_DMAC_SSI_SLAVE(2, 0xec241080, 0x05, 0x06),
+	AUDIO_DMAC_SSI_SLAVE(3, 0xec2410c0, 0x07, 0x08),
+	AUDIO_DMAC_SSI_SLAVE(4, 0xec241100, 0x09, 0x0a),
+	AUDIO_DMAC_SSI_SLAVE(5, 0xec241140, 0x0b, 0x0c),
+	AUDIO_DMAC_SSI_SLAVE(6, 0xec241180, 0x0d, 0x0e),
+	AUDIO_DMAC_SSI_SLAVE(7, 0xec2411c0, 0x0f, 0x10),
+	AUDIO_DMAC_SSI_SLAVE(8, 0xec241200, 0x11, 0x12),
+	AUDIO_DMAC_SSI_SLAVE(9, 0xec241240, 0x13, 0x14),
+	AUDIO_DMAC_SSIU_SLAVE(0, 0, 0x15, 0x16),
+	AUDIO_DMAC_SSIU_SLAVE(1, 0, 0x49, 0x4a),
+	AUDIO_DMAC_SSIU_SLAVE(2, 0, 0x63, 0x64),
+	AUDIO_DMAC_SSIU_SLAVE(3, 0, 0x6f, 0x70),
+	AUDIO_DMAC_SSIU_SLAVE(4, 0, 0x71, 0x72),
+	AUDIO_DMAC_SSIU_SLAVE(5, 0, 0x73, 0x74),
+	AUDIO_DMAC_SSIU_SLAVE(6, 0, 0x75, 0x76),
+	AUDIO_DMAC_SSIU_SLAVE(7, 0, 0x79, 0x7a),
+	AUDIO_DMAC_SSIU_SLAVE(8, 0, 0x7b, 0x7c),
+	AUDIO_DMAC_SSIU_SLAVE(9, 0, 0x7d, 0x7e),
+};
+
+#define DMAE_CHANNEL(a, b)			\
+{						\
+	.offset		= (a) - 0x20,		\
+	.dmars		= (a) - 0x20 + 0x40,	\
+	.chclr_bit	= (b),			\
+	.chclr_offset	= 0x80 - 0x20,		\
+}
+
+static const struct sh_dmae_channel r8a7794_audio_dmac_channels[] = {
+	DMAE_CHANNEL(0x8000, 0),
+	DMAE_CHANNEL(0x8080, 1),
+	DMAE_CHANNEL(0x8100, 2),
+	DMAE_CHANNEL(0x8180, 3),
+	DMAE_CHANNEL(0x8200, 4),
+	DMAE_CHANNEL(0x8280, 5),
+	DMAE_CHANNEL(0x8300, 6),
+	DMAE_CHANNEL(0x8380, 7),
+	DMAE_CHANNEL(0x8400, 8),
+	DMAE_CHANNEL(0x8480, 9),
+	DMAE_CHANNEL(0x8500, 10),
+	DMAE_CHANNEL(0x8580, 11),
+	DMAE_CHANNEL(0x8600, 12),
+};
+
+static struct sh_dmae_pdata r8a7794_audio_dmac_platform_data = {
+	.slave		= r8a7794_audio_dmac_slaves,
+	.slave_num	= ARRAY_SIZE(r8a7794_audio_dmac_slaves),
+	.channel	= r8a7794_audio_dmac_channels,
+	.channel_num	= ARRAY_SIZE(r8a7794_audio_dmac_channels),
+	.ts_low_shift	= TS_LOW_SHIFT,
+	.ts_low_mask	= TS_LOW_BIT << TS_LOW_SHIFT,
+	.ts_high_shift	= TS_HI_SHIFT,
+	.ts_high_mask	= TS_HI_BIT << TS_HI_SHIFT,
+	.ts_shift	= dma_ts_shift,
+	.ts_shift_num	= ARRAY_SIZE(dma_ts_shift),
+	.dmaor_init	= DMAOR_DME,
+	.chclr_present	= 1,
+	.chclr_bitwise	= 1,
+};
+
+static struct resource r8a7794_audio_dmac_resources[] = {
+	/* Channel registers and DMAOR for low */
+	DEFINE_RES_MEM(0xec700020, 0x8663 - 0x20),
+	DEFINE_RES_IRQ(gic_spi(346)),
+	DEFINE_RES_NAMED(gic_spi(320), 13, NULL, IORESOURCE_IRQ),
+};
+
+#define r8a7794_register_audio_dmac(id)				\
+	platform_device_register_resndata(			\
+		&platform_bus, "sh-dma-engine", id,		\
+		&r8a7794_audio_dmac_resources[id],	3,	\
+		&r8a7794_audio_dmac_platform_data,		\
+		sizeof(r8a7794_audio_dmac_platform_data))
+
 static const struct resource pfc_resources[] __initconst = {
 	DEFINE_RES_MEM(0xe6060000, 0x250),
 };
@@ -205,6 +311,7 @@ void __init r8a7794_add_dt_devices(void)
 	r8a7794_register_scif(10);
 	r8a7794_register_cmt(00);
 	r8a7794_register_pvrsrvkm();
+	r8a7794_register_audio_dmac(0);
 }
 
 void __init r8a7794_add_standard_devices(void)
