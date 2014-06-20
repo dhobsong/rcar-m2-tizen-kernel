@@ -74,14 +74,14 @@ static void update_subrect(struct v4l2_rect *rect, struct v4l2_rect *subrect)
 
 	if (rect->left > subrect->left)
 		subrect->left = rect->left;
-	else if (rect->left + rect->width >
+	else if (rect->left + rect->width <
 		 subrect->left + subrect->width)
 		subrect->left = rect->left + rect->width -
 			subrect->width;
 
 	if (rect->top > subrect->top)
 		subrect->top = rect->top;
-	else if (rect->top + rect->height >
+	else if (rect->top + rect->height <
 		 subrect->top + subrect->height)
 		subrect->top = rect->top + rect->height -
 			subrect->height;
@@ -117,6 +117,7 @@ int soc_camera_client_s_crop(struct v4l2_subdev *sd,
 		dev_dbg(dev, "Camera S_CROP successful for %dx%d@%d:%d\n",
 			rect->width, rect->height, rect->left, rect->top);
 		*target_rect = *cam_rect;
+		*subrect = *rect;
 		return 0;
 	}
 
@@ -204,6 +205,7 @@ int soc_camera_client_s_crop(struct v4l2_subdev *sd,
 
 	if (!ret) {
 		*target_rect = *cam_rect;
+		*subrect = *rect;
 		update_subrect(target_rect, subrect);
 	}
 

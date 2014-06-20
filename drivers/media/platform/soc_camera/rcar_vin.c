@@ -1539,9 +1539,6 @@ static int rcar_vin_set_crop(struct soc_camera_device *icd,
 	cam->width = mf.width;
 	cam->height = mf.height;
 
-	icd->user_width  = cam->width;
-	icd->user_height = cam->height;
-
 	cam->vin_left = rect->left & ~1;
 	cam->vin_top = rect->top & ~1;
 
@@ -1549,8 +1546,6 @@ static int rcar_vin_set_crop(struct soc_camera_device *icd,
 	ret = rcar_vin_set_rect(icd);
 	if (ret < 0)
 		return ret;
-
-	cam->subrect = *rect;
 
 	dev_dbg(dev, "VIN cropped to %ux%u@%u:%u\n",
 		icd->user_width, icd->user_height,
