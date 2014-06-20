@@ -431,4 +431,6 @@ void tmio_mmc_release_dma(struct tmio_mmc_host *host)
 		free_pages((unsigned long)host->bounce_buf, 0);
 		host->bounce_buf = NULL;
 	}
+	tasklet_kill(&host->dma_complete);
+	tasklet_kill(&host->dma_issue);
 }
