@@ -229,6 +229,7 @@ static const struct clk_name clk_enables[] __initconst = {
 	{ "ehci", NULL, "pci-rcar-gen2.1" },
 	{ "pvrsrvkm", NULL, "pvrsrvkm" },
 	{ "vcp0", NULL, "vcp1" },
+	{ "dmal", NULL, "sh-dma-engine.0" },
 };
 
 /* USBHS PHY */
