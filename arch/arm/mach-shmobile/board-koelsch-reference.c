@@ -320,22 +320,24 @@ static struct resource r8a7791_sys_dmac_resources[] = {
 	DEFINE_RES_IRQ(gic_spi(197)),
 	DEFINE_RES_NAMED(gic_spi(200), 15, NULL, IORESOURCE_IRQ),
 
-	/*
-	 * HI is not supported
-	 * since IRQ has strange mapping
-	 */
+	/* Channel registers and DMAOR for high */
+	DEFINE_RES_MEM(0xe6720020, 0x8763 - 0x20),
+	DEFINE_RES_IRQ(gic_spi(220)),
+	DEFINE_RES_NAMED(gic_spi(216), 4, NULL, IORESOURCE_IRQ),
+	DEFINE_RES_NAMED(gic_spi(308), 11, NULL, IORESOURCE_IRQ),
 };
 
 #define r8a7791_register_sys_dmac(id)				\
 	platform_device_register_resndata(			\
 		&platform_bus, "sh-dma-engine", 2 + id,		\
-		&r8a7791_sys_dmac_resources[id * 3],	3,	\
+		&r8a7791_sys_dmac_resources[id * 3],	id * 1 + 3,	\
 		&r8a7791_sys_dmac_platform_data,		\
 		sizeof(r8a7791_sys_dmac_platform_data))
 
 static void __init koelsch_add_dmac_prototype(void)
 {
 	r8a7791_register_sys_dmac(0);
+	r8a7791_register_sys_dmac(1);
 }
 
 static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
