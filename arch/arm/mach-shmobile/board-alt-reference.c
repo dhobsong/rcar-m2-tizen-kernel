@@ -21,8 +21,10 @@
 #include <linux/gpio.h>
 #include <linux/i2c.h>
 #include <linux/kernel.h>
+#include <linux/mfd/tmio.h>
 #include <linux/mmc/host.h>
 #include <linux/mmc/sh_mmcif.h>
+#include <linux/mmc/sh_mobile_sdhi.h>
 #include <linux/of_gpio.h>
 #include <linux/of_platform.h>
 #include <linux/platform_data/camera-rcar.h>
@@ -260,6 +262,8 @@ static const struct clk_name clk_enables[] __initconst = {
 
 static const struct sh_dmae_slave_config r8a7794_sys_dmac_slaves[] = {
 	SYS_DMAC_SLAVE(MMCIF0, 32, 0xee200000, 0x34, 0x34, 0xd1, 0xd2),
+	SYS_DMAC_SLAVE(SDHI0, 256, 0xee100000, 0x60, 0x2060, 0xcd, 0xce),
+	SYS_DMAC_SLAVE(SDHI1, 256, 0xee140000, 0x30, 0x2030, 0xc1, 0xc2),
 };
 
 static const struct sh_dmae_channel r8a7794_sys_dmac_channels[] = {
@@ -330,6 +334,27 @@ static struct sh_mmcif_plat_data mmcif0_pdata = {
 	.ccs_unsupported = true,
 	.slave_id_tx	= SYS_DMAC_SLAVE_MMCIF0_TX,
 	.slave_id_rx	= SYS_DMAC_SLAVE_MMCIF0_RX,
+};
+
+static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
+	.dma_slave_tx   = SYS_DMAC_SLAVE_SDHI0_TX,
+	.dma_slave_rx   = SYS_DMAC_SLAVE_SDHI0_RX,
+	.dma_rx_offset  = 0x2000,
+
+	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+			  MMC_CAP_POWER_OFF_CARD,
+	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
+};
+
+static struct sh_mobile_sdhi_info sdhi1_info __initdata = {
+	.dma_slave_tx   = SYS_DMAC_SLAVE_SDHI1_TX,
+	.dma_slave_rx   = SYS_DMAC_SLAVE_SDHI1_RX,
+	.tmio_caps	= MMC_CAP_POWER_OFF_CARD,
+	.dma_rx_offset  = 0x2000,
+
+	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+			  MMC_CAP_POWER_OFF_CARD,
+	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
 };
 
 /* USBHS PHY */
@@ -510,6 +535,10 @@ static void __init alt_add_vsp1_devices(void)
 static struct of_dev_auxdata alt_auxdata_lookup[] __initdata = {
 	OF_DEV_AUXDATA("renesas,mmcif-r8a7794", 0xee200000, "sh_mmcif",
 			&mmcif0_pdata),
+	OF_DEV_AUXDATA("renesas,sdhi-r8a7794", 0xee100000, "sdhi0",
+			&sdhi0_info),
+	OF_DEV_AUXDATA("renesas,sdhi-r8a7794", 0xee140000, "sdhi1",
+			&sdhi1_info),
 	{},
 };
 
