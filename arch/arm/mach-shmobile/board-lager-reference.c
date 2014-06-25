@@ -278,15 +278,6 @@ static const struct clk_name clk_enables[] __initconst = {
 	{ "ssp_dev", NULL, "ssp_dev" },
 };
 
-/* Local DMA slave IDs */
-enum {
-	RCAR_DMA_SLAVE_LAGER_INVALID = 0,
-	SYS_DMAC_SLAVE_SDHI0_TX,
-	SYS_DMAC_SLAVE_SDHI0_RX,
-	SYS_DMAC_SLAVE_SDHI2_TX,
-	SYS_DMAC_SLAVE_SDHI2_RX,
-};
-
 #define DMAE_CHANNEL(a, b)			\
 {						\
 	.offset		= (a) - 0x20,		\
