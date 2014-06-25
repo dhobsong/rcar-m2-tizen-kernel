@@ -8,6 +8,19 @@
  * kind, whether express or implied.
  */
 
+/*
+ * SSI-AK4643
+ *
+ * SW1: 1: AK4643
+ *      2: CN22
+ *      3: ADV7511
+ *
+ * this command is required when playback.
+ *
+ * # amixer set "LINEOUT Mixer DACL" on
+ * # amixer set "Playback" 100
+ */
+
 /dts-v1/;
 #include "r8a7794.dtsi"
 #include <dt-bindings/gpio/gpio.h>
@@ -166,6 +179,12 @@
 
 	status = "okay";
 	clock-frequency = <400000>;
+
+	snd_codec: ak4643 {
+		#sound-dai-cells = <0>;
+		compatible = "asahi-kasei,ak4643";
+		reg = <0x12>;
+	};
 };
 
 &i2c8 {
@@ -174,7 +193,8 @@
 };
 
 &pfc {
-	pinctrl-0 = <&du_pins &scif2_pins &usb0_pins &usb1_pins &vin0_pins>;
+	pinctrl-0 = <&du_pins &scif2_pins &usb0_pins &usb1_pins &sound_pins &sound_clk_pins
+		     &vin0_pins>;
 	pinctrl-names = "default";
 
 	du_pins: du {
@@ -232,6 +252,15 @@
 		renesas,groups = "vin0_data8", "vin0_sync", "vin0_field",
 				 "vin0_clkenb", "vin0_clk";
 		renesas,function = "vin0";
+	};
+
+	sound_pins: sound {
+		renesas,groups = "ssi0129_ctrl", "ssi0_data", "ssi1_data";
+		renesas,function = "ssi";
+	};
+	sound_clk_pins: sound_clk {
+		renesas,groups = "audio_clk_a";
+		renesas,function = "audio_clk";
 	};
 };
 
