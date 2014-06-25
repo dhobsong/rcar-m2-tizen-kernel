@@ -21,6 +21,8 @@
 #include <linux/gpio.h>
 #include <linux/i2c.h>
 #include <linux/kernel.h>
+#include <linux/mmc/host.h>
+#include <linux/mmc/sh_mmcif.h>
 #include <linux/of_gpio.h>
 #include <linux/of_platform.h>
 #include <linux/platform_data/camera-rcar.h>
@@ -234,11 +236,6 @@ static const struct clk_name clk_enables[] __initconst = {
 	{ "dmal", NULL, "sh-dma-engine.0" },
 };
 
-/* Local DMA slave IDs */
-enum {
-	RCAR_DMA_SLAVE_ALT_INVALID = 0,
-};
-
 #define DMAE_CHANNEL(a, b)			\
 {						\
 	.offset		= (a) - 0x20,		\
@@ -262,6 +259,7 @@ enum {
 }
 
 static const struct sh_dmae_slave_config r8a7794_sys_dmac_slaves[] = {
+	SYS_DMAC_SLAVE(MMCIF0, 32, 0xee200000, 0x34, 0x34, 0xd1, 0xd2),
 };
 
 static const struct sh_dmae_channel r8a7794_sys_dmac_channels[] = {
@@ -324,6 +322,15 @@ static void __init alt_add_dmac_prototype(void)
 	r8a7794_register_sys_dmac(0);
 	r8a7794_register_sys_dmac(1);
 }
+
+static struct sh_mmcif_plat_data mmcif0_pdata = {
+	.caps		= MMC_CAP_4_BIT_DATA |
+			  MMC_CAP_8_BIT_DATA |
+			  MMC_CAP_NONREMOVABLE,
+	.ccs_unsupported = true,
+	.slave_id_tx	= SYS_DMAC_SLAVE_MMCIF0_TX,
+	.slave_id_rx	= SYS_DMAC_SLAVE_MMCIF0_RX,
+};
 
 /* USBHS PHY */
 static const struct rcar_gen2_phy_platform_data usbhs_phy_pdata __initconst = {
@@ -500,13 +507,20 @@ static void __init alt_add_vsp1_devices(void)
 }
 #endif
 
+static struct of_dev_auxdata alt_auxdata_lookup[] __initdata = {
+	OF_DEV_AUXDATA("renesas,mmcif-r8a7794", 0xee200000, "sh_mmcif",
+			&mmcif0_pdata),
+	{},
+};
+
 static void __init alt_add_standard_devices(void)
 {
 	shmobile_clk_workaround(clk_names, ARRAY_SIZE(clk_names), false);
 	shmobile_clk_workaround(clk_enables, ARRAY_SIZE(clk_enables), true);
 	r8a7794_add_dt_devices();
 	alt_add_dmac_prototype();
-	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
+	of_platform_populate(NULL, of_default_bus_match_table,
+			     alt_auxdata_lookup, NULL);
 	alt_add_du_device();
 
 	platform_device_register_resndata(&platform_bus, "usb_phy_rcar_gen2",
