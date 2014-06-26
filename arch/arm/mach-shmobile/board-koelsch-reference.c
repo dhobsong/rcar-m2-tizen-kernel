@@ -23,9 +23,6 @@
 #include <linux/gpio.h>
 #include <linux/i2c.h>
 #include <linux/kernel.h>
-#include <linux/mfd/tmio.h>
-#include <linux/mmc/host.h>
-#include <linux/mmc/sh_mobile_sdhi.h>
 #include <linux/of_gpio.h>
 #include <linux/of_platform.h>
 #include <linux/platform_data/camera-rcar.h>
@@ -243,12 +240,6 @@ static const struct clk_name clk_enables[] __initconst = {
 /* Local DMA slave IDs */
 enum {
 	RCAR_DMA_SLAVE_KOELSCH_INVALID = 0,
-	SYS_DMAC_SLAVE_SDHI0_TX = 64,
-	SYS_DMAC_SLAVE_SDHI0_RX,
-	SYS_DMAC_SLAVE_SDHI1_TX,
-	SYS_DMAC_SLAVE_SDHI1_RX,
-	SYS_DMAC_SLAVE_SDHI2_TX,
-	SYS_DMAC_SLAVE_SDHI2_RX,
 };
 
 #define DMAE_CHANNEL(a, b)			\
@@ -274,9 +265,6 @@ enum {
 }
 
 static const struct sh_dmae_slave_config r8a7791_sys_dmac_slaves[] = {
-	SYS_DMAC_SLAVE(SDHI0, 16, 0xee100000, 0x60, 0x2060, 0xcd, 0xce),
-	SYS_DMAC_SLAVE(SDHI1, 16, 0xee140000, 0x30, 0x2030, 0xc1, 0xc2),
-	SYS_DMAC_SLAVE(SDHI2, 16, 0xee160000, 0x30, 0x2030, 0xd3, 0xd4),
 };
 
 static const struct sh_dmae_channel r8a7791_sys_dmac_channels[] = {
@@ -337,39 +325,6 @@ static void __init koelsch_add_dmac_prototype(void)
 {
 	r8a7791_register_sys_dmac(0);
 }
-
-static struct sh_mobile_sdhi_info sdhi0_info __initdata = {
-	.dma_slave_tx   = SYS_DMAC_SLAVE_SDHI0_TX,
-	.dma_slave_rx   = SYS_DMAC_SLAVE_SDHI0_RX,
-	.dma_rx_offset  = 0x2000,
-
-	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-			  MMC_CAP_POWER_OFF_CARD,
-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
-};
-
-static struct sh_mobile_sdhi_info sdhi1_info __initdata = {
-	.dma_slave_tx   = SYS_DMAC_SLAVE_SDHI1_TX,
-	.dma_slave_rx   = SYS_DMAC_SLAVE_SDHI1_RX,
-	.tmio_caps	= MMC_CAP_POWER_OFF_CARD,
-	.dma_rx_offset  = 0x2000,
-
-	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-			  MMC_CAP_POWER_OFF_CARD,
-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT,
-};
-
-static struct sh_mobile_sdhi_info sdhi2_info __initdata = {
-	.dma_slave_tx   = SYS_DMAC_SLAVE_SDHI2_TX,
-	.dma_slave_rx   = SYS_DMAC_SLAVE_SDHI2_RX,
-	.dma_rx_offset  = 0x2000,
-
-	.tmio_caps	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-			  MMC_CAP_POWER_OFF_CARD,
-	.tmio_caps	= MMC_CAP_POWER_OFF_CARD,
-	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT |
-			  TMIO_MMC_WRPROTECT_DISABLE,
-};
 
 /* USBHS */
 static const struct resource usbhs_resources[] __initconst = {
@@ -735,24 +690,13 @@ static void koelsch_restart(char mode, const char *cmd)
 
 #define koelsch_add_msiof_device spi_register_board_info
 
-static struct of_dev_auxdata koelsch_auxdata_lookup[] __initdata = {
-	OF_DEV_AUXDATA("renesas,sdhi-r8a7791", 0xee100000, "sdhi0",
-			&sdhi0_info),
-	OF_DEV_AUXDATA("renesas,sdhi-r8a7791", 0xee140000, "sdhi1",
-			&sdhi1_info),
-	OF_DEV_AUXDATA("renesas,sdhi-r8a7791", 0xee160000, "sdhi2",
-			&sdhi2_info),
-	{},
-};
-
 static void __init koelsch_add_standard_devices(void)
 {
 	shmobile_clk_workaround(clk_names, ARRAY_SIZE(clk_names), false);
 	shmobile_clk_workaround(clk_enables, ARRAY_SIZE(clk_enables), true);
 	r8a7791_add_dt_devices();
 	koelsch_add_dmac_prototype();
-	of_platform_populate(NULL, of_default_bus_match_table,
-			     koelsch_auxdata_lookup, NULL);
+	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
 
 	koelsch_add_du_device();
 	koelsch_add_usb_devices();
