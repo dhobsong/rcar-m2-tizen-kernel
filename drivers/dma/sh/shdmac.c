@@ -42,8 +42,6 @@
 #define DAR	0x04
 #define TCR	0x08
 #define CHCR	0x0C
-#define FIXSAR  0x10
-#define FIXDAR  0x14
 #define DMAOR	0x40
 
 #define TEND	0x18 /* USB-DMAC */
@@ -219,16 +217,8 @@ static u32 log2size_to_chcr(struct sh_dmae_chan *sh_chan, int l2size)
 
 static void dmae_set_reg(struct sh_dmae_chan *sh_chan, struct sh_dmae_regs *hw)
 {
-	struct sh_dmae_device *shdev = to_sh_dev(sh_chan);
-
-#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
-	if (shdev->pdata->fourty_bits_addr) {
-		sh_dmae_writel(sh_chan, hw->sar >> 32, FIXSAR);
-		sh_dmae_writel(sh_chan, hw->dar >> 32, FIXDAR);
-	}
-#endif
-	sh_dmae_writel(sh_chan, hw->sar & 0xffffffff, SAR);
-	sh_dmae_writel(sh_chan, hw->dar & 0xffffffff, DAR);
+	sh_dmae_writel(sh_chan, hw->sar, SAR);
+	sh_dmae_writel(sh_chan, hw->dar, DAR);
 	sh_dmae_writel(sh_chan, hw->tcr >> sh_chan->xmit_shift, TCR);
 }
 
@@ -300,9 +290,9 @@ static void sh_dmae_start_xfer(struct shdma_chan *schan,
 						    shdma_chan);
 	struct sh_dmae_desc *sh_desc = container_of(sdesc,
 					struct sh_dmae_desc, shdma_desc);
-	dev_dbg(sh_chan->shdma_chan.dev, "Queue #%d to %d: %u@%pad-> %pad\n",
+	dev_dbg(sh_chan->shdma_chan.dev, "Queue #%d to %d: %u@%x -> %x\n",
 		sdesc->async_tx.cookie, sh_chan->shdma_chan.id,
-		sh_desc->hw.tcr, &sh_desc->hw.sar, &sh_desc->hw.dar);
+		sh_desc->hw.tcr, sh_desc->hw.sar, sh_desc->hw.dar);
 	/* Get the ld start address from ld_queue */
 	dmae_set_reg(sh_chan, &sh_desc->hw);
 	dmae_start(sh_chan);
@@ -392,27 +382,11 @@ static int sh_dmae_desc_setup(struct shdma_chan *schan,
 			      struct shdma_desc *sdesc,
 			      dma_addr_t src, dma_addr_t dst, size_t *len)
 {
-	struct sh_dmae_chan *sh_chan = container_of(schan,
-					struct sh_dmae_chan, shdma_chan);
 	struct sh_dmae_desc *sh_desc = container_of(sdesc,
 					struct sh_dmae_desc, shdma_desc);
-	struct sh_dmae_device *shdev = to_sh_dev(sh_chan);
 
 	if (*len > schan->max_xfer_len)
 		*len = schan->max_xfer_len;
-
-#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
-	/* disable transfer across 32-bit boundary */
-	if (shdev->pdata->fourty_bits_addr) {
-		dma_addr_t four_gigs = 1ULL << 32;
-
-		if ((src >> 32) != ((src + *len - 1) >> 32))
-			*len = four_gigs - (src & (four_gigs - 1));
-
-		if ((dst >> 32) != ((dst + *len - 1) >> 32))
-			*len = four_gigs - (dst & (four_gigs - 1));
-	}
-#endif
 
 	sh_desc->hw.sar = src;
 	sh_desc->hw.dar = dst;
@@ -487,16 +461,8 @@ static bool sh_dmae_desc_completed(struct shdma_chan *schan,
 					struct sh_dmae_chan, shdma_chan);
 	struct sh_dmae_desc *sh_desc = container_of(sdesc,
 					struct sh_dmae_desc, shdma_desc);
-	struct sh_dmae_device *shdev = to_sh_dev(sh_chan);
-	dma_addr_t sar_buf = sh_dmae_readl(sh_chan, SAR);
-	dma_addr_t dar_buf = sh_dmae_readl(sh_chan, DAR);
-
-#ifdef CONFIG_ARCH_DMA_ADDR_T_64BIT
-	if (shdev->pdata->fourty_bits_addr) {
-		sar_buf |= (dma_addr_t)sh_dmae_readl(sh_chan, FIXSAR) << 32;
-		dar_buf |= (dma_addr_t)sh_dmae_readl(sh_chan, FIXDAR) << 32;
-	}
-#endif
+	u32 sar_buf = sh_dmae_readl(sh_chan, SAR);
+	u32 dar_buf = sh_dmae_readl(sh_chan, DAR);
 
 	return	(sdesc->direction == DMA_DEV_TO_MEM &&
 		 (sh_desc->hw.dar + sh_desc->hw.tcr) == dar_buf) ||
