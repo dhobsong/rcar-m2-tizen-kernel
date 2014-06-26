@@ -80,6 +80,7 @@ struct rcar_du_device_info {
 	unsigned int cpu_clk_time_ps;
 	unsigned int lvds0_crtc;
 	unsigned int lvds1_crtc;
+	unsigned int vspd_crtc;
 };
 
 struct rcar_du_device {

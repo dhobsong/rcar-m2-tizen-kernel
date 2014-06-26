@@ -64,6 +64,9 @@ int rcar_du_vsp1_sources_init(struct rcar_du_device *rcdu)
 		char name[6];
 		int ret;
 
+		if ((rcdu->info->vspd_crtc & (0x01 << i)) == 0)
+			continue;
+
 		src = devm_kzalloc(rcdu->dev, sizeof(*src), GFP_KERNEL);
 		if (src == NULL)
 			return -ENOMEM;
