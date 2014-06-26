@@ -656,6 +656,7 @@ DT_MACHINE_START(ALT_DT, "alt")
 	.init_time	= r8a7794_timer_init,
 	.init_machine	= alt_add_standard_devices,
 	.init_late	= shmobile_init_late,
+	.reserve	= rcar_gen2_reserve,
 	.restart	= alt_restart,
 	.dt_compat	= alt_boards_compat_dt,
 MACHINE_END

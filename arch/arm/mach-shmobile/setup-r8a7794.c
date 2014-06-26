@@ -441,6 +441,7 @@ DT_MACHINE_START(R8A7794_DT, "Generic R8A7794 (Flattened Device Tree)")
 	.smp		= smp_ops(r8a7794_smp_ops),
 	.init_early	= r8a7794_init_early,
 	.init_time	= r8a7794_timer_init,
+	.reserve	= rcar_gen2_reserve,
 	.dt_compat	= r8a7794_boards_compat_dt,
 MACHINE_END
 #endif /* CONFIG_USE_OF */
