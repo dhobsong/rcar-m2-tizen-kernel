@@ -31,14 +31,12 @@
 #if defined(CONFIG_VIDEO_RENESAS_VSP1)
 #include <linux/platform_data/vsp1.h>
 #endif
-#include <linux/sh_dma.h>
 #include <linux/spi/flash.h>
 #include <linux/spi/spi.h>
 #include <linux/usb/phy.h>
 #include <linux/usb/renesas_usbhs.h>
 #include <mach/clock.h>
 #include <mach/common.h>
-#include <mach/dma-register.h>
 #include <mach/irqs.h>
 #include <mach/rcar-gen2.h>
 #include <mach/r8a7791.h>
@@ -236,95 +234,6 @@ static const struct clk_name clk_enables[] __initconst = {
 	{ "pvrsrvkm", NULL, "pvrsrvkm" },
 	{ "ssp_dev", NULL, "ssp_dev" },
 };
-
-/* Local DMA slave IDs */
-enum {
-	RCAR_DMA_SLAVE_KOELSCH_INVALID = 0,
-};
-
-#define DMAE_CHANNEL(a, b)			\
-{						\
-	.offset		= (a) - 0x20,		\
-	.dmars		= (a) - 0x20 + 0x40,	\
-	.chclr_bit	= (b),			\
-	.chclr_offset	= 0x80 - 0x20,		\
-}
-
-/* Sys-DMAC */
-#define SYS_DMAC_SLAVE(_id, _bit, _addr, toffset, roffset, t, r)	\
-{								\
-	.slave_id	= SYS_DMAC_SLAVE_## _id ##_TX,		\
-	.addr		= _addr + toffset,			\
-	.chcr		= CHCR_TX(XMIT_SZ_## _bit ##BIT),	\
-	.mid_rid	= t,					\
-}, {								\
-	.slave_id	= SYS_DMAC_SLAVE_## _id ##_RX,		\
-	.addr		= _addr + roffset,			\
-	.chcr		= CHCR_RX(XMIT_SZ_## _bit ##BIT),	\
-	.mid_rid	= r,					\
-}
-
-static const struct sh_dmae_slave_config r8a7791_sys_dmac_slaves[] = {
-};
-
-static const struct sh_dmae_channel r8a7791_sys_dmac_channels[] = {
-	DMAE_CHANNEL(0x8000, 0),
-	DMAE_CHANNEL(0x8080, 1),
-	DMAE_CHANNEL(0x8100, 2),
-	DMAE_CHANNEL(0x8180, 3),
-	DMAE_CHANNEL(0x8200, 4),
-	DMAE_CHANNEL(0x8280, 5),
-	DMAE_CHANNEL(0x8300, 6),
-	DMAE_CHANNEL(0x8380, 7),
-	DMAE_CHANNEL(0x8400, 8),
-	DMAE_CHANNEL(0x8480, 9),
-	DMAE_CHANNEL(0x8500, 10),
-	DMAE_CHANNEL(0x8580, 11),
-	DMAE_CHANNEL(0x8600, 12),
-	DMAE_CHANNEL(0x8680, 13),
-	DMAE_CHANNEL(0x8700, 14),
-};
-
-static struct sh_dmae_pdata r8a7791_sys_dmac_platform_data = {
-	.slave		= r8a7791_sys_dmac_slaves,
-	.slave_num	= ARRAY_SIZE(r8a7791_sys_dmac_slaves),
-	.channel	= r8a7791_sys_dmac_channels,
-	.channel_num	= ARRAY_SIZE(r8a7791_sys_dmac_channels),
-	.ts_low_shift	= TS_LOW_SHIFT,
-	.ts_low_mask	= TS_LOW_BIT << TS_LOW_SHIFT,
-	.ts_high_shift	= TS_HI_SHIFT,
-	.ts_high_mask	= TS_HI_BIT << TS_HI_SHIFT,
-	.ts_shift	= dma_ts_shift,
-	.ts_shift_num	= ARRAY_SIZE(dma_ts_shift),
-	.dmaor_init	= DMAOR_DME,
-	.chclr_present	= 1,
-	.chclr_bitwise	= 1,
-	.fourty_bits_addr = 1,
-};
-
-static struct resource r8a7791_sys_dmac_resources[] = {
-	/* Channel registers and DMAOR for low */
-	DEFINE_RES_MEM(0xe6700020, 0x8763 - 0x20),
-	DEFINE_RES_IRQ(gic_spi(197)),
-	DEFINE_RES_NAMED(gic_spi(200), 15, NULL, IORESOURCE_IRQ),
-
-	/*
-	 * HI is not supported
-	 * since IRQ has strange mapping
-	 */
-};
-
-#define r8a7791_register_sys_dmac(id)				\
-	platform_device_register_resndata(			\
-		&platform_bus, "sh-dma-engine", 2 + id,		\
-		&r8a7791_sys_dmac_resources[id * 3],	3,	\
-		&r8a7791_sys_dmac_platform_data,		\
-		sizeof(r8a7791_sys_dmac_platform_data))
-
-static void __init koelsch_add_dmac_prototype(void)
-{
-	r8a7791_register_sys_dmac(0);
-}
 
 /* USBHS */
 static const struct resource usbhs_resources[] __initconst = {
@@ -695,7 +604,6 @@ static void __init koelsch_add_standard_devices(void)
 	shmobile_clk_workaround(clk_names, ARRAY_SIZE(clk_names), false);
 	shmobile_clk_workaround(clk_enables, ARRAY_SIZE(clk_enables), true);
 	r8a7791_add_dt_devices();
-	koelsch_add_dmac_prototype();
 	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
 
 	koelsch_add_du_device();
