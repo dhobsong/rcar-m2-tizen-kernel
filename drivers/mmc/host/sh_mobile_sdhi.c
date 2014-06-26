@@ -334,7 +334,6 @@ static int sh_mobile_sdhi_probe(struct platform_device *pdev)
 		mmc_data->capabilities |= p->tmio_caps;
 		mmc_data->capabilities2 |= p->tmio_caps2;
 		mmc_data->cd_gpio = p->cd_gpio;
-		dma_priv->dma_rx_offset = p->dma_rx_offset;
 
 		if (p->dma_slave_tx > 0 && p->dma_slave_rx > 0) {
 			/*
