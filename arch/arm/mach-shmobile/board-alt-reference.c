@@ -410,6 +410,7 @@ static struct sh_mmcif_plat_data mmcif0_pdata = {
 			  MMC_CAP_8_BIT_DATA |
 			  MMC_CAP_NONREMOVABLE,
 	.ccs_unsupported = true,
+	.clk_ctrl2_present = true,
 	.slave_id_tx	= SYS_DMAC_SLAVE_MMCIF0_TX,
 	.slave_id_rx	= SYS_DMAC_SLAVE_MMCIF0_RX,
 };
