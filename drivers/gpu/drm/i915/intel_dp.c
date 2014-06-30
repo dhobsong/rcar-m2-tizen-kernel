@@ -2959,8 +2959,8 @@ intel_dp_detect_dpcd(struct intel_dp *intel_dp)
 		if (!intel_dp_aux_native_read_retry(intel_dp, DP_SINK_COUNT,
 						    &reg, 1))
 			return connector_status_unknown;
-		return DP_GET_SINK_COUNT(reg) ? connector_status_connected
-					      : connector_status_disconnected;
+		if (DP_GET_SINK_COUNT(reg))
+			return connector_status_connected;
 	}
 
 	/* If no HPD, poke DDC gently */
