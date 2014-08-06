@@ -5,6 +5,8 @@
 
 %define upstream_version 3.10.31
 
+%define platform rcar-m2
+
 %if !%{defined platform}
 %define platform default
 %endif
