@@ -137,7 +137,7 @@ Group: Development/System
 Provides: kernel-devel = %{kernel_full_version}
 Provides: kernel-devel-uname-r = %{kernel_full_version}
 Requires(post): /usr/bin/find
-Requires: %{name} = %{version}-%{release}
+Requires: kernel-%{variant} = %{version}-%{release}
 AutoReqProv: no
 
 %description -n kernel-%{variant}-devel
@@ -149,7 +149,7 @@ against the %{variant} kernel package.
 Summary: The 'perf' performance counter tool
 Group: System/Kernel
 Provides: perf = %{kernel_full_version}
-Requires: %{name} = %{version}-%{release}
+Requires: kernel-%{variant} = %{version}-%{release}
 
 %description -n perf
 This package provides the "perf" tool that can be used to monitor performance
