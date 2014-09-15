@@ -432,7 +432,7 @@ char *smk_parse_smack(const char *string, int len)
 
 	smack = kzalloc(i + 1, GFP_KERNEL);
 	if (smack != NULL) {
-		strncpy(smack, string, i + 1);
+		strncpy(smack, string, i);
 		smack[i] = '\0';
 	}
 	return smack;
