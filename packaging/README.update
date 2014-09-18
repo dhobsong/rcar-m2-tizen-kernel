@@ -9,7 +9,7 @@ Parameters:
 
 Define variables:
 # linux_branch=linux-3.14.y
-# linux_tag=v3.14.14
+# linux_tag=v3.14.19
 
 1. Clone kernel-common
 ----------------------
@@ -52,6 +52,12 @@ Define variables:
 # ... change config ...
 # make ARCH=x86_64 savedefconfig
 # mv defconfig arch/x86/configs/common_x86_64_defconfig
+
+# make ARCH=arm tizen_defconfig
+# make ARCH=arm menuconfig
+# ... change config ...
+# make ARCH=arm savedefconfig
+# mv defconfig arch/arm/configs/tizen_defconfig
 
 6. Bump the kernel version in the spec file
 -------------------------------------------
